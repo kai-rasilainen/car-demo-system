@@ -1,0 +1,55 @@
+# Car Demo System - Complete Integration
+
+services:
+  # Backend Databases
+  mongodb:
+    image: mongo:7.0
+    container_name: car-data-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: cardata
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - car-network
+
+  postgres:
+    image: postgres:15
+    container_name: car-info-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: carinfo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - car-network
+
+  # In-Car Systems
+  redis:
+    image: redis:7-alpine
+    container_name: car-central-broker
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - car-network
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  car-network:
+    driver: bridge
