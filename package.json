@@ -1,0 +1,39 @@
+{
+  "name": "car-demo-system",
+  "version": "1.0.0",
+  "description": "Car Demo System - Complete testing infrastructure",
+  "scripts": {
+    "test": "./run-tests.sh --unit",
+    "test:unit": "./run-tests.sh --unit",
+    "test:e2e": "./run-tests.sh --e2e", 
+    "test:coverage": "./run-tests.sh --unit --coverage",
+    "test:watch": "./run-tests.sh --unit --watch",
+    "test:all": "./run-tests.sh --all",
+    "test:b1": "cd car-demo-backend/B1-web-server && npm test",
+    "test:b2": "cd car-demo-backend/B2-iot-gateway && npm test",
+    "test:c2": "cd car-demo-in-car/C2-central-broker && npm test",
+    "test:python": "source car-demo-venv/bin/activate && cd car-demo-in-car/C1-cloud-communication && python -m pytest tests/ -v && cd ../C5-data-sensors && python -m pytest tests/ -v",
+    "install-deps": "cd car-demo-backend/B1-web-server && npm install && cd ../B2-iot-gateway && npm install && cd ../../car-demo-in-car/C2-central-broker && npm install",
+    "start:dev": "./scripts/start-all.sh",
+    "setup": "./scripts/setup-all.sh"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "car-demo",
+    "iot",
+    "testing",
+    "jest",
+    "pytest",
+    "nodejs",
+    "python"
+  ],
+  "author": "Car Demo Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
