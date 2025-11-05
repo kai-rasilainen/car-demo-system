@@ -276,7 +276,7 @@ else
         print_status $YELLOW "Press Enter to continue with E2E tests, or Ctrl+C to cancel"
         read
         
-        cd /home/kai/projects/car-demo-repos
+        cd /home/kai/projects/car-demo-repos/car-demo-system
         npx jest tests/e2e/ --runInBand --detectOpenHandles
     fi
 fi
