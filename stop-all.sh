@@ -99,11 +99,18 @@ echo ""
 # Stop Node.js and Python processes first
 print_status $BLUE "Stopping Node.js and Python processes..."
 
-# Kill npm processes (all npm processes including start, dev, test, etc.)
-NPM_PIDS=$(pgrep -f "npm" 2>/dev/null)
+# Kill npm processes related to car-demo projects
+NPM_PIDS=$(pgrep -f "npm.*(start|dev|run).*car-demo" 2>/dev/null)
 if [ -n "$NPM_PIDS" ]; then
-    pkill -f "npm" 2>/dev/null
+    pkill -f "npm.*(start|dev|run).*car-demo" 2>/dev/null
     print_status $GREEN "✓ npm processes stopped (PIDs: $NPM_PIDS)"
+else
+    # Fallback: try to find npm processes in car-demo directories
+    NPM_PIDS=$(ps aux | grep -E "npm.*(start|dev|run)" | grep "car-demo" | grep -v grep | awk '{print $2}')
+    if [ -n "$NPM_PIDS" ]; then
+        echo "$NPM_PIDS" | xargs kill 2>/dev/null
+        print_status $GREEN "✓ npm processes stopped (PIDs: $NPM_PIDS)"
+    fi
 fi
 
 # Kill node processes related to car-demo
