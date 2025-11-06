@@ -113,4 +113,12 @@ out/
 
 # Dependencies lock files (optional - some teams prefer to commit these)
 # package-lock.json
-# yarn.lockcar-demo-venv/
+# yarn.lock
+
+# Python virtual environment
+car-demo-venv/
+
+# Separate git repositories (managed independently)
+car-demo-backend/
+car-demo-frontend/
+car-demo-in-car/
