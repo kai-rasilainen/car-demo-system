@@ -222,16 +222,16 @@ if [ -n "$COMPONENT" ]; then
     case $COMPONENT in
         b1)
             print_status $BLUE "Running B1 Web Server tests..."
-            $JEST_CMD --testPathPattern=B1-web-server/tests
+            $JEST_CMD --testPathPatterns="B1-web-server/tests"
             ;;
         b2)
             print_status $BLUE "Running B2 IoT Gateway tests..."
-            $JEST_CMD --testPathPattern=B2-iot-gateway/tests
+            $JEST_CMD --testPathPatterns="B2-iot-gateway/tests"
             ;;
         c2)
             print_status $BLUE "Running C2 Central Broker tests..."
             cd "$SCRIPT_DIR/car-demo-in-car/C2-central-broker"
-            $JEST_CMD --testPathPattern=tests
+            $JEST_CMD --testPathPatterns="tests"
             ;;
         *)
             print_status $RED "Unknown component: $COMPONENT"
@@ -244,7 +244,7 @@ else
         print_status $BLUE "Running Unit Tests..."
         
         # Node.js unit tests
-        $JEST_CMD --testPathPattern=tests --testNamePattern='(?!.*integration)'
+        $JEST_CMD --testPathPatterns="tests" --testNamePattern='(?!.*integration)'
         
         # Python unit tests
         print_status $BLUE "Running Python Unit Tests..."
