@@ -43,3 +43,26 @@ cd car-demo-in-car && ./scripts/start-all.sh
 - **B1 API**: http://localhost:3001
 - **B2 IoT**: http://localhost:3002
 - **C2 Broker**: http://localhost:3003
+
+## Container Management
+
+### Start Containers
+```bash
+# Start all database containers
+./scripts/start-all.sh
+
+# Or manually
+docker compose up -d
+```
+
+### Stop Containers
+```bash
+# Stop containers only (preserves data)
+./stop-all.sh
+
+# Stop and remove volumes (deletes all data)
+./stop-all.sh --volumes
+
+# Stop and clean everything (containers + volumes + images)
+./stop-all.sh --all
+```
