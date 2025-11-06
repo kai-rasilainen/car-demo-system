@@ -13,27 +13,31 @@ The system is split into focused repositories:
 
 ## Quick Start
 
-### Clone All Repositories
+### Complete System Startup
 ```bash
+# Clone and setup
 git clone --recursive https://github.com/kai-rasilainen/car-demo-orchestration.git
 cd car-demo-orchestration
-./scripts/setup-all.sh
-./scripts/start-all.sh
+
+# Start everything (recommended)
+./start-complete.sh
+
+# Or start components individually
+./start-complete.sh --databases-only  # Just databases
+./start-complete.sh --backend-only     # Databases + backend
+./start-complete.sh --frontend-only    # Databases + frontend
+./start-complete.sh --incar-only       # Databases + in-car systems
 ```
 
-### Individual Components
+### Alternative: Manual Component Startup
 ```bash
-# Backend only
-git clone https://github.com/kai-rasilainen/car-demo-backend.git
-cd car-demo-backend && ./scripts/dev-start.sh
+# Start databases first
+./scripts/start-all.sh
 
-# Frontend only  
-git clone https://github.com/kai-rasilainen/car-demo-frontend.git
-cd car-demo-frontend && ./scripts/dev-start.sh
-
-# In-car only
-git clone https://github.com/kai-rasilainen/car-demo-in-car.git
-cd car-demo-in-car && ./scripts/start-all.sh
+# Then start components in separate terminals:
+cd car-demo-backend && ./scripts/dev-start.sh     # Backend
+cd car-demo-frontend && ./scripts/dev-start.sh    # Frontend  
+cd car-demo-in-car && ./scripts/start-all.sh      # In-car
 ```
 
 ## Service URLs
