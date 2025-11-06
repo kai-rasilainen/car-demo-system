@@ -162,12 +162,13 @@ if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_INCAR_ONLY" != true ]; then
         cd "$SCRIPT_DIR"
         print_status $GREEN "✓ Backend services starting (PID: $BACKEND_PID)"
         
-        # Give backend time to start
-        sleep 10
+        # Give backend time to start and install dependencies if needed
+        print_status $BLUE "Waiting for backend services to initialize..."
+        sleep 15
         
-        # Check backend services
-        check_service "http://localhost:3001" "B1 Web Server" 10
-        check_service "http://localhost:3002" "B2 IoT Gateway" 10
+        # Check backend services with longer timeout
+        check_service "http://localhost:3001" "B1 Web Server" 30
+        check_service "http://localhost:3002" "B2 IoT Gateway" 30
     else
         print_status $YELLOW "⚠ Backend directory not found, skipping..."
     fi
