@@ -3,8 +3,13 @@
 # Car Demo System - Python Virtual Environment Setup
 echo "🐍 Activating Car Demo Python Environment..."
 
+# Get the directory where this script is located (should be car-demo-system)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Go up one level to find car-demo-venv
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Activate virtual environment
-source /home/kai/projects/car-demo-repos/car-demo-venv/bin/activate
+source "$PROJECT_ROOT/car-demo-venv/bin/activate"
 
 # Verify activation
 echo "✅ Virtual environment activated:"
@@ -15,7 +20,7 @@ echo "Pip: $(pip --version)"
 # Show installed packages
 echo ""
 echo "📦 Installed Python packages:"
-pip list --format=table
+pip list --format=columns
 
 echo ""
 echo "🚀 Ready to run Python components!"

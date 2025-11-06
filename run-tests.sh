@@ -3,6 +3,11 @@
 echo "🧪 Car Demo System - Test Suite Runner"
 echo "======================================"
 
+# Get the directory where this script is located (should be car-demo-system)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Go up one level to find the project root
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -181,19 +186,19 @@ fi
 # Install dependencies if needed
 print_status $YELLOW "2. Installing Dependencies..."
 
-cd /home/kai/projects/car-demo-repos/car-demo-backend
+cd "$PROJECT_ROOT/car-demo-backend"
 if [ ! -d "node_modules" ]; then
     print_status $YELLOW "Installing Node.js dependencies..."
     npm install
 fi
 
 # Install Python dependencies
-if [ -d "/home/kai/projects/car-demo-repos/car-demo-venv" ]; then
+if [ -d "$PROJECT_ROOT/car-demo-venv" ]; then
     print_status $GREEN "✓ Python virtual environment exists"
-    source /home/kai/projects/car-demo-repos/car-demo-venv/bin/activate
+    source "$PROJECT_ROOT/car-demo-venv/bin/activate"
 else
     print_status $YELLOW "Creating Python virtual environment..."
-    cd /home/kai/projects/car-demo-repos
+    cd "$PROJECT_ROOT"
     python3 -m venv car-demo-venv
     source car-demo-venv/bin/activate
     pip install pytest pytest-asyncio pytest-mock fakeredis
@@ -201,7 +206,7 @@ fi
 
 # Run tests based on configuration
 print_status $YELLOW "3. Running Tests..."
-cd /home/kai/projects/car-demo-repos/car-demo-backend
+cd "$PROJECT_ROOT/car-demo-backend"
 
 # Build Jest command
 JEST_CMD="npx jest"
@@ -225,7 +230,7 @@ if [ -n "$COMPONENT" ]; then
             ;;
         c2)
             print_status $BLUE "Running C2 Central Broker tests..."
-            cd /home/kai/projects/car-demo-repos/car-demo-system/car-demo-in-car/C2-central-broker
+            cd "$SCRIPT_DIR/car-demo-in-car/C2-central-broker"
             $JEST_CMD --testPathPattern=tests
             ;;
         *)
@@ -243,14 +248,14 @@ else
         
         # Python unit tests
         print_status $BLUE "Running Python Unit Tests..."
-        cd /home/kai/projects/car-demo-repos
+        cd "$PROJECT_ROOT"
         source car-demo-venv/bin/activate
         
         # Run C1 tests
-        if [ -f "car-demo-system/car-demo-in-car/C1-cloud-communication/tests/test_cloud_communication.py" ]; then
-            cd car-demo-system/car-demo-in-car/C1-cloud-communication
+        if [ -f "$SCRIPT_DIR/car-demo-in-car/C1-cloud-communication/tests/test_cloud_communication.py" ]; then
+            cd "$SCRIPT_DIR/car-demo-in-car/C1-cloud-communication"
             python -m pytest tests/ -v
-            cd ../../../..
+            cd "$PROJECT_ROOT"
         fi
         
         # Run C5 tests
@@ -276,7 +281,7 @@ else
         print_status $YELLOW "Press Enter to continue with E2E tests, or Ctrl+C to cancel"
         read
         
-        cd /home/kai/projects/car-demo-repos/car-demo-system
+        cd "$SCRIPT_DIR"
         npx jest tests/e2e/ --runInBand --detectOpenHandles
     fi
 fi
