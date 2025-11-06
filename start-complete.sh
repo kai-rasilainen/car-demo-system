@@ -198,7 +198,14 @@ if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_BACKEND_ONLY" != true ]; then
             source "$PROJECT_ROOT/car-demo-venv/bin/activate"
             print_status $GREEN "✓ Python virtual environment activated"
         else
-            print_status $YELLOW "⚠ Python virtual environment not found"
+            print_status $YELLOW "Python virtual environment not found, creating..."
+            cd "$PROJECT_ROOT"
+            python3 -m venv car-demo-venv
+            source car-demo-venv/bin/activate
+            pip install --upgrade pip
+            pip install pytest pytest-asyncio pytest-mock fakeredis
+            print_status $GREEN "✓ Python virtual environment created and activated"
+            cd "$PROJECT_ROOT/car-demo-in-car"
         fi
         
         # Start C2 central broker
