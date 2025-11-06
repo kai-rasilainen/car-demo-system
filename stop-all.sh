@@ -65,14 +65,22 @@ while [[ $# -gt 0 ]]; do
         --help|-h)
             echo "Usage: $0 [options]"
             echo ""
+            echo "Stops all Car Demo System processes and containers"
+            echo ""
             echo "Options:"
             echo "  --volumes, -v    Also remove volumes (deletes all data)"
             echo "  --images, -i     Also remove images (saves disk space)"
             echo "  --all, -a        Remove volumes and images"
             echo "  --help, -h       Show this help message"
             echo ""
+            echo "What it stops:"
+            echo "  - npm dev processes"
+            echo "  - Node.js server processes"
+            echo "  - Python sensor and cloud processes"
+            echo "  - Docker containers (MongoDB, PostgreSQL, Redis)"
+            echo ""
             echo "Examples:"
-            echo "  $0               Stop containers only"
+            echo "  $0               Stop all processes and containers"
             echo "  $0 --volumes     Stop containers and remove volumes"
             echo "  $0 --all         Stop everything and clean up completely"
             exit 0
@@ -86,6 +94,43 @@ while [[ $# -gt 0 ]]; do
 done
 
 print_status $YELLOW "Stopping all Car Demo System containers..."
+echo ""
+
+# Stop Node.js and Python processes first
+print_status $BLUE "Stopping Node.js and Python processes..."
+
+# Kill npm processes
+NPM_PIDS=$(pgrep -f "npm.*dev" 2>/dev/null)
+if [ -n "$NPM_PIDS" ]; then
+    pkill -f "npm.*dev" 2>/dev/null
+    print_status $GREEN "✓ npm dev processes stopped (PIDs: $NPM_PIDS)"
+fi
+
+# Kill node processes related to car-demo
+NODE_PIDS=$(pgrep -f "node.*server.js" 2>/dev/null)
+if [ -n "$NODE_PIDS" ]; then
+    pkill -f "node.*server.js" 2>/dev/null
+    print_status $GREEN "✓ Node.js server processes stopped (PIDs: $NODE_PIDS)"
+fi
+
+# Kill Python processes related to car-demo
+SENSOR_PIDS=$(pgrep -f "python.*sensor_simulator.py" 2>/dev/null)
+if [ -n "$SENSOR_PIDS" ]; then
+    pkill -f "python.*sensor_simulator.py" 2>/dev/null
+    print_status $GREEN "✓ Sensor simulator processes stopped (PIDs: $SENSOR_PIDS)"
+fi
+
+CLOUD_PIDS=$(pgrep -f "python.*cloud_communicator.py" 2>/dev/null)
+if [ -n "$CLOUD_PIDS" ]; then
+    pkill -f "python.*cloud_communicator.py" 2>/dev/null
+    print_status $GREEN "✓ Cloud communicator processes stopped (PIDs: $CLOUD_PIDS)"
+fi
+
+# Check if any processes were stopped
+if [ -z "$NPM_PIDS" ] && [ -z "$NODE_PIDS" ] && [ -z "$SENSOR_PIDS" ] && [ -z "$CLOUD_PIDS" ]; then
+    print_status $YELLOW "⚠ No running processes found"
+fi
+
 echo ""
 
 # Stop main system containers
