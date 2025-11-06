@@ -273,13 +273,11 @@ else
         print_status $YELLOW "Ensuring services are running for E2E tests..."
         
         # Note: In a real scenario, you'd start the services here
-        print_status $YELLOW "Please ensure the following services are running:"
+        print_status $YELLOW "Ensure the following services are running for E2E tests:"
         echo "  - B1 Web Server (port 3001)"
         echo "  - B2 IoT Gateway (port 3002)" 
         echo "  - C2 Central Broker (port 3003)"
         echo ""
-        print_status $YELLOW "Press Enter to continue with E2E tests, or Ctrl+C to cancel"
-        read
         
         cd "$SCRIPT_DIR"
         npx jest tests/e2e/ --runInBand --detectOpenHandles
