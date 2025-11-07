@@ -244,11 +244,11 @@ if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_BACKEND_ONLY" != true ]; then
         
         cd "$SCRIPT_DIR"
         
-        # Give in-car systems time to start
-        sleep 5
+        # Give in-car systems time to start (C2 broker needs more time)
+        sleep 10
         
-        # Check in-car services
-        check_service "http://localhost:3003" "C2 Central Broker" 10
+        # Check in-car services (C2 Central Broker takes longer to initialize)
+        check_service "http://localhost:3003" "C2 Central Broker" 20
     else
         print_status $YELLOW "⚠ In-car directory not found, skipping..."
     fi
