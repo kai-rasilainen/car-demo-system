@@ -160,28 +160,28 @@ print_status $BLUE "Checking for individual component containers..."
 
 # Check and stop individual components
 # Note: These may not exist depending on setup
-if [ -d "car-demo-backend" ]; then
-    stop_containers "car-demo-backend" "Backend"
-    stop_containers "car-demo-backend/B3-realtime-database" "MongoDB"
-    stop_containers "car-demo-backend/B4-static-database" "PostgreSQL"
+if [ -d "B-car-demo-backend" ]; then
+    stop_containers "B-car-demo-backend" "Backend"
+    stop_containers "B-car-demo-backend/B3-realtime-database" "MongoDB"
+    stop_containers "B-car-demo-backend/B4-static-database" "PostgreSQL"
 fi
 
-if [ -d "car-demo-in-car" ]; then
-    stop_containers "car-demo-in-car" "In-car"
-    stop_containers "car-demo-in-car/C2-central-broker" "Redis"
+if [ -d "C-car-demo-in-car" ]; then
+    stop_containers "C-car-demo-in-car" "In-car"
+    stop_containers "C-car-demo-in-car/C2-central-broker" "Redis"
 fi
 
 # Also check parent directory structure
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
-if [ -d "$PARENT_DIR/car-demo-backend" ]; then
-    stop_containers "$PARENT_DIR/car-demo-backend" "Backend (parent dir)"
-    stop_containers "$PARENT_DIR/car-demo-backend/B3-realtime-database" "MongoDB (parent dir)"
-    stop_containers "$PARENT_DIR/car-demo-backend/B4-static-database" "PostgreSQL (parent dir)"
+if [ -d "$PARENT_DIR/B-car-demo-backend" ]; then
+    stop_containers "$PARENT_DIR/B-car-demo-backend" "Backend (parent dir)"
+    stop_containers "$PARENT_DIR/B-car-demo-backend/B3-realtime-database" "MongoDB (parent dir)"
+    stop_containers "$PARENT_DIR/B-car-demo-backend/B4-static-database" "PostgreSQL (parent dir)"
 fi
 
-if [ -d "$PARENT_DIR/car-demo-in-car" ]; then
-    stop_containers "$PARENT_DIR/car-demo-in-car" "In-car (parent dir)"
-    stop_containers "$PARENT_DIR/car-demo-in-car/C2-central-broker" "Redis (parent dir)"
+if [ -d "$PARENT_DIR/C-car-demo-in-car" ]; then
+    stop_containers "$PARENT_DIR/C-car-demo-in-car" "In-car (parent dir)"
+    stop_containers "$PARENT_DIR/C-car-demo-in-car/C2-central-broker" "Redis (parent dir)"
 fi
 
 # Remove car-demo specific containers by name (fallback)

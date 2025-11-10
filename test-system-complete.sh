@@ -49,7 +49,7 @@ curl -s "http://localhost:3003/api/cars" | jq -r '.[] | "  - \(.licensePlate): \
 
 echo -e "\n${BLUE}6. PYTHON COMPONENT TESTING:${NC}"
 echo "Testing C1 Cloud Communication (will run for 10 seconds)..."
-timeout 10 python car-demo-in-car/C1-cloud-communication/test_c2_simulator.py 2>/dev/null &
+timeout 10 python C-car-demo-in-car/C1-cloud-communication/test_c2_simulator.py 2>/dev/null &
 PID=$!
 sleep 12
 if kill -0 $PID 2>/dev/null; then
@@ -73,8 +73,8 @@ echo "curl http://localhost:3003/health"
 echo ""
 echo "🐍 PYTHON COMPONENTS:"
 echo "source car-demo-venv/bin/activate"
-echo "cd car-demo-in-car/C1-cloud-communication && python cloud_communicator.py"
-echo "cd car-demo-in-car/C5-data-sensors && python sensor_simulator.py"
+echo "cd C-car-demo-in-car/C1-cloud-communication && python cloud_communicator.py"
+echo "cd C-car-demo-in-car/C5-data-sensors && python sensor_simulator.py"
 echo ""
 echo "📊 MONITORING:"
 echo "redis-cli monitor    # Watch real-time Redis activity"

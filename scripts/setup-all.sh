@@ -11,7 +11,7 @@ else
 fi
 
 # Clone all repositories if not present
-repos=("car-demo-frontend" "car-demo-backend" "car-demo-in-car")
+repos=("A-A-car-demo-frontend" "B-B-car-demo-backend" "C-C-car-demo-in-car")
 base_url="https://github.com/kai-rasilainen"
 
 for repo in "${repos[@]}"; do
@@ -27,10 +27,10 @@ done
 # Get the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYSTEM_DIR="$(dirname "$SCRIPT_DIR")"
-IN_CAR_DIR="$SYSTEM_DIR/car-demo-in-car"
+IN_CAR_DIR="$SYSTEM_DIR/C-C-car-demo-in-car"
 VENV_DIR="$IN_CAR_DIR/venv"
 
-# Create and configure Python virtual environment for car-demo-in-car
+# Create and configure Python virtual environment for C-car-demo-in-car
 if [ -d "$IN_CAR_DIR" ]; then
     echo "Setting up Python virtual environment for in-car components..."
     

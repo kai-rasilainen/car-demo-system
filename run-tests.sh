@@ -186,7 +186,7 @@ fi
 # Install dependencies if needed
 print_status $YELLOW "2. Installing Dependencies..."
 
-cd "$PROJECT_ROOT/car-demo-backend"
+cd "$PROJECT_ROOT/B-car-demo-backend"
 if [ ! -d "node_modules" ]; then
     print_status $YELLOW "Installing Node.js dependencies..."
     npm install
@@ -206,7 +206,7 @@ fi
 
 # Run tests based on configuration
 print_status $YELLOW "3. Running Tests..."
-cd "$PROJECT_ROOT/car-demo-backend"
+cd "$PROJECT_ROOT/B-car-demo-backend"
 
 # Build Jest command
 JEST_CMD="npx jest"
@@ -230,7 +230,7 @@ if [ -n "$COMPONENT" ]; then
             ;;
         c2)
             print_status $BLUE "Running C2 Central Broker tests..."
-            cd "$SCRIPT_DIR/car-demo-in-car/C2-central-broker"
+            cd "$SCRIPT_DIR/C-car-demo-in-car/C2-central-broker"
             $JEST_CMD --testPathPatterns="tests"
             ;;
         *)
@@ -252,15 +252,15 @@ else
         source car-demo-venv/bin/activate
         
         # Run C1 tests
-        if [ -f "$SCRIPT_DIR/car-demo-in-car/C1-cloud-communication/tests/test_cloud_communication.py" ]; then
-            cd "$SCRIPT_DIR/car-demo-in-car/C1-cloud-communication"
+        if [ -f "$SCRIPT_DIR/C-car-demo-in-car/C1-cloud-communication/tests/test_cloud_communication.py" ]; then
+            cd "$SCRIPT_DIR/C-car-demo-in-car/C1-cloud-communication"
             python -m pytest tests/ -v
             cd "$PROJECT_ROOT"
         fi
         
         # Run C5 tests
-        if [ -f "car-demo-system/car-demo-in-car/C5-data-sensors/tests/test_sensor_simulator.py" ]; then
-            cd car-demo-system/car-demo-in-car/C5-data-sensors
+        if [ -f "car-demo-system/C-car-demo-in-car/C5-data-sensors/tests/test_sensor_simulator.py" ]; then
+            cd car-demo-system/C-car-demo-in-car/C5-data-sensors
             python -m pytest tests/ -v
             cd ../../../..
         fi

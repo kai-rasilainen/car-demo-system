@@ -52,7 +52,7 @@ echo "  2. Push all repositories to GitHub"
 echo ""
 echo "Prerequisites:"
 echo "  ✓ You must have created the GitHub repositories manually"
-echo "  ✓ Repository names: car-demo-frontend, car-demo-backend, car-demo-in-car, car-demo-system"
+echo "  ✓ Repository names: A-car-demo-frontend, B-car-demo-backend, C-car-demo-in-car, car-demo-system"
 echo ""
 read -p "Have you created all 4 repositories on GitHub? (y/N): " confirm
 
@@ -63,9 +63,9 @@ if [[ ! $confirm =~ ^[Yy]$ ]]; then
     echo "1. Go to https://github.com/$GITHUB_USER"
     echo "2. Click '+' → 'New repository'"
     echo "3. Create these repositories (don't initialize with README/gitignore):"
-    echo "   - car-demo-frontend"
-    echo "   - car-demo-backend"
-    echo "   - car-demo-in-car"
+    echo "   - A-car-demo-frontend"
+    echo "   - B-car-demo-backend"
+    echo "   - C-car-demo-in-car"
     echo "   - car-demo-system"
     echo ""
     echo "Then run this script again."
@@ -76,9 +76,9 @@ cd "$REPOS_DIR"
 
 # Repository configurations
 declare -A repositories=(
-    ["car-demo-frontend"]="Frontend applications for car demo system"
-    ["car-demo-backend"]="Backend services and databases for car demo system"
-    ["car-demo-in-car"]="In-car systems and sensors for car demo system"
+    ["A-car-demo-frontend"]="Frontend applications for car demo system"
+    ["B-car-demo-backend"]="Backend services and databases for car demo system"
+    ["C-car-demo-in-car"]="In-car systems and sensors for car demo system"
     ["car-demo-system"]="Main orchestration repository for car demo system"
 )
 

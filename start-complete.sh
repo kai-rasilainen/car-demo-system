@@ -121,9 +121,9 @@ if [ "$START_DATABASES_ONLY" = true ]; then
     echo "  Redis:      redis://localhost:6379"
     echo ""
     print_status $YELLOW "To start other components:"
-    echo "  Backend:  cd car-demo-backend && ./scripts/dev-start.sh"
-    echo "  Frontend: cd car-demo-frontend && ./scripts/dev-start.sh"
-    echo "  In-car:   cd car-demo-in-car && ./scripts/start-all.sh"
+    echo "  Backend:  cd B-car-demo-backend && ./scripts/dev-start.sh"
+    echo "  Frontend: cd A-car-demo-frontend && ./scripts/dev-start.sh"
+    echo "  In-car:   cd C-car-demo-in-car && ./scripts/start-all.sh"
     exit 0
 fi
 
@@ -133,8 +133,8 @@ echo ""
 if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_INCAR_ONLY" != true ]; then
     print_status $YELLOW "2. Starting Backend Services..."
     
-    if [ -d "$PROJECT_ROOT/car-demo-backend" ]; then
-        cd "$PROJECT_ROOT/car-demo-backend"
+    if [ -d "$PROJECT_ROOT/B-car-demo-backend" ]; then
+        cd "$PROJECT_ROOT/B-car-demo-backend"
         
         # Install dependencies if needed
         if [ ! -d "node_modules" ]; then
@@ -181,7 +181,7 @@ if [ "$START_BACKEND_ONLY" = true ]; then
     echo "  B1 Web Server: http://localhost:3001"
     echo "  B2 IoT Gateway: http://localhost:3002"
     echo ""
-    print_status $YELLOW "Backend logs: tail -f car-demo-backend/backend.log"
+    print_status $YELLOW "Backend logs: tail -f B-car-demo-backend/backend.log"
     exit 0
 fi
 
@@ -191,8 +191,8 @@ echo ""
 if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_BACKEND_ONLY" != true ]; then
     print_status $YELLOW "3. Starting In-Car Systems..."
     
-    if [ -d "$PROJECT_ROOT/car-demo-in-car" ]; then
-        cd "$PROJECT_ROOT/car-demo-in-car"
+    if [ -d "$PROJECT_ROOT/C-car-demo-in-car" ]; then
+        cd "$PROJECT_ROOT/C-car-demo-in-car"
         
         # Activate Python environment
         if [ -d "$PROJECT_ROOT/car-demo-venv" ]; then
@@ -206,7 +206,7 @@ if [ "$START_FRONTEND_ONLY" != true ] && [ "$START_BACKEND_ONLY" != true ]; then
             pip install --upgrade pip
             pip install pytest pytest-asyncio pytest-mock fakeredis
             print_status $GREEN "✓ Python virtual environment created and activated"
-            cd "$PROJECT_ROOT/car-demo-in-car"
+            cd "$PROJECT_ROOT/C-car-demo-in-car"
         fi
         
         # Start C2 central broker
@@ -261,9 +261,9 @@ if [ "$START_INCAR_ONLY" = true ]; then
     echo "  C2 Central Broker: http://localhost:3003"
     echo ""
     print_status $YELLOW "In-car logs:"
-    echo "  C2 Broker: tail -f car-demo-in-car/c2-broker.log"
-    echo "  C5 Sensors: tail -f car-demo-in-car/c5-sensors.log"
-    echo "  C1 Cloud: tail -f car-demo-in-car/c1-cloud.log"
+    echo "  C2 Broker: tail -f C-car-demo-in-car/c2-broker.log"
+    echo "  C5 Sensors: tail -f C-car-demo-in-car/c5-sensors.log"
+    echo "  C1 Cloud: tail -f C-car-demo-in-car/c1-cloud.log"
     exit 0
 fi
 
@@ -273,8 +273,8 @@ echo ""
 if [ "$START_BACKEND_ONLY" != true ] && [ "$START_INCAR_ONLY" != true ]; then
     print_status $YELLOW "4. Starting Frontend Applications..."
     
-    if [ -d "$PROJECT_ROOT/car-demo-frontend" ]; then
-        cd "$PROJECT_ROOT/car-demo-frontend"
+    if [ -d "$PROJECT_ROOT/A-car-demo-frontend" ]; then
+        cd "$PROJECT_ROOT/A-car-demo-frontend"
         
         # Install dependencies if needed
         if [ ! -d "node_modules" ]; then
@@ -320,20 +320,20 @@ echo "  🔴 Redis:      redis://localhost:6379"
 echo ""
 
 print_status $BLUE "📋 Logs:"
-if [ -f "$PROJECT_ROOT/car-demo-backend/backend.log" ]; then
-    echo "  Backend:  tail -f car-demo-backend/backend.log"
+if [ -f "$PROJECT_ROOT/B-car-demo-backend/backend.log" ]; then
+    echo "  Backend:  tail -f B-car-demo-backend/backend.log"
 fi
-if [ -f "$PROJECT_ROOT/car-demo-frontend/frontend.log" ]; then
-    echo "  Frontend: tail -f car-demo-frontend/frontend.log"
+if [ -f "$PROJECT_ROOT/A-car-demo-frontend/frontend.log" ]; then
+    echo "  Frontend: tail -f A-car-demo-frontend/frontend.log"
 fi
-if [ -f "$PROJECT_ROOT/car-demo-in-car/c2-broker.log" ]; then
-    echo "  C2 Broker: tail -f car-demo-in-car/c2-broker.log"
+if [ -f "$PROJECT_ROOT/C-car-demo-in-car/c2-broker.log" ]; then
+    echo "  C2 Broker: tail -f C-car-demo-in-car/c2-broker.log"
 fi
-if [ -f "$PROJECT_ROOT/car-demo-in-car/c5-sensors.log" ]; then
-    echo "  C5 Sensors: tail -f car-demo-in-car/c5-sensors.log"
+if [ -f "$PROJECT_ROOT/C-car-demo-in-car/c5-sensors.log" ]; then
+    echo "  C5 Sensors: tail -f C-car-demo-in-car/c5-sensors.log"
 fi
-if [ -f "$PROJECT_ROOT/car-demo-in-car/c1-cloud.log" ]; then
-    echo "  C1 Cloud: tail -f car-demo-in-car/c1-cloud.log"
+if [ -f "$PROJECT_ROOT/C-car-demo-in-car/c1-cloud.log" ]; then
+    echo "  C1 Cloud: tail -f C-car-demo-in-car/c1-cloud.log"
 fi
 
 echo ""
