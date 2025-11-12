@@ -263,7 +263,7 @@ Agent A combines:
 - [ ] Screen transition performance
 - [ ] API response time handling
 - [ ] Memory usage monitoring
-- [ ] Battery impact (A1 mobile)
+- [ ] Real-time data updates (A1 mobile)
 
 ### Security Tests
 - [ ] Token storage and handling

@@ -315,102 +315,109 @@ B1 API → Frontend Apps
 
 ## Example: Complete Feature Analysis
 
-### Feature Request: "Add Battery Level Monitoring"
+### Feature Request: "Add Tire Pressure Monitoring"
 
 #### Agent A - Frontend Analysis
 
 ```markdown
-### Frontend Impact: LOW
+### Frontend Impact: MEDIUM
 
 **A1 Car User App**:
-- Add battery gauge to car status screen
-- Show battery percentage and charging status
-- Add low battery warning (< 20%)
+- Add tire pressure gauge display showing all 4 tires
+- Visual indicators for each tire (green/yellow/red based on pressure)
+- Warning alert when any tire is below 1.9 bar
+- Real-time updates as pressure changes
 
 **A2 Rental Staff App**:
-- Add battery column to fleet dashboard
-- Add battery filter (show only low battery cars)
-- Add battery chart to car details
+- Add tire pressure column to fleet dashboard
+- Add tire pressure filter (show only cars with low pressure)
+- Add detailed tire pressure view in car details page
+- Historical tire pressure chart
 
 **API Requirements**:
-- Modify GET /api/car/:licensePlate to include batteryLevel field
-- Add GET /api/cars?lowBattery=true filter
+- Modify GET /api/car/:licensePlate to include tirePressure field
+- Add GET /api/cars?lowPressure=true filter
 
-**Estimated Effort**: 6 hours
-- A1 changes: 3 hours
-- A2 changes: 3 hours
+**Estimated Effort**: 8 hours
+- A1 changes: 4 hours (gauge component, alerts)
+- A2 changes: 4 hours (dashboard, charts)
 
-**Test Cases**: 8 unit tests, 4 integration tests, 2 E2E tests
+**Test Cases**: 10 unit tests, 6 integration tests, 4 E2E tests
 ```
 
 #### Agent B - Backend Analysis
 
 ```markdown
-### Backend Impact: LOW
+### Backend Impact: MEDIUM
 
 **B1 Web Server**:
 - Modify GET /api/car/:licensePlate response schema
-- Add batteryLevel field (number, 0-100)
+- Add tirePressure field: { frontLeft, frontRight, rearLeft, rearRight }
+- Data type: Numbers in bar (1.5-4.0 range)
 - Update Swagger documentation
 
 **B2 IoT Gateway**:
-- Accept batteryLevel in WebSocket messages
+- Accept tirePressure in WebSocket messages
+- Validate pressure values (1.5-4.0 bar)
 - Store in MongoDB car_data collection
 - Forward to B1 via database query
 
 **B3 MongoDB**:
-- Add batteryLevel field to car_data collection
+- Add tirePressure field to car_data collection
 - No migration needed (schema-less)
-- Add index: { batteryLevel: 1, timestamp: -1 }
+- Add index: { tirePressure.frontLeft: 1, timestamp: -1 }
 
 **B4 PostgreSQL**:
-- Optional: Add battery_capacity_kwh to cars table
+- Optional: Add tire_specification to cars table
 - Not required for MVP
 
-**Estimated Effort**: 8 hours
-- B1 changes: 3 hours
+**Estimated Effort**: 6 hours
+- B1 changes: 2 hours
 - B2 changes: 3 hours
 - B3 setup: 1 hour
-- Testing: 1 hour
+- Testing: included above
 
-**Test Cases**: 12 unit tests, 6 integration tests, 3 E2E tests
+**Test Cases**: 12 unit tests, 8 integration tests, 4 E2E tests
 ```
 
 #### Agent C - In-Car Analysis
 
 ```markdown
-### In-Car Impact: LOW
+### In-Car Impact: MEDIUM
 
 **C5 Data Sensors**:
-- Add battery sensor simulation
-- Start at 100%, drain at ~0.1% per minute
-- Simulate charging when parked
-- Publish to Redis: sensors:battery_level
+- Add tire pressure sensor simulation
+- Generate realistic pressure values (1.9-2.4 bar)
+- Simulate gradual pressure loss over time
+- Random variation (±0.05 bar)
+- Publish to Redis: sensors:tire_pressure
 
 **C2 Central Broker**:
-- Subscribe to sensors:battery_level
+- Subscribe to sensors:tire_pressure
 - Store in car:{licensePlate}:sensors hash
 - Include in latest_data aggregation
+- Forward to cloud via C1
 
 **C1 Cloud Communication**:
-- Forward batteryLevel in sensor_data messages
+- Forward tirePressure in sensor_data messages
 - No protocol changes needed
 
 **Data Format**:
 ```json
 {
-  "value": 85.5,
-  "unit": "percent",
-  "charging": false,
-  "timestamp": "2025-11-11T10:30:00Z",
+  "frontLeft": 2.25,
+  "frontRight": 2.28,
+  "rearLeft": 2.21,
+  "rearRight": 2.23,
+  "timestamp": "2025-11-12T10:30:00Z",
   "licensePlate": "ABC-123"
 }
 ```
 
-**Estimated Effort**: 6 hours
+**Estimated Effort**: 5 hours
 - C5 sensor: 3 hours
-- C2 changes: 2 hours
-- Testing: 1 hour
+- C2 changes: 1.5 hours
+- Testing: 0.5 hours
 
 **Test Cases**: 8 unit tests, 4 integration tests, 2 E2E tests
 ```
@@ -418,40 +425,40 @@ B1 API → Frontend Apps
 #### Consolidated Assessment
 
 ```markdown
-## Feature: Add Battery Level Monitoring
+## Feature: Add Tire Pressure Monitoring
 
-### Overall Impact: LOW ✅
+### Overall Impact: MEDIUM ✅
 
-**Total Estimated Effort**: 20 hours
-- Frontend: 6 hours
-- Backend: 8 hours
-- In-Car: 6 hours
+**Total Estimated Effort**: 19 hours
+- Frontend: 8 hours
+- Backend: 6 hours
+- In-Car: 5 hours
 
 **Breaking Changes**: None (additive change only)
 
 **Implementation Order**:
-1. C5: Add battery sensor (3 hours)
-2. C2: Subscribe and aggregate (2 hours)
-3. B2: Accept and store battery data (3 hours)
-4. B1: Add to API response (3 hours)
-5. A1/A2: Display in UI (6 hours)
-6. Testing: Integration and E2E (3 hours)
+1. C5: Add tire pressure sensor (3 hours)
+2. C2: Subscribe and aggregate (1.5 hours)
+3. B2: Accept and store tire pressure data (3 hours)
+4. B1: Add to API response (2 hours)
+5. A1/A2: Display in UI (8 hours)
+6. Testing: Integration and E2E (1.5 hours)
 
 **Total Test Cases**: 
-- Unit: 28 tests
-- Integration: 14 tests
-- E2E: 7 tests
-- Test development: ~6 hours
+- Unit: 30 tests
+- Integration: 18 tests
+- E2E: 10 tests
+- Test development: ~5 hours
 
 **Risks**: 
-- None identified
-- Backwards compatible
-- No performance concerns
+- Sensor simulation must be realistic (gradual pressure loss, not sudden)
+- Low pressure alerts should not be too sensitive (avoid false alarms)
+- Need proper validation (pressure can't be negative or > 4.0 bar)
 
 **Go/No-Go**: ✅ PROCEED
 
-This is a low-risk, high-value feature that can be implemented incrementally 
-without breaking existing functionality. Estimated delivery: 2-3 days.
+This is a medium-complexity, high-value safety feature that can be implemented
+incrementally without breaking existing functionality. Estimated delivery: 2-3 days.
 ```
 
 ## Agent Communication Protocols
@@ -617,22 +624,27 @@ TECHNICAL DETAILS:
 ```
 FROM: Agent A (Frontend)
 TO: Agent B (Backend)
-RE: Battery Level Monitoring
+RE: Tire Pressure Monitoring
 
 REQUEST:
-Need API endpoint to retrieve battery level for a car
+Need API endpoint to retrieve tire pressure data for a car
 
 DETAILS:
-- Should include current battery percentage (0-100)
-- Should include charging status (boolean)
+- Should include pressure for all 4 tires (in bar)
+- Should include low pressure alerts
 - Should be part of existing car data endpoint
 
 PROPOSED API:
 GET /api/car/:licensePlate
 Response: {
   ...existing fields...,
-  "batteryLevel": 85.5,
-  "charging": false
+  "tirePressure": {
+    "frontLeft": 2.25,
+    "frontRight": 2.28,
+    "rearLeft": 2.21,
+    "rearRight": 2.23
+  },
+  "lowPressureAlert": false
 }
 
 TIMELINE:
@@ -643,22 +655,23 @@ Need this before frontend development (Week 2)
 ```
 FROM: Agent B (Backend)
 TO: Agent C (In-Car)
-RE: Battery Level Monitoring
+RE: Tire Pressure Monitoring
 
 REQUEST:
-Need battery level sensor data from in-car system
+Need tire pressure sensor data from in-car system
 
 DETAILS:
-- Data type: Number (0-100 percentage)
+- Data type: Object with 4 tire pressures (in bar)
 - Update frequency: Every 30 seconds
-- Must include charging status
+- Must include low pressure detection
 
 REQUIRED FORMAT:
-Redis Channel: sensors:battery_level
+Redis Channel: sensors:tire_pressure
 Payload: {
-  "value": 85.5,
-  "unit": "percent",
-  "charging": false,
+  "frontLeft": 2.25,
+  "frontRight": 2.28,
+  "rearLeft": 2.21,
+  "rearRight": 2.23,
   "timestamp": "ISO8601",
   "licensePlate": "ABC-123"
 }
@@ -670,18 +683,18 @@ Need sensor operational by Week 1 for testing
 **Agent C to Agent B**:
 ```
 FROM: Agent C (In-Car)
-TO: Agent B (Backend)
-RE: Battery Level Monitoring
+TO: Agent C (Backend)
+RE: Tire Pressure Monitoring
 
 RESPONSE:
-✅ Can provide battery level data
+✅ Can provide tire pressure data
 
 IMPLEMENTATION:
-- Sensor: C5 battery_level_sensor.py
-- Channel: sensors:battery_level
+- Sensor: C5 tire_pressure_sensor.py
+- Channel: sensors:tire_pressure
 - Format: As specified
 - Update: Every 30 seconds
-- Additional: Will simulate charging when stationary
+- Additional: Will simulate gradual pressure loss over time
 
 READY BY: End of Week 1
 
@@ -773,7 +786,7 @@ Feature Request Arrives
 4. **Consult Both B and C** (Full stack feature)
    - New sensors + new APIs + new UI
    - Complete data flow from car to user
-   - Example: "Add battery level monitoring"
+   - Example: "Add tire pressure monitoring"
 
 ## Risk Levels and Responses
 

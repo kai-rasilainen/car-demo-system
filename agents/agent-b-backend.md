@@ -294,22 +294,22 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 
 ## Example Feature Analysis
 
-### Example: Add "Battery Level Monitoring" Feature
+### Example: Add "Tire Pressure Monitoring" Feature
 
 #### Impact Assessment
 
 **Backend Components Affected**:
-- ✅ B1 Web Server - Add battery level to car data API
-- ✅ B2 IoT Gateway - Receive and store battery data
-- ✅ B3 MongoDB - Store battery level time series
-- ⚠️ B4 PostgreSQL - Optionally add battery specs to cars table
+- ✅ B1 Web Server - Add tire pressure data to car data API
+- ✅ B2 IoT Gateway - Receive and store tire pressure data
+- ✅ B3 MongoDB - Store tire pressure time series
+- ⚠️ B4 PostgreSQL - Optionally add tire specs to cars table
 
 **API Changes**:
 
 **B1 Web Server**:
 ```javascript
 // Modified Endpoint: GET /api/car/:licensePlate
-// Add batteryLevel to response
+// Add tirePressure to response
 {
   "licensePlate": "ABC-123",
   "make": "Tesla",
@@ -317,7 +317,13 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
   "indoorTemp": 22.5,
   "outdoorTemp": 18.3,
   "gps": { "lat": 60.1699, "lng": 24.9384 },
-  "batteryLevel": 85.5,  // NEW: Battery percentage (0-100)
+  "tirePressure": {  // NEW: Tire pressures in bar
+    "frontLeft": 2.25,
+    "frontRight": 2.28,
+    "rearLeft": 2.21,
+    "rearRight": 2.23
+  },
+  "lowPressureAlert": false,
   "timestamp": "2025-11-11T10:30:00Z"
 }
 ```
@@ -325,19 +331,25 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 **B2 IoT Gateway**:
 ```javascript
 // Modified: WebSocket message format
-// Add battery data to sensor messages
+// Add tire pressure data to sensor messages
 {
   "type": "sensor_data",
   "licensePlate": "ABC-123",
   "indoorTemp": 22.5,
   "outdoorTemp": 18.3,
   "gps": { "lat": 60.1699, "lng": 24.9384 },
-  "batteryLevel": 85.5,  // NEW
+  "tirePressure": {  // NEW
+    "frontLeft": 2.25,
+    "frontRight": 2.28,
+    "rearLeft": 2.21,
+    "rearRight": 2.23
+  },
+  "lowPressureAlert": false,
   "timestamp": "2025-11-11T10:30:00Z"
 }
 
-// New Endpoint: GET /api/car/:licensePlate/battery-history
-// Return battery level time series
+// New Endpoint: GET /api/car/:licensePlate/tire-pressure-history
+// Return tire pressure time series
 ```
 
 **Database Schema Changes**:
@@ -351,42 +363,48 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
   indoorTemp: Number,
   outdoorTemp: Number,
   gps: { lat: Number, lng: Number },
-  batteryLevel: Number,  // NEW: 0-100 percentage
+  tirePressure: {  // NEW: Pressures in bar (1.5-4.0 range)
+    frontLeft: Number,
+    frontRight: Number,
+    rearLeft: Number,
+    rearRight: Number
+  },
+  lowPressureAlert: Boolean,
   timestamp: Date
 }
 
-// Optional: Create new index for battery queries
-db.car_data.createIndex({ "batteryLevel": 1, "timestamp": -1 })
+// Optional: Create new index for tire pressure queries
+db.car_data.createIndex({ "tirePressure.frontLeft": 1, "timestamp": -1 })
 ```
 
 **B4 PostgreSQL**:
 ```sql
--- Optional: Add battery capacity to cars table
+-- Optional: Add tire specifications to cars table
 ALTER TABLE cars 
-ADD COLUMN battery_capacity_kwh DECIMAL(5,2),
-ADD COLUMN battery_type VARCHAR(50);
+ADD COLUMN recommended_tire_pressure_bar DECIMAL(3,2),
+ADD COLUMN tire_size VARCHAR(20);
 
 -- No migration needed for existing cars
 -- Can be populated manually or left NULL
 ```
 
 **Data Flow**:
-1. C5 sensors generate battery level data
-2. C2 publishes to Redis: `sensors:battery_level`
-3. B2 subscribes and receives battery data
+1. C5 sensors generate tire pressure data (4 sensors)
+2. C2 publishes to Redis: `sensors:tire_pressure`
+3. B2 subscribes and receives tire pressure data
 4. B2 stores in MongoDB car_data collection
 5. B2 broadcasts via WebSocket to connected clients
-6. B1 queries MongoDB for latest battery level
-7. Frontend displays battery level
+6. B1 queries MongoDB for latest tire pressures
+7. Frontend displays tire pressure gauges
 
 **Performance Implications**:
-- **Database Load**: +5% MongoDB writes (one additional field)
+- **Database Load**: +8% MongoDB writes (four additional numeric fields)
 - **API Throughput**: No change (same endpoints)
-- **Response Time**: +0-2ms (minimal additional data)
-- **Caching Strategy**: Cache battery level with other sensor data (30s TTL)
+- **Response Time**: +0-3ms (additional nested object data)
+- **Caching Strategy**: Cache tire pressure with other sensor data (30s TTL)
 
 **Security Considerations**:
-- **Validation**: Battery level must be 0-100 range
+- **Validation**: Tire pressure must be 1.5-4.0 bar range
 - **Authorization**: Same as existing sensor data (no new permissions)
 - **Rate Limiting**: No change needed
 
@@ -398,55 +416,68 @@ ADD COLUMN battery_type VARCHAR(50);
 - **Rollback Plan**: Remove field from responses, no data loss
 
 **Estimated Effort**:
-- **API Development**: 3-4 hours (B1 + B2 changes)
+- **API Development**: 2-3 hours (B1 + B2 changes)
 - **Database Work**: 1 hour (optional PostgreSQL schema)
-- **Testing**: 3-4 hours
+- **Testing**: 2-3 hours
 - **Documentation**: 1 hour (Swagger updates)
-- **Total**: 8-10 hours
+- **Total**: 6-8 hours
 
 #### Test Cases
 
 **Unit Tests**:
 ```javascript
 // B1 Web Server
-describe('GET /api/car/:licensePlate with battery', () => {
-  it('should return battery level when available', async () => {
-    // Mock MongoDB response with battery data
+describe('GET /api/car/:licensePlate with tire pressure', () => {
+  it('should return tire pressure data when available', async () => {
+    // Mock MongoDB response with tire pressure data
     const response = await request(app).get('/api/car/ABC-123');
-    expect(response.body.batteryLevel).toBe(85.5);
+    expect(response.body.tirePressure.frontLeft).toBe(2.25);
+    expect(response.body.tirePressure.frontRight).toBe(2.28);
   });
 
-  it('should handle missing battery level gracefully', async () => {
-    // Mock MongoDB response without battery data
+  it('should handle missing tire pressure gracefully', async () => {
+    // Mock MongoDB response without tire pressure data
     const response = await request(app).get('/api/car/XYZ-789');
-    expect(response.body.batteryLevel).toBeUndefined();
+    expect(response.body.tirePressure).toBeUndefined();
   });
 
-  it('should validate battery level range', () => {
-    expect(() => validateBatteryLevel(150)).toThrow();
-    expect(() => validateBatteryLevel(-10)).toThrow();
-    expect(() => validateBatteryLevel(50)).not.toThrow();
+  it('should validate tire pressure range', () => {
+    expect(() => validateTirePressure(5.0)).toThrow();  // Too high
+    expect(() => validateTirePressure(0.5)).toThrow();  // Too low
+    expect(() => validateTirePressure(2.2)).not.toThrow();  // Valid
+  });
+
+  it('should detect low pressure alert', () => {
+    const pressure = { frontLeft: 1.8, frontRight: 2.2, rearLeft: 2.1, rearRight: 2.3 };
+    expect(isLowPressure(pressure)).toBe(true);  // frontLeft < 1.9
   });
 });
 
 // B2 IoT Gateway
-describe('WebSocket battery data handling', () => {
-  it('should store battery level in MongoDB', async () => {
+describe('WebSocket tire pressure handling', () => {
+  it('should store tire pressure in MongoDB', async () => {
     const message = {
       type: 'sensor_data',
       licensePlate: 'ABC-123',
-      batteryLevel: 85.5,
+      tirePressure: {
+        frontLeft: 2.25,
+        frontRight: 2.28,
+        rearLeft: 2.21,
+        rearRight: 2.23
+      },
       timestamp: new Date()
     };
     await handleSensorData(message);
     
     const stored = await mongodb.collection('car_data')
       .findOne({ licensePlate: 'ABC-123' });
-    expect(stored.batteryLevel).toBe(85.5);
+    expect(stored.tirePressure.frontLeft).toBe(2.25);
   });
 
-  it('should reject invalid battery levels', () => {
-    const message = { batteryLevel: 150 };
+  it('should reject invalid tire pressures', () => {
+    const message = { 
+      tirePressure: { frontLeft: 10.0, frontRight: 2.2, rearLeft: 2.1, rearRight: 2.3 } 
+    };
     expect(() => validateSensorData(message)).toThrow();
   });
 });
@@ -455,13 +486,18 @@ describe('WebSocket battery data handling', () => {
 **Integration Tests**:
 ```javascript
 // Full data flow test
-it('should flow battery data from B2 to B1', async () => {
+it('should flow tire pressure from B2 to B1', async () => {
   // 1. Send data to B2 WebSocket
   const ws = new WebSocket('ws://localhost:8081');
   ws.send(JSON.stringify({
     type: 'sensor_data',
     licensePlate: 'ABC-123',
-    batteryLevel: 85.5
+    tirePressure: {
+      frontLeft: 2.25,
+      frontRight: 2.28,
+      rearLeft: 2.21,
+      rearRight: 2.23
+    }
   }));
 
   // 2. Wait for MongoDB storage
@@ -469,18 +505,23 @@ it('should flow battery data from B2 to B1', async () => {
 
   // 3. Query B1 API
   const response = await axios.get('http://localhost:3001/api/car/ABC-123');
-  expect(response.data.batteryLevel).toBe(85.5);
+  expect(response.data.tirePressure.frontLeft).toBe(2.25);
 });
 ```
 
 **Performance Tests**:
 ```javascript
-// Load test with battery data
-it('should handle 1000 battery updates per second', async () => {
+// Load test with tire pressure data
+it('should handle 1000 tire pressure updates per second', async () => {
   const startTime = Date.now();
   
   for (let i = 0; i < 1000; i++) {
-    await sendBatteryUpdate('ABC-123', Math.random() * 100);
+    await sendTirePressureUpdate('ABC-123', {
+      frontLeft: 2.1 + Math.random() * 0.3,
+      frontRight: 2.1 + Math.random() * 0.3,
+      rearLeft: 2.1 + Math.random() * 0.3,
+      rearRight: 2.1 + Math.random() * 0.3
+    });
   }
   
   const duration = Date.now() - startTime;
@@ -517,20 +558,23 @@ Ready to implement after frontend approval.
 
 **Message to Agent C (In-Car)**:
 ```
+```
 Feature Request: [Feature Name]
 
 Backend requires the following from in-car systems:
 
 New Sensor Data Required:
-- Sensor Type: [e.g., battery_level]
+- Sensor Type: [e.g., tire_pressure]
 - Data Format: [Schema]
 - Update Frequency: [e.g., every 30 seconds]
 - Redis Channel: [Channel name]
 
 New Commands to Support:
-- Command Name: [e.g., fast_charge]
+- Command Name: [e.g., calibrate_sensors]
 - Parameters: [Schema]
 - Expected Response: [Schema]
+
+```
 
 Please assess impact on In-Car components (C1, C2, C5)
 ```

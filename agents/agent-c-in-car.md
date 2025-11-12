@@ -136,7 +136,7 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 
 #### New Sensor Requirements
 
-**Sensor Type**: [e.g., tire_pressure, battery_level, door_status]
+**Sensor Type**: [e.g., tire_pressure, speed_sensor, door_status]
 
 **Data Characteristics**:
 - **Data Type**: Number | String | Boolean | Object
@@ -221,7 +221,7 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 **Realism Requirements**:
 - **Simple**: Random values within range
 - **Moderate**: Realistic patterns (temperature gradual change)
-- **Complex**: Correlated sensors (speed affects battery drain)
+- **Complex**: Correlated sensors (speed affects tire pressure)
 
 **Edge Cases to Simulate**:
 - Sensor failures/disconnections
@@ -726,7 +726,7 @@ Please coordinate with Agent B for API integration.
 - Low frequency changes
 
 **Polling** (regular intervals):
-- Continuous values (temperature, speed, battery)
+- Continuous values (temperature, speed, tire pressure)
 - Gradual changes
 - Monitoring/heartbeat requirements
 

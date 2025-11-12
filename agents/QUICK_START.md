@@ -88,12 +88,12 @@ Based on Agent A's consolidated report:
 ## Example Feature Requests
 
 ### Example 1: Simple Feature
-**Request**: "Add battery percentage to car display"
+**Request**: "Add tire pressure monitoring to car display"
 
 **Quick Answer**:
 - ✅ **Low complexity**
 - Affects all 3 components
-- ~20 hours total work
+- ~19 hours total work
 - No breaking changes
 - **Recommendation**: Proceed
 
