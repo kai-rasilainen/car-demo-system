@@ -2,70 +2,85 @@
 
 ## What is This?
 
-The car demo project has three AI agents that help analyze feature requests and assess their impact across the entire system. Think of them as expert consultants for each part of the system.
+The car demo project has three AI agents that help analyze feature requests and assess their impact across the entire system. **Agent A (Frontend)** is your primary contact point and coordinates with the other agents as needed.
 
 ## The Three Agents
 
-### 🎨 Agent A - Frontend Expert
-- **Knows**: React Native mobile app, React web app
-- **Analyzes**: UI changes, user experience, what APIs are needed
-- **Example**: "If we add tire pressure display, we need a gauge component and an API that returns tire pressure data"
+### 🎨 Agent A - Frontend Expert & Coordinator (START HERE!)
+- **Role**: Primary entry point for ALL feature requests
+- **Knows**: React Native mobile app, React web app, system coordination
+- **Analyzes**: UI changes, user experience, what APIs/sensors are needed
+- **Coordinates**: Consults with Agents B and C, consolidates responses
+- **Example**: "If we add tire pressure display, I'll analyze the UI needs, ask Agent B for the API, ask Agent C for the sensor, then give you a complete plan"
 
-### ⚙️ Agent B - Backend Expert
+### ⚙️ Agent B - Backend Expert (Consultant)
+- **Role**: Backend specialist who responds to Agent A's requests
 - **Knows**: REST APIs, WebSockets, databases (MongoDB + PostgreSQL)
 - **Analyzes**: API design, database changes, performance impact
-- **Example**: "To provide tire pressure data, we need to add a field to MongoDB and expose it in the GET /api/car/:licensePlate endpoint"
+- **Example**: "When Agent A asks me about tire pressure data, I'll explain how to add it to MongoDB and expose it via the B1 API"
 
-### 🚗 Agent C - In-Car Systems Expert
+### 🚗 Agent C - In-Car Systems Expert (Consultant)
+- **Role**: In-car specialist who responds to Agent A's requests
 - **Knows**: Sensors, data collection, communication protocols
 - **Analyzes**: What sensors are needed, how data flows, simulation complexity
-- **Example**: "We need to create a tire pressure sensor that publishes to Redis every 10 seconds with 4 values (one per tire)"
+- **Example**: "When Agent A asks me about tire pressure sensors, I'll explain how to create a simulator that publishes to Redis every 10 seconds"
 
 ## How to Use
 
-### Step 1: Ask Your Question
+### Step 1: Send Your Request to Agent A
 
-Simply describe the feature you want:
+**Always start with Agent A** - it's the entry point for everything:
 
 ```
 "I want to add tire pressure monitoring to the car dashboard"
 ```
 
-### Step 2: Get Agent Analysis
+### Step 2: Agent A Analyzes and Coordinates
 
-Each agent will analyze your request:
+Agent A will:
+1. Analyze what frontend changes are needed
+2. Determine if it needs backend support → consults Agent B
+3. Determine if it needs sensor data → consults Agent C
+4. Wait for their responses
+5. Consolidate everything
 
-**Agent A says:**
-- Need to add tire pressure gauge to mobile app
-- Need to add tire pressure indicators to staff dashboard
-- Requires new API endpoint
-- Estimated: 6 hours
+**What happens behind the scenes:**
 
-**Agent B says:**
-- Add tire pressure field to MongoDB
-- Modify GET /api/car/:licensePlate endpoint
-- Update Swagger documentation
-- Estimated: 4 hours
+```
+You → Agent A: "Add tire pressure monitoring"
+      ↓
+Agent A: "I need tire pressure gauge UI in mobile app (6 hours)"
+      ↓
+Agent A → Agent B: "Can you provide tire pressure API data?"
+      ↓
+Agent B → Agent A: "Yes, I'll add it to MongoDB and API (4 hours)"
+      ↓
+Agent A → Agent C: "Can you provide tire pressure sensor?"
+      ↓
+Agent C → Agent A: "Yes, I'll create sensor simulator (4 hours)"
+      ↓
+Agent A: "Here's the complete plan for all 3 components..."
+```
 
-**Agent C says:**
-- Create tire pressure sensor simulator
-- Publish 4 tire values (front-left, front-right, rear-left, rear-right)
-- Update every 10 seconds
-- Estimated: 4 hours
+### Step 3: Review Agent A's Consolidated Report
 
-### Step 3: Review Consolidated Report
+You'll get ONE complete analysis from Agent A:
 
-You'll get a complete analysis:
+**Agent A's Report:**
 - **Total effort**: 14 hours
 - **Complexity**: Low
 - **Breaking changes**: No
-- **Implementation order**: Start with sensors, then backend API, then frontend
-- **Test cases**: Detailed list of what to test
-- **Risks**: Any concerns to watch out for
+- **Implementation order**: 
+  1. C5 sensor (4 hours)
+  2. B2+B1 API (4 hours)
+  3. A1+A2 UI (6 hours)
+- **Test cases**: Detailed list
+- **Risks**: Any concerns
+- **Recommendation**: ✅ Proceed
 
 ### Step 4: Decide and Implement
 
-Based on the analysis:
+Based on Agent A's consolidated report:
 - ✅ **Green light** - Proceed with implementation
 - ⚠️ **Yellow light** - Proceed with caution, extra planning needed
 - 🔴 **Red light** - Too complex, consider alternatives
@@ -106,17 +121,20 @@ Based on the analysis:
 
 ## Common Questions
 
+### Q: Do I always start with Agent A?
+**A**: YES! Agent A is the entry point for ALL feature requests. It will coordinate with Agents B and C if needed.
+
+### Q: Can I talk directly to Agent B or Agent C?
+**A**: No - always go through Agent A. Agent A knows when to involve them and will handle the coordination.
+
+### Q: What if my feature is backend-only or sensor-only?
+**A**: Still start with Agent A. It will quickly determine that and consult the appropriate agent. Agent A ensures nothing is missed.
+
 ### Q: Do I need to understand all the technical details?
-**A**: No! The agents break down the impact for you. You just need to understand:
+**A**: No! Agent A breaks down everything for you. You just need to understand:
 - How much work it is
 - What the risks are
 - Whether it's worth doing
-
-### Q: Can I just talk to one agent?
-**A**: You can, but features usually affect multiple parts. It's best to get all three perspectives for a complete picture.
-
-### Q: What if the agents disagree?
-**A**: The coordination system helps resolve conflicts. Usually disagreements are about implementation details, and the agents will work it out.
 
 ### Q: How accurate are the effort estimates?
 **A**: The estimates are based on the current system architecture. Actual time may vary based on:
@@ -265,15 +283,20 @@ If you need clarification on agent outputs:
 
 ## Summary: When to Use Each Agent
 
-| Situation | Agent to Ask | Why |
-|-----------|--------------|-----|
-| "What will users see?" | Agent A | UI/UX expert |
-| "How does the API work?" | Agent B | Backend expert |
-| "Where does the data come from?" | Agent C | Sensor expert |
-| "How much work is this?" | All three | Get complete estimate |
-| "Is this feasible?" | All three | Get full risk assessment |
-| "Should we build this?" | All three | Get comprehensive recommendation |
+| Situation | Who to Contact | Why |
+|-----------|----------------|-----|
+| "I want to add a new feature" | **Agent A** | Entry point for everything |
+| "What will users see?" | **Agent A** | Coordinates UI analysis |
+| "How does the API work?" | **Agent A** | Will consult Agent B if needed |
+| "Where does the data come from?" | **Agent A** | Will consult Agent C if needed |
+| "How much work is this?" | **Agent A** | Gets estimates from all agents |
+| "Is this feasible?" | **Agent A** | Consolidates all assessments |
+| "Should we build this?" | **Agent A** | Provides final recommendation |
 
 ---
 
-**Remember**: The agents are here to help you make informed decisions. Use them early and often!
+**Remember**: 
+- 🎯 **Always start with Agent A** - it's your single point of contact
+- 🤝 Agent A coordinates with B and C behind the scenes
+- 📊 You get ONE consolidated report with everything you need
+- ✅ Agent A provides the final go/no-go recommendation

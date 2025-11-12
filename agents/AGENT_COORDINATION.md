@@ -13,20 +13,26 @@ This document describes the AI agent system for the car demo project. Three spec
 └──────────────────┬──────────────────────────────────────────┘
                    │
                    ▼
-        ┌──────────────────────┐
-        │   Agent Coordinator   │
-        │  (Routes to agents)   │
-        └──────────┬────────────┘
+            ┌──────────────┐
+            │   Agent A    │
+            │  (Frontend)  │
+            │ Entry Point  │
+            └──────┬───────┘
                    │
-         ┌─────────┼─────────┐
-         │         │         │
-         ▼         ▼         ▼
-    ┌─────────┬─────────┬─────────┐
-    │ Agent A │ Agent B │ Agent C │
-    │Frontend │ Backend │  In-Car │
-    └────┬────┴────┬────┴────┬────┘
-         │         │         │
-         └─────────┼─────────┘
+         ┌─────────┴─────────┐
+         │                   │
+         ▼                   ▼
+    ┌─────────┐         ┌─────────┐
+    │ Agent B │         │ Agent C │
+    │ Backend │         │  In-Car │
+    └────┬────┘         └────┬────┘
+         │                   │
+         └─────────┬─────────┘
+                   ▼
+            ┌──────────────┐
+            │   Agent A    │
+            │ Consolidates │
+            └──────┬───────┘
                    ▼
         ┌──────────────────────┐
         │  Consolidated Impact  │
@@ -35,15 +41,25 @@ This document describes the AI agent system for the car demo project. Three spec
         └──────────────────────┘
 ```
 
+**Architecture Flow**:
+1. All feature requests go to **Agent A (Frontend)** as the entry point
+2. Agent A analyzes frontend impact first
+3. Agent A identifies if backend changes are needed → consults Agent B
+4. Agent A identifies if in-car changes are needed → consults Agent C
+5. Agent A consolidates all responses and provides final assessment
+
 ## Agent Roles
 
-### Agent A - Frontend Component Agent
+### Agent A - Frontend Component Agent (Entry Point & Coordinator)
 **File**: `agents/agent-a-frontend.md`
 
-**Responsibilities**:
+**Primary Responsibilities**:
+- **Entry point for all feature requests**
 - Analyze UI/UX implications
 - Assess API integration requirements
 - Identify state management needs
+- **Coordinate with Agents B and C when needed**
+- **Consolidate all agent responses into final assessment**
 - Recommend frontend test cases
 
 **Components**:
@@ -55,6 +71,7 @@ This document describes the AI agent system for the car demo project. Three spec
 - REST API consumption
 - Mobile and web UI patterns
 - Frontend testing strategies
+- **Cross-component coordination**
 
 ### Agent B - Backend Component Agent
 **File**: `agents/agent-b-backend.md`
@@ -99,87 +116,201 @@ This document describes the AI agent system for the car demo project. Three spec
 
 ## Feature Analysis Workflow
 
-### Step 1: Initial Analysis
-Each agent independently analyzes the feature request:
+### Step 1: Feature Request to Agent A
+All feature requests start with Agent A (Frontend):
 
 ```markdown
-Feature: [Feature Name]
+Feature: Add tire pressure monitoring
 
-Agent A Assessment:
-- UI/UX Impact: [Low/Medium/High]
-- New screens needed: [Yes/No]
-- API changes required: [List]
-- Estimated effort: [X hours]
+Agent A receives request and asks:
+1. Does this affect the UI? → YES (need gauge display)
+2. Do I need new API data? → YES (need tire pressure from backend)
+3. Will backend need new sensors? → PROBABLY (need to ask Agent C)
 
-Agent B Assessment:
-- API changes: [New/Modified endpoints]
-- Database changes: [Schema updates]
-- Performance impact: [Assessment]
-- Estimated effort: [X hours]
+Agent A's initial assessment:
+- UI Impact: Medium (new gauge component in 2 apps)
+- API Needs: New field in existing endpoint
+- Estimated frontend effort: 6 hours
 
-Agent C Assessment:
-- New sensors needed: [Yes/No]
-- Sensor types: [List]
-- Data flow changes: [Description]
-- Estimated effort: [X hours]
+Next: Consult Agent B about API feasibility
 ```
 
-### Step 2: Cross-Component Communication
-
-Agents communicate dependencies:
-
-```
-Agent A → Agent B: "Need GET /api/car/:licensePlate/tire-pressure endpoint"
-Agent B → Agent C: "Need tire_pressure sensor data via Redis"
-Agent C → Agent B: "Will publish to sensors:tire_pressure channel"
-Agent B → Agent A: "API endpoint will be available, schema: {...}"
-```
-
-### Step 3: Consolidated Impact Assessment
+### Step 2: Agent A Consults Agent B
+Agent A sends request to Agent B:
 
 ```markdown
-## Feature: [Feature Name]
+FROM: Agent A (Frontend)
+TO: Agent B (Backend)
 
-### Overall Impact
-- **Complexity**: Low | Medium | High
-- **Breaking Changes**: Yes/No
-- **Estimated Total Effort**: [X hours/days]
+I need the following for "tire pressure monitoring" feature:
 
-### Component Breakdown
+API Requirement:
+- Modify GET /api/car/:licensePlate
+- Add field: tirePressure { frontLeft, frontRight, rearLeft, rearRight }
+- Data type: Numbers (PSI, 0-60 range)
+- Update frequency: Every 10 seconds
 
-#### Frontend (Agent A)
-- Impact: [Summary]
-- Changes: [List]
-- Effort: [X hours]
-- Risks: [List]
+Question: Can backend provide this data?
+Where does the data come from?
+```
 
-#### Backend (Agent B)
-- Impact: [Summary]
-- Changes: [List]
-- Effort: [X hours]
-- Risks: [List]
+Agent B responds:
 
-#### In-Car (Agent C)
-- Impact: [Summary]
-- Changes: [List]
-- Effort: [X hours]
-- Risks: [List]
+```markdown
+FROM: Agent B (Backend)
+TO: Agent A (Frontend)
 
-### Implementation Order
-1. [First component to implement]
-2. [Second component]
-3. [Third component]
+✅ YES - Backend can provide this data
 
-### Testing Strategy
-- Unit tests: [Count] across all components
-- Integration tests: [Count]
-- E2E tests: [Count]
-- Total test effort: [X hours]
+Implementation:
+- B1: Add tirePressure field to API response (2 hours)
+- B2: Accept and store tire pressure from sensors (2 hours)
+- B3: Add field to MongoDB car_data collection (no migration needed)
 
-### Go/No-Go Recommendation
-✅ PROCEED | ⚠️ PROCEED WITH CAUTION | 🔴 DO NOT PROCEED
+Data Source: Needs new sensor from in-car systems (Agent C)
 
-Reasoning: [Explanation]
+Backend Effort: 4 hours
+Dependencies: Agent C must provide tire pressure sensor data via Redis
+
+Next: Check with Agent C about sensor availability
+```
+
+### Step 3: Agent A Consults Agent C
+Agent A sends request to Agent C:
+
+```markdown
+FROM: Agent A (Frontend)
+TO: Agent C (In-Car)
+
+I need the following sensor data for "tire pressure monitoring":
+
+Sensor Requirement:
+- Type: tire_pressure
+- Data: 4 values (frontLeft, frontRight, rearLeft, rearRight)
+- Range: 0-60 PSI
+- Update Frequency: Every 10 seconds
+- Format: JSON via Redis
+
+Question: Can in-car systems provide this sensor data?
+```
+
+Agent C responds:
+
+```markdown
+FROM: Agent C (In-Car)
+TO: Agent A (Frontend)
+
+✅ YES - Can provide tire pressure sensor data
+
+Implementation:
+- C5: Create tire pressure sensor simulator (3 hours)
+- C2: Subscribe to sensors:tire_pressure channel (1 hour)
+- C1: Forward to cloud via WebSocket (no changes needed)
+
+Data Format:
+{
+  "frontLeft": 32.5,
+  "frontRight": 32.8,
+  "rearLeft": 31.9,
+  "rearRight": 32.1,
+  "timestamp": "2025-11-12T10:30:00Z",
+  "licensePlate": "ABC-123"
+}
+
+In-Car Effort: 4 hours
+Ready to implement: Yes
+
+Data will be available via: sensors:tire_pressure Redis channel
+```
+
+### Step 4: Agent A Consolidates Response
+Agent A receives responses from B and C, consolidates everything:
+
+### Step 4: Agent A Consolidates Response
+Agent A receives responses from B and C, consolidates everything:
+
+```markdown
+## Feature: Add Tire Pressure Monitoring
+
+### Final Assessment by Agent A
+
+#### Overall Impact: LOW-MEDIUM ✅
+
+**Total Estimated Effort**: 14 hours
+- Frontend (A1 + A2): 6 hours
+- Backend (B1 + B2): 4 hours
+- In-Car (C5 + C2): 4 hours
+
+**Breaking Changes**: None (additive change only)
+
+**Implementation Order**:
+1. **Week 1, Day 1-2**: C5 sensor + C2 broker (4 hours)
+2. **Week 1, Day 2-3**: B2 ingestion + B1 API (4 hours)
+3. **Week 1, Day 3-4**: A1 mobile + A2 web UI (6 hours)
+4. **Week 1, Day 5**: Integration testing (2 hours)
+
+#### Component Breakdown
+
+**Frontend (Agent A)**:
+- A1 Mobile: Add tire pressure gauge component
+- A2 Web: Add tire pressure indicators to dashboard
+- Both: Show warnings for low pressure (<28 PSI)
+- API Integration: Consume new tirePressure field
+- Effort: 6 hours
+- Risk: Low
+
+**Backend (Agent B)**:
+- B1: Add tirePressure field to GET /api/car/:licensePlate
+- B2: Accept tire pressure in WebSocket messages
+- B3: Add tirePressure to MongoDB car_data collection
+- Swagger: Update API documentation
+- Effort: 4 hours
+- Risk: Low
+
+**In-Car (Agent C)**:
+- C5: Create tire pressure sensor simulator
+- C2: Subscribe to sensors:tire_pressure channel
+- Redis: Publish to sensors:tire_pressure every 10 seconds
+- Effort: 4 hours
+- Risk: Low
+
+#### Data Flow
+```
+C5 Sensor → Redis (sensors:tire_pressure) → C2 Broker → 
+C1 Communication → WebSocket → B2 Gateway → MongoDB → 
+B1 API → Frontend Apps
+```
+
+#### Test Cases Summary
+- Unit Tests: 24 total (8 per component)
+- Integration Tests: 12 total
+- E2E Tests: 6 total
+- Test Development: 4 hours
+
+#### Dependencies & Sequencing
+1. C5 must publish data before B2 can receive it
+2. B2 must store data before B1 can query it
+3. B1 API must be ready before frontend can display
+4. All components can develop in parallel, integrate sequentially
+
+#### Risks & Mitigations
+- **Risk**: Sensor simulation realism
+  - **Mitigation**: Use realistic pressure ranges (28-35 PSI), simulate slow leaks
+- **Risk**: Data synchronization lag
+  - **Mitigation**: 10-second update frequency is acceptable for tire pressure
+- **Risk**: API backwards compatibility
+  - **Mitigation**: tirePressure is optional field, old clients ignore it
+
+#### Go/No-Go Decision: ✅ PROCEED
+
+**Reasoning**: 
+- Low complexity across all components
+- No breaking changes
+- Reasonable effort (14 hours = ~2 days)
+- High user value (safety feature)
+- Low risk implementation
+
+**Recommendation**: Proceed with implementation in Sprint 12
 ```
 
 ## Example: Complete Feature Analysis
@@ -325,29 +456,164 @@ without breaking existing functionality. Estimated delivery: 2-3 days.
 
 ## Agent Communication Protocols
 
-### Standard Message Format
+### Agent A → Agent B Communication
+
+**When to Consult Agent B**:
+- New API endpoints needed
+- Modifications to existing API responses
+- Database schema questions
+- Performance/scalability concerns
+- Data storage requirements
+
+**Message Format from Agent A to Agent B**:
+
+**Message Format from Agent A to Agent B**:
 
 ```markdown
-FROM: Agent [A/B/C]
-TO: Agent [A/B/C]
+FROM: Agent A (Frontend)
+TO: Agent B (Backend)
 RE: [Feature Name]
 
-REQUEST:
-[Specific requirement or question]
+FRONTEND NEEDS:
+[Specific API requirements from frontend perspective]
 
-DETAILS:
-[Additional context]
+API REQUEST:
+- Endpoint: [Method] [Path]
+- Request Body: [Schema if POST/PUT]
+- Response Needed: [Schema]
+- Update Frequency: [Real-time/polling interval]
+- Error Handling: [Expected error cases]
 
-DEPENDENCIES:
-[What you need from the other agent]
+QUESTIONS FOR BACKEND:
+1. Can you provide this data?
+2. Where will the data come from?
+3. What's the expected latency?
+4. Any performance concerns?
 
-TIMELINE:
-[When you need this by]
+FRONTEND CONTEXT:
+- Use case: [How frontend will use this data]
+- User impact: [Why users need this]
 ```
 
-### Example Communications
+**Response Format from Agent B to Agent A**:
 
-**Agent A to Agent B**:
+```markdown
+FROM: Agent B (Backend)
+TO: Agent A (Frontend)
+RE: [Feature Name]
+
+STATUS: ✅ YES / ⚠️ PARTIAL / ❌ NO
+
+IMPLEMENTATION PLAN:
+- B1 Changes: [API modifications]
+- B2 Changes: [Data ingestion]
+- B3/B4 Changes: [Database schema]
+- Effort: [X hours]
+
+API SPECIFICATION:
+[Detailed endpoint spec with request/response schemas]
+
+DATA SOURCE:
+[Where backend gets the data from - may need Agent C]
+
+DEPENDENCIES:
+[What backend needs from other components]
+
+TIMELINE:
+[When this can be ready]
+
+CONCERNS:
+[Any issues or limitations]
+```
+
+### Agent A → Agent C Communication
+
+**When to Consult Agent C**:
+- New sensor data needed
+- Questions about data collection frequency
+- In-car system capabilities
+- Command execution requirements
+- Real-time data streaming needs
+
+**Message Format from Agent A to Agent C**:
+
+```markdown
+FROM: Agent A (Frontend)
+TO: Agent C (In-Car)
+RE: [Feature Name]
+
+FRONTEND NEEDS:
+[What data/functionality frontend requires]
+
+SENSOR REQUIREMENT:
+- Data Type: [What needs to be measured]
+- Format: [Expected data structure]
+- Frequency: [How often updates are needed]
+- Accuracy: [Required precision]
+
+COMMAND REQUIREMENT (if applicable):
+- Command: [What action car should perform]
+- Parameters: [Command parameters]
+- Response: [Expected feedback]
+
+QUESTIONS FOR IN-CAR:
+1. Can sensors provide this data?
+2. What's the update frequency limit?
+3. Is simulation feasible or need real hardware?
+4. Any safety/security concerns?
+
+FRONTEND CONTEXT:
+- Use case: [How frontend will display/use this]
+- User impact: [Why users need this]
+```
+
+**Response Format from Agent C to Agent A**:
+
+```markdown
+FROM: Agent C (In-Car)
+TO: Agent A (Frontend)
+RE: [Feature Name]
+
+STATUS: ✅ YES / ⚠️ PARTIAL / ❌ NO
+
+IMPLEMENTATION PLAN:
+- C5 Sensor: [New sensor or modification]
+- C2 Broker: [Message routing changes]
+- C1 Communication: [Cloud sync changes]
+- Effort: [X hours]
+
+DATA SPECIFICATION:
+[Exact data format, channels, update frequency]
+
+SIMULATION APPROACH:
+[How sensor will be simulated]
+
+DEPENDENCIES:
+[What in-car system needs from backend]
+
+TIMELINE:
+[When this can be ready]
+
+CONCERNS:
+[Any issues or limitations]
+```
+
+### Agent B ↔ Agent C Communication
+
+When Agent B needs clarification from Agent C (routed through Agent A):
+
+**Agent B to Agent A to Agent C**:
+```markdown
+FROM: Agent B (Backend) via Agent A
+TO: Agent C (In-Car)
+RE: [Feature Name]
+
+BACKEND NEEDS CLARIFICATION:
+[Specific question about sensor data format/availability]
+
+TECHNICAL DETAILS:
+[Backend-specific requirements for data processing]
+```
 ```
 FROM: Agent A (Frontend)
 TO: Agent B (Backend)
@@ -428,22 +694,86 @@ NOTES:
 ## Decision Tree
 
 ```
-Feature Request
-    │
-    ├─ Does it affect UI?
-    │   └─ Yes → Consult Agent A
-    │
-    ├─ Does it need new API/data?
-    │   └─ Yes → Consult Agent B
-    │
-    ├─ Does it need new sensors/car data?
-    │   └─ Yes → Consult Agent C
-    │
-    └─ Coordination needed?
-        ├─ Frontend + Backend → A ↔ B
-        ├─ Backend + In-Car → B ↔ C
-        └─ All three → A ↔ B ↔ C
+Feature Request Arrives
+    ↓
+┌─────────────────────┐
+│   Agent A Receives  │
+│   (Entry Point)     │
+└──────────┬──────────┘
+           ↓
+    Does it affect UI?
+           ↓
+       ┌───┴───┐
+      Yes      No → [Unusual - verify it's really a frontend request]
+       ↓
+┌──────────────────┐
+│ Agent A analyzes │
+│ frontend impact  │
+└──────┬───────────┘
+       ↓
+   Need new API data?
+       ↓
+    ┌──┴──┐
+   Yes    No
+    ↓      ↓
+┌───────────────┐    ┌─────────────────┐
+│ Consult       │    │ Frontend-only   │
+│ Agent B       │    │ implementation  │
+│ about API     │    └─────────────────┘
+└───────┬───────┘
+        ↓
+    Agent B responds
+        ↓
+    Need new sensor data?
+        ↓
+     ┌──┴──┐
+    Yes    No
+     ↓      ↓
+┌───────────────┐    ┌─────────────────┐
+│ Consult       │    │ Backend provides│
+│ Agent C       │    │ from existing   │
+│ about sensors │    │ data sources    │
+└───────┬───────┘    └─────────────────┘
+        ↓
+    Agent C responds
+        ↓
+┌─────────────────────┐
+│ Agent A consolidates│
+│ all responses       │
+└──────────┬──────────┘
+           ↓
+    ┌──────────────┐
+    │ Final Report │
+    │ with effort, │
+    │ risks, steps │
+    └──────────────┘
 ```
+
+**Agent A Decision Points**:
+
+1. **Frontend-Only Feature** (No consult needed)
+   - UI-only changes (styling, layout, navigation)
+   - Client-side logic (validation, formatting)
+   - Using existing API data in new ways
+   - Example: "Add dark mode to mobile app"
+
+2. **Consult Agent B** (Backend involvement)
+   - New API endpoints needed
+   - Modify API response format
+   - New database queries
+   - Performance optimization
+   - Example: "Add user preferences storage"
+
+3. **Consult Agent C** (Sensor/in-car involvement)
+   - New sensor data required
+   - New car commands needed
+   - In-car system changes
+   - Example: "Add tire pressure monitoring"
+
+4. **Consult Both B and C** (Full stack feature)
+   - New sensors + new APIs + new UI
+   - Complete data flow from car to user
+   - Example: "Add battery level monitoring"
 
 ## Risk Levels and Responses
 
@@ -488,48 +818,85 @@ Feature Request
 
 ### For Development Teams
 
-1. **Submit Feature Request**:
-   - Describe the feature clearly
-   - Include user stories
-   - Specify requirements
+1. **Submit Feature Request to Agent A**:
+   ```markdown
+   Feature: [Name]
+   Description: [What users will see/do]
+   User Story: As a [user], I want [feature] so that [benefit]
+   ```
 
-2. **Agent Analysis**:
-   - Review each agent's assessment
-   - Understand cross-component impacts
-   - Review test case recommendations
+2. **Agent A's Analysis Process**:
+   - Analyzes frontend requirements
+   - Identifies API needs → Consults Agent B if needed
+   - Identifies sensor needs → Consults Agent C if needed
+   - Waits for responses from B and C
+   - Consolidates everything into final report
 
-3. **Make Go/No-Go Decision**:
-   - Consider consolidated risk assessment
-   - Review effort estimates
-   - Check team capacity
+3. **Review Agent A's Final Report**:
+   - Overall complexity and effort
+   - Component-by-component breakdown
+   - Implementation order
+   - Test case recommendations
+   - Risk assessment
+   - Go/No-Go recommendation
 
-4. **Implementation**:
-   - Follow recommended implementation order
+4. **Make Decision**:
+   - ✅ Green light → Proceed with implementation
+   - ⚠️ Yellow light → Proceed with extra planning
+   - 🔴 Red light → Consider alternatives
+
+5. **Implementation**:
+   - Follow implementation order from Agent A
    - Use test cases as acceptance criteria
-   - Monitor for issues flagged by agents
+   - Monitor for flagged risks
 
 ### For AI Assistants Acting as Agents
 
-1. **Read Your Agent Document**:
-   - agent-a-frontend.md for frontend
-   - agent-b-backend.md for backend
-   - agent-c-in-car.md for in-car
+**If you are Agent A** (Entry Point & Coordinator):
+1. Receive all feature requests first
+2. Analyze frontend impact immediately
+3. Identify if you need backend support:
+   - New API endpoints?
+   - Data modifications?
+   - Performance concerns?
+   → If YES: Send request to Agent B
+4. Identify if you need in-car support:
+   - New sensors?
+   - New commands?
+   - Data collection changes?
+   → If YES: Send request to Agent C
+5. Wait for responses from B and/or C
+6. Consolidate all responses into comprehensive report
+7. Provide final go/no-go recommendation
 
-2. **Analyze Feature Request**:
-   - Use the analysis templates
-   - Follow decision-making guidelines
-   - Identify cross-agent dependencies
+**If you are Agent B** (Backend Support):
+1. Wait for requests from Agent A
+2. Analyze backend implications:
+   - API design
+   - Database changes
+   - Performance impact
+3. Check if you need sensor data from Agent C:
+   - Send clarification request to Agent A
+   - Agent A will forward to Agent C
+4. Respond to Agent A with:
+   - Implementation plan
+   - Effort estimate
+   - API specifications
+   - Dependencies
+   - Concerns
 
-3. **Communicate with Other Agents**:
-   - Use standard message format
-   - Be specific about requirements
-   - Provide clear schemas/interfaces
-
-4. **Provide Comprehensive Output**:
-   - Impact assessment
-   - Test case recommendations
-   - Risk analysis
-   - Effort estimates
+**If you are Agent C** (In-Car Support):
+1. Wait for requests from Agent A
+2. Analyze in-car system implications:
+   - Sensor availability
+   - Data collection feasibility
+   - Simulation complexity
+3. Respond to Agent A with:
+   - Implementation plan
+   - Effort estimate
+   - Data specifications
+   - Dependencies
+   - Concerns
 
 ## Integration with Development Process
 
@@ -576,25 +943,47 @@ After feature implementation:
 
 ## Quick Reference
 
-### Agent Contact Points
-- **Frontend questions** → agent-a-frontend.md
-- **Backend/API questions** → agent-b-backend.md
-- **Sensor/IoT questions** → agent-c-in-car.md
-- **Coordination** → This document
+### Communication Flow
+```
+Feature Request
+    ↓
+Agent A (analyzes)
+    ↓
+Agent A → Agent B (if API needed)
+    ↓
+Agent A → Agent C (if sensors needed)
+    ↓
+Agent B → Agent A (responds)
+    ↓
+Agent C → Agent A (responds)
+    ↓
+Agent A (consolidates)
+    ↓
+Final Report to User
+```
 
-### Key Questions for Each Agent
+### Who to Start With
+- **ALL feature requests** → Start with Agent A
+- Agent A decides if B or C consultation is needed
+- Never start with Agent B or C directly
 
-**Agent A**:
-- What UI changes are needed?
-- Which apps are affected?
-- What API data is required?
+### Agent Responsibilities
 
-**Agent B**:
-- What API endpoints are needed?
-- What database changes are required?
-- What's the performance impact?
+**Agent A (Coordinator)**:
+- Entry point for all requests
+- Frontend impact analysis
+- Consult other agents
+- Consolidate responses
+- Final recommendation
 
-**Agent C**:
-- What sensor data is needed?
-- How should data flow through Redis?
-- What's the simulation complexity?
+**Agent B (Consultant)**:
+- Respond to Agent A requests
+- Backend/API expertise
+- Database design
+- Performance analysis
+
+**Agent C (Consultant)**:
+- Respond to Agent A requests
+- Sensor expertise
+- In-car systems
+- Data collection
