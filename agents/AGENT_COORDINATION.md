@@ -209,10 +209,10 @@ Implementation:
 
 Data Format:
 {
-  "frontLeft": 2.25,
-  "frontRight": 2.28,
-  "rearLeft": 2.21,
-  "rearRight": 2.23,
+  "frontLeft": 2.3,
+  "frontRight": 2.3,
+  "rearLeft": 2.2,
+  "rearRight": 2.2,
   "timestamp": "2025-11-12T10:30:00Z",
   "licensePlate": "ABC-123"
 }
@@ -389,7 +389,7 @@ B1 API → Frontend Apps
 - Add tire pressure sensor simulation
 - Generate realistic pressure values (1.9-2.4 bar)
 - Simulate gradual pressure loss over time
-- Random variation (±0.05 bar)
+- Random variation (±0.1 bar)
 - Publish to Redis: sensors:tire_pressure
 
 **C2 Central Broker**:
@@ -405,10 +405,10 @@ B1 API → Frontend Apps
 **Data Format**:
 ```json
 {
-  "frontLeft": 2.25,
-  "frontRight": 2.28,
-  "rearLeft": 2.21,
-  "rearRight": 2.23,
+  "frontLeft": 2.3,
+  "frontRight": 2.3,
+  "rearLeft": 2.2,
+  "rearRight": 2.2,
   "timestamp": "2025-11-12T10:30:00Z",
   "licensePlate": "ABC-123"
 }
@@ -639,10 +639,10 @@ GET /api/car/:licensePlate
 Response: {
   ...existing fields...,
   "tirePressure": {
-    "frontLeft": 2.25,
-    "frontRight": 2.28,
-    "rearLeft": 2.21,
-    "rearRight": 2.23
+    "frontLeft": 2.3,
+    "frontRight": 2.3,
+    "rearLeft": 2.2,
+    "rearRight": 2.2
   },
   "lowPressureAlert": false
 }
@@ -668,10 +668,10 @@ DETAILS:
 REQUIRED FORMAT:
 Redis Channel: sensors:tire_pressure
 Payload: {
-  "frontLeft": 2.25,
-  "frontRight": 2.28,
-  "rearLeft": 2.21,
-  "rearRight": 2.23,
+  "frontLeft": 2.3,
+  "frontRight": 2.3,
+  "rearLeft": 2.2,
+  "rearRight": 2.2,
   "timestamp": "ISO8601",
   "licensePlate": "ABC-123"
 }

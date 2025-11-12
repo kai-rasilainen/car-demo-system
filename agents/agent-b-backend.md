@@ -318,10 +318,10 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
   "outdoorTemp": 18.3,
   "gps": { "lat": 60.1699, "lng": 24.9384 },
   "tirePressure": {  // NEW: Tire pressures in bar
-    "frontLeft": 2.25,
-    "frontRight": 2.28,
-    "rearLeft": 2.21,
-    "rearRight": 2.23
+    "frontLeft": 2.3,
+    "frontRight": 2.3,
+    "rearLeft": 2.2,
+    "rearRight": 2.2
   },
   "lowPressureAlert": false,
   "timestamp": "2025-11-11T10:30:00Z"
@@ -339,10 +339,10 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
   "outdoorTemp": 18.3,
   "gps": { "lat": 60.1699, "lng": 24.9384 },
   "tirePressure": {  // NEW
-    "frontLeft": 2.25,
-    "frontRight": 2.28,
-    "rearLeft": 2.21,
-    "rearRight": 2.23
+    "frontLeft": 2.3,
+    "frontRight": 2.3,
+    "rearLeft": 2.2,
+    "rearRight": 2.2
   },
   "lowPressureAlert": false,
   "timestamp": "2025-11-11T10:30:00Z"
@@ -431,8 +431,8 @@ describe('GET /api/car/:licensePlate with tire pressure', () => {
   it('should return tire pressure data when available', async () => {
     // Mock MongoDB response with tire pressure data
     const response = await request(app).get('/api/car/ABC-123');
-    expect(response.body.tirePressure.frontLeft).toBe(2.25);
-    expect(response.body.tirePressure.frontRight).toBe(2.28);
+    expect(response.body.tirePressure.frontLeft).toBe(2.3);
+    expect(response.body.tirePressure.frontRight).toBe(2.3);
   });
 
   it('should handle missing tire pressure gracefully', async () => {
@@ -460,10 +460,10 @@ describe('WebSocket tire pressure handling', () => {
       type: 'sensor_data',
       licensePlate: 'ABC-123',
       tirePressure: {
-        frontLeft: 2.25,
-        frontRight: 2.28,
-        rearLeft: 2.21,
-        rearRight: 2.23
+        frontLeft: 2.3,
+        frontRight: 2.3,
+        rearLeft: 2.2,
+        rearRight: 2.2
       },
       timestamp: new Date()
     };
@@ -471,7 +471,7 @@ describe('WebSocket tire pressure handling', () => {
     
     const stored = await mongodb.collection('car_data')
       .findOne({ licensePlate: 'ABC-123' });
-    expect(stored.tirePressure.frontLeft).toBe(2.25);
+    expect(stored.tirePressure.frontLeft).toBe(2.3);
   });
 
   it('should reject invalid tire pressures', () => {
@@ -493,10 +493,10 @@ it('should flow tire pressure from B2 to B1', async () => {
     type: 'sensor_data',
     licensePlate: 'ABC-123',
     tirePressure: {
-      frontLeft: 2.25,
-      frontRight: 2.28,
-      rearLeft: 2.21,
-      rearRight: 2.23
+      frontLeft: 2.3,
+      frontRight: 2.3,
+      rearLeft: 2.2,
+      rearRight: 2.2
     }
   }));
 
@@ -505,7 +505,7 @@ it('should flow tire pressure from B2 to B1', async () => {
 
   // 3. Query B1 API
   const response = await axios.get('http://localhost:3001/api/car/ABC-123');
-  expect(response.data.tirePressure.frontLeft).toBe(2.25);
+  expect(response.data.tirePressure.frontLeft).toBe(2.3);
 });
 ```
 

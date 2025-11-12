@@ -143,7 +143,7 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 - **Value Range**: [Min-Max or valid values]
 - **Unit**: [e.g., bar, percentage, celsius]
 - **Update Frequency**: [e.g., every 5 seconds, on change, on demand]
-- **Accuracy Required**: [e.g., ±0.1°C, ±0.05 bar]
+- **Accuracy Required**: [e.g., ±0.1°C, ±0.1 bar]
 
 **Implementation**:
 - **Simulation Logic**: [How to simulate realistic data]
