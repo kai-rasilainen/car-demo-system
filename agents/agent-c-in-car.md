@@ -141,9 +141,9 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 **Data Characteristics**:
 - **Data Type**: Number | String | Boolean | Object
 - **Value Range**: [Min-Max or valid values]
-- **Unit**: [e.g., PSI, percentage, celsius]
+- **Unit**: [e.g., bar, percentage, celsius]
 - **Update Frequency**: [e.g., every 5 seconds, on change, on demand]
-- **Accuracy Required**: [e.g., ±0.1°C, ±1 PSI]
+- **Accuracy Required**: [e.g., ±0.1°C, ±0.05 bar]
 
 **Implementation**:
 - **Simulation Logic**: [How to simulate realistic data]

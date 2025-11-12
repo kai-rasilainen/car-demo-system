@@ -322,8 +322,9 @@ Agent A combines:
 #### Test Cases
 
 **Unit Tests**:
+**Test Cases**:
 - [ ] A1: Test tire pressure component renders with valid data
-- [ ] A1: Test tire pressure component shows warning for low pressure (<30 PSI)
+- [ ] A1: Test tire pressure component shows warning for low pressure (<2.0 bar)
 - [ ] A2: Test tire pressure section displays all 4 tires correctly
 - [ ] A2: Test color coding for pressure levels (green/yellow/red)
 

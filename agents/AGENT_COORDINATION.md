@@ -147,7 +147,7 @@ I need the following for "tire pressure monitoring" feature:
 API Requirement:
 - Modify GET /api/car/:licensePlate
 - Add field: tirePressure { frontLeft, frontRight, rearLeft, rearRight }
-- Data type: Numbers (PSI, 0-60 range)
+- Data type: Numbers (bar, 1.5-4.0 range)
 - Update frequency: Every 10 seconds
 
 Question: Can backend provide this data?
@@ -187,7 +187,7 @@ I need the following sensor data for "tire pressure monitoring":
 Sensor Requirement:
 - Type: tire_pressure
 - Data: 4 values (frontLeft, frontRight, rearLeft, rearRight)
-- Range: 0-60 PSI
+- Range: 1.5-4.0 bar
 - Update Frequency: Every 10 seconds
 - Format: JSON via Redis
 
@@ -209,10 +209,10 @@ Implementation:
 
 Data Format:
 {
-  "frontLeft": 32.5,
-  "frontRight": 32.8,
-  "rearLeft": 31.9,
-  "rearRight": 32.1,
+  "frontLeft": 2.25,
+  "frontRight": 2.28,
+  "rearLeft": 2.21,
+  "rearRight": 2.23,
   "timestamp": "2025-11-12T10:30:00Z",
   "licensePlate": "ABC-123"
 }
@@ -254,7 +254,7 @@ Agent A receives responses from B and C, consolidates everything:
 **Frontend (Agent A)**:
 - A1 Mobile: Add tire pressure gauge component
 - A2 Web: Add tire pressure indicators to dashboard
-- Both: Show warnings for low pressure (<28 PSI)
+- Both: Show warnings for low pressure (<1.9 bar)
 - API Integration: Consume new tirePressure field
 - Effort: 6 hours
 - Risk: Low
@@ -295,7 +295,7 @@ B1 API → Frontend Apps
 
 #### Risks & Mitigations
 - **Risk**: Sensor simulation realism
-  - **Mitigation**: Use realistic pressure ranges (28-35 PSI), simulate slow leaks
+  - **Mitigation**: Use realistic pressure ranges (1.9-2.4 bar), simulate slow leaks
 - **Risk**: Data synchronization lag
   - **Mitigation**: 10-second update frequency is acceptable for tire pressure
 - **Risk**: API backwards compatibility
