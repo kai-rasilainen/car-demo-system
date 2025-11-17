@@ -409,13 +409,15 @@ Message Format:
 
 ### Total Effort Estimate
 
-**Breakdown by Component:**
-
-- Frontend (A1 + A2): 9-13 hours | Moderate Complexity
-- Backend (B1 + B2 + B3): 7-10 hours | Low-Moderate Complexity
-- In-Car (C5 + C2): 6-8 hours | Moderate Complexity
-
-**Total Range**: 22-31 hours (~3-4 development days)
+\`\`\`
+Component               | Effort | Complexity
+----------------------- | ------ | -------------
+Frontend (A1 + A2)      | 9-13h  | Moderate
+Backend (B1 + B2 + B3)  | 7-10h  | Low-Moderate
+In-Car (C5 + C2)        | 6-8h   | Moderate
+----------------------- | ------ | -------------
+TOTAL                   | 22-31h | ~3-4 days
+\`\`\`
 
 ### Implementation Order
 1. **Day 1**: C5 Sensor Simulator (6-8 hours)

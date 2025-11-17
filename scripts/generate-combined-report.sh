@@ -30,13 +30,15 @@ cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
 
 ### Total Effort: 22-31 hours (3-4 days)
 
-**Breakdown by Component:**
-
-- Frontend (A1 + A2): 9-13 hours | Moderate Complexity | Low Risk
-- Backend (B1 + B2 + B3): 7-10 hours | Low-Moderate Complexity | Low Risk  
-- In-Car (C5 + C2): 6-8 hours | Moderate Complexity | Low Risk
-
-**Total Range**: 22-31 hours (~3-4 development days)
+```
+Component               | Hours  | Complexity    | Risk
+----------------------- | ------ | ------------- | ----
+Frontend (A1 + A2)      | 9-13   | Moderate      | Low
+Backend (B1 + B2 + B3)  | 7-10   | Low-Moderate  | Low
+In-Car (C5 + C2)        | 6-8    | Moderate      | Low
+----------------------- | ------ | ------------- | ----
+TOTAL                   | 22-31  | ~3-4 days     |
+```
 
 **Decision**: [YES] PROCEED
 
