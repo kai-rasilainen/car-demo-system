@@ -57,24 +57,24 @@ cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
 
 **UI Design**:
 ```
-┌─────────────────────────┐
-│  Car Dashboard          │
-│                         │
-│   Front Tires           │
-│  ┌──────┐  ┌──────┐   │
-│  │ 2.3  │  │ 2.3  │   │ ← Tire gauges
-│  │ bar  │  │ bar  │   │   with colors
-│  └──────┘  └──────┘   │
-│                         │
-│   Rear Tires            │
-│  ┌──────┐  ┌──────┐   │
-│  │ 2.2  │  │ 2.2  │   │
-│  │ bar  │  │ bar  │   │
-│  └──────┘  └──────┘   │
-│                         │
-│  [!] Low Pressure Alert  │
-│  Front Left: 1.8 bar    │
-└─────────────────────────┘
++-------------------------+
+|  Car Dashboard          |
+|                         |
+|   Front Tires           |
+|  +------+  +------+     |
+|  | 2.3  |  | 2.3  |     | <- Tire gauges
+|  | bar  |  | bar  |     |    with colors
+|  +------+  +------+     |
+|                         |
+|   Rear Tires            |
+|  +------+  +------+     |
+|  | 2.2  |  | 2.2  |     |
+|  | bar  |  | bar  |     |
+|  +------+  +------+     |
+|                         |
+|  [!] Low Pressure Alert |
+|  Front Left: 1.8 bar    |
++-------------------------+
 ```
 
 #### A2 - Rental Staff App (React Web)
