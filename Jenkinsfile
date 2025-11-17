@@ -19,7 +19,7 @@ pipeline {
         )
         booleanParam(
             name: 'USE_OLLAMA',
-            defaultValue: false,
+            defaultValue: true,
             description: 'Use Ollama for additional code analysis (requires Windows Ollama running)'
         )
         string(
@@ -620,7 +620,7 @@ socket.on('sensor_data', (data) => {
 **Impact**: MODERATE
 
 **Changes Required**:
-- Subscribe to Redis channel: \`sensors:tire_pressure\`
+- Subscribe to Redis channel: `sensors:tire_pressure`
 - Store data in MongoDB
 - Broadcast to WebSocket clients
 - Handle 4 pressure values per update
@@ -689,7 +689,7 @@ Frontend displays tire pressure
 #### C5 - Data Sensors
 **Impact**: MODERATE
 
-**New File**: \`tire_pressure_sensor.py\`
+**New File**: `tire_pressure_sensor.py`
 
 **Requirements**:
 - Generate 4 tire pressure values (1.9-2.4 bar normal)
@@ -702,7 +702,7 @@ Frontend displays tire pressure
 **Impact**: LOW
 
 **Changes**:
-- Publish to Redis channel: \`sensors:tire_pressure\`
+- Publish to Redis channel: `sensors:tire_pressure`
 - Format message with 4 pressure values
 
 #### C1 - Cloud Communication
@@ -737,7 +737,7 @@ Frontend displays tire pressure
 
 ### 1. C5 Tire Pressure Sensor (Python)
 
-**File**: \`C5-data-sensors/tire_pressure_sensor.py\`
+**File**: `C5-data-sensors/tire_pressure_sensor.py`
 
 ```python
 import random
@@ -810,7 +810,7 @@ if __name__ == '__main__':
 
 ### 2. B2 IoT Gateway - Redis Subscription (Node.js)
 
-**File**: \`B2-iot-gateway/redis-subscriber.js\`
+**File**: `B2-iot-gateway/redis-subscriber.js`
 
 ```javascript
 const redis = require('redis');
@@ -861,7 +861,7 @@ subscriber.on('message', async (channel, message) => {
       timestamp: new Date(data.timestamp)
     });
     
-    console.log(\`Stored tire pressure for \${data.licensePlate}\`);
+    console.log(`Stored tire pressure for \${data.licensePlate}`);
     
     // Broadcast to WebSocket clients
     const broadcastData = {
@@ -906,7 +906,7 @@ console.log('B2 IoT Gateway listening for tire pressure data...');
 
 ### 3. B1 Web Server - API Endpoint (Node.js)
 
-**File**: \`B1-web-server/routes/cars.js\`
+**File**: `B1-web-server/routes/cars.js`
 
 ```javascript
 const express = require('express');
@@ -990,7 +990,7 @@ module.exports = router;
 
 ### 4. A1 Mobile App - Tire Pressure Component (React Native)
 
-**File**: \`A1-car-user-app/components/TirePressureGauge.js\`
+**File**: `A1-car-user-app/components/TirePressureGauge.js`
 
 ```javascript
 import React from 'react';
@@ -1297,7 +1297,7 @@ describe('Complete tire pressure flow', () => {
 ## Implementation Timeline
 
 ### Day 1: In-Car Sensor (6 hours)
-- ✅ Create \`tire_pressure_sensor.py\`
+- ✅ Create `tire_pressure_sensor.py`
 - ✅ Implement simulation logic
 - ✅ Setup Redis publishing
 - ✅ Write unit tests (10 tests)
