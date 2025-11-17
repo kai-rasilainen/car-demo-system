@@ -485,7 +485,8 @@ ${params.USE_OLLAMA ? '- ollama-backend-analysis.txt\n- ollama-sensor-analysis.t
                 echo "📑 Creating Combined Detailed Report..."
                 
                 script {
-                    def combinedReport = """
+                    // Write combined report using shell to avoid Groovy string escaping issues
+                    sh """cat > ${env.ANALYSIS_DIR}/COMPLETE-ANALYSIS.md << 'EOFCOMBINED'
 # 🚗 Complete Feature Analysis - ${params.FEATURE_REQUEST}
 
 **Generated**: ${env.TIMESTAMP} | **Build**: #${env.BUILD_NUMBER}
@@ -534,7 +535,7 @@ ${params.USE_OLLAMA ? '- ollama-backend-analysis.txt\n- ollama-sensor-analysis.t
 - Low pressure notifications
 
 **UI Design**:
-\`\`\`
+```
 ┌─────────────────────────┐
 │  Car Dashboard          │
 │                         │
@@ -553,7 +554,7 @@ ${params.USE_OLLAMA ? '- ollama-backend-analysis.txt\n- ollama-sensor-analysis.t
 │  ⚠️ Low Pressure Alert  │
 │  Front Left: 1.8 bar    │
 └─────────────────────────┘
-\`\`\`
+```
 
 #### A2 - Rental Staff App (React Web)
 **Impact**: LOW
@@ -568,7 +569,7 @@ ${params.USE_OLLAMA ? '- ollama-backend-analysis.txt\n- ollama-sensor-analysis.t
 **Endpoint Needed**: GET /api/car/:licensePlate
 
 **Expected Response**:
-\`\`\`json
+```json
 {
   "licensePlate": "ABC-123",
   "make": "Tesla",
@@ -582,17 +583,17 @@ ${params.USE_OLLAMA ? '- ollama-backend-analysis.txt\n- ollama-sensor-analysis.t
   "lowPressureAlert": false,
   "timestamp": "2025-11-17T10:30:00Z"
 }
-\`\`\`
+```
 
 **WebSocket Subscription**:
-\`\`\`javascript
+```javascript
 socket.on('sensor_data', (data) => {
   if (data.tirePressure) {
     updateTirePressureDisplay(data.tirePressure);
     checkLowPressureAlert(data.tirePressure);
   }
 });
-\`\`\`
+```
 
 ### Effort Estimate
 - UI Components: 4 hours
@@ -628,7 +629,7 @@ socket.on('sensor_data', (data) => {
 **Impact**: LOW
 
 **Schema Addition**:
-\`\`\`javascript
+```javascript
 // car_data collection
 {
   licensePlate: String,
@@ -644,21 +645,21 @@ socket.on('sensor_data', (data) => {
   lowPressureAlert: Boolean,  // NEW
   timestamp: Date
 }
-\`\`\`
+```
 
 #### B4 - PostgreSQL (Static Database)
 **Impact**: OPTIONAL
 
 **Optional Enhancement**:
-\`\`\`sql
+```sql
 -- Add recommended tire pressure to cars table
 ALTER TABLE cars 
 ADD COLUMN recommended_tire_pressure_bar DECIMAL(3,2),
 ADD COLUMN tire_size VARCHAR(20);
-\`\`\`
+```
 
 ### Data Flow
-\`\`\`
+```
 C5 Sensors → Redis (sensors:tire_pressure) → C2 Broker
     ↓
 B2 Gateway subscribes
@@ -670,7 +671,7 @@ B2 broadcasts via WebSocket
 B1 queries MongoDB on API request
     ↓
 Frontend displays tire pressure
-\`\`\`
+```
 
 ### Effort Estimate
 - API Development: 3 hours (B1 + B2)
@@ -710,7 +711,7 @@ Frontend displays tire pressure
 **Changes**: None needed (already forwards all sensor data)
 
 ### Redis Message Format
-\`\`\`json
+```json
 {
   "channel": "sensors:tire_pressure",
   "message": {
@@ -722,7 +723,7 @@ Frontend displays tire pressure
     "timestamp": "2025-11-17T10:30:00Z"
   }
 }
-\`\`\`
+```
 
 ### Effort Estimate
 - Sensor Simulator: 3 hours
@@ -738,7 +739,7 @@ Frontend displays tire pressure
 
 **File**: \`C5-data-sensors/tire_pressure_sensor.py\`
 
-\`\`\`python
+```python
 import random
 import time
 import redis
@@ -805,13 +806,13 @@ class TirePressureSensor:
 if __name__ == '__main__':
     sensor = TirePressureSensor('ABC-123')
     sensor.run(interval=30)  # Update every 30 seconds
-\`\`\`
+```
 
 ### 2. B2 IoT Gateway - Redis Subscription (Node.js)
 
 **File**: \`B2-iot-gateway/redis-subscriber.js\`
 
-\`\`\`javascript
+```javascript
 const redis = require('redis');
 const { MongoClient } = require('mongodb');
 const WebSocket = require('ws');
@@ -901,13 +902,13 @@ function isLowPressure(data) {
 }
 
 console.log('B2 IoT Gateway listening for tire pressure data...');
-\`\`\`
+```
 
 ### 3. B1 Web Server - API Endpoint (Node.js)
 
 **File**: \`B1-web-server/routes/cars.js\`
 
-\`\`\`javascript
+```javascript
 const express = require('express');
 const router = express.Router();
 const { MongoClient } = require('mongodb');
@@ -985,13 +986,13 @@ function validateTirePressure(req, res, next) {
 }
 
 module.exports = router;
-\`\`\`
+```
 
 ### 4. A1 Mobile App - Tire Pressure Component (React Native)
 
 **File**: \`A1-car-user-app/components/TirePressureGauge.js\`
 
-\`\`\`javascript
+```javascript
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
@@ -1102,10 +1103,10 @@ const styles = StyleSheet.create({
 });
 
 export default TirePressureGauge;
-\`\`\`
+```
 
 **Usage in Dashboard**:
-\`\`\`javascript
+```javascript
 import TirePressureGauge from './components/TirePressureGauge';
 
 // In your dashboard component
@@ -1130,7 +1131,7 @@ useEffect(() => {
   tirePressure={carData?.tirePressure}
   lowPressureAlert={carData?.lowPressureAlert}
 />
-\`\`\`
+```
 
 ---
 
@@ -1138,7 +1139,7 @@ useEffect(() => {
 
 ### Frontend Tests (15 tests)
 
-\`\`\`javascript
+```javascript
 // A1 Mobile App - TirePressureGauge.test.js
 import { render, screen } from '@testing-library/react-native';
 import TirePressureGauge from '../components/TirePressureGauge';
@@ -1176,11 +1177,11 @@ describe('TirePressureGauge', () => {
     expect(screen.getByText(/Low Tire Pressure/i)).toBeTruthy();
   });
 });
-\`\`\`
+```
 
 ### Backend Tests (20 tests)
 
-\`\`\`javascript
+```javascript
 // B1 Web Server - cars.test.js
 const request = require('supertest');
 const app = require('../server');
@@ -1228,11 +1229,11 @@ describe('Redis tire pressure subscription', () => {
     expect(isLowPressure(data2)).toBe(false);
   });
 });
-\`\`\`
+```
 
 ### In-Car Tests (10 tests)
 
-\`\`\`python
+```python
 # C5 Sensors - test_tire_pressure_sensor.py
 import pytest
 from tire_pressure_sensor import TirePressureSensor
@@ -1258,11 +1259,11 @@ def test_redis_publishing():
     assert message['licensePlate'] == 'ABC-123'
     assert 'frontLeft' in message
     assert 'timestamp' in message
-\`\`\`
+```
 
 ### Integration Tests (5 tests)
 
-\`\`\`javascript
+```javascript
 // End-to-end test
 describe('Complete tire pressure flow', () => {
   test('flows from sensor to frontend', async () => {
@@ -1287,7 +1288,7 @@ describe('Complete tire pressure flow', () => {
     sensor.stop();
   });
 });
-\`\`\`
+```
 
 **Total Tests**: 50 tests (15 frontend + 20 backend + 10 in-car + 5 integration)
 
@@ -1349,9 +1350,8 @@ describe('Complete tire pressure flow', () => {
 **Report Generated**: ${env.TIMESTAMP}  
 **Jenkins Build**: #${env.BUILD_NUMBER}  
 **Status**: ✅ Complete
+EOFCOMBINED
 """
-                    
-                    writeFile file: "${env.ANALYSIS_DIR}/COMPLETE-ANALYSIS.md", text: combinedReport
                     
                     echo "✅ Combined detailed report created"
                     echo "📁 Report location: ${env.ANALYSIS_DIR}/COMPLETE-ANALYSIS.md"
