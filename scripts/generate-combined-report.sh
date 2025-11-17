@@ -185,16 +185,21 @@ ADD COLUMN tire_size VARCHAR(20);
 
 ### Data Flow
 ```
-C5 Sensors → Redis (sensors:tire_pressure) → C2 Broker
-    ↓
+C5 Sensors -> Redis (sensors:tire_pressure) -> C2 Broker
+    |
+    v
 B2 Gateway subscribes
-    ↓
+    |
+    v
 B2 stores in MongoDB (car_data)
-    ↓
+    |
+    v
 B2 broadcasts via WebSocket
-    ↓
+    |
+    v
 B1 queries MongoDB on API request
-    ↓
+    |
+    v
 Frontend displays tire pressure
 ```
 

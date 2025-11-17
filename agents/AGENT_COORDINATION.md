@@ -276,9 +276,9 @@ Agent A receives responses from B and C, consolidates everything:
 
 #### Data Flow
 ```
-C5 Sensor → Redis (sensors:tire_pressure) → C2 Broker → 
-C1 Communication → WebSocket → B2 Gateway → MongoDB → 
-B1 API → Frontend Apps
+C5 Sensor -> Redis (sensors:tire_pressure) -> C2 Broker -> 
+C1 Communication -> WebSocket -> B2 Gateway -> MongoDB -> 
+B1 API -> Frontend Apps
 ```
 
 #### Test Cases Summary
