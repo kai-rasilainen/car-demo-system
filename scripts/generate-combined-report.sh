@@ -7,14 +7,14 @@ BUILD_NUMBER="$3"
 OUTPUT_FILE="$4"
 
 cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
-# 🚗 Complete Feature Analysis
+# Complete Feature Analysis
 
 **Feature Request**: ${FEATURE_REQUEST}
 **Generated**: ${TIMESTAMP} | **Build**: #${BUILD_NUMBER}
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Executive Summary](#executive-summary)
 2. [Agent A: Frontend Analysis](#agent-a-frontend-analysis)
@@ -36,7 +36,7 @@ cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
 | Backend (B1 + B2 + B3) | 7-10 | Low-Moderate | Low |
 | In-Car (C5 + C2) | 6-8 | Moderate | Low |
 
-### Decision: ✅ PROCEED
+**Decision**: [YES] PROCEED
 
 **Rationale**: Additive changes only, no breaking changes, clear implementation path.
 
@@ -44,7 +44,7 @@ cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
 
 ## Agent A: Frontend Analysis
 
-### 🎨 Components Affected
+### Components Affected
 
 #### A1 - Car User App (React Native Mobile)
 **Impact**: MODERATE
@@ -72,7 +72,7 @@ cat > "$OUTPUT_FILE" << 'EOFCOMBINED'
 │  │ bar  │  │ bar  │   │
 │  └──────┘  └──────┘   │
 │                         │
-│  ⚠️ Low Pressure Alert  │
+│  [!] Low Pressure Alert  │
 │  Front Left: 1.8 bar    │
 └─────────────────────────┘
 ```
@@ -127,7 +127,7 @@ socket.on('sensor_data', (data) => {
 
 ## Agent B: Backend Analysis
 
-### ⚙️ Components Affected
+### Components Affected
 
 #### B1 - Web Server (REST API)
 **Impact**: LOW-MODERATE
@@ -205,7 +205,7 @@ Frontend displays tire pressure
 
 ## Agent C: In-Car Analysis
 
-### 🚗 Components Affected
+### Components Affected
 
 #### C5 - Data Sensors
 **Impact**: MODERATE
@@ -529,7 +529,7 @@ const TirePressureGauge = ({ tirePressure, lowPressureAlert }) => {
       
       {lowPressureAlert && (
         <View style={styles.alert}>
-          <Text style={styles.alertText}>⚠️ Low Tire Pressure Detected!</Text>
+          <Text style={styles.alertText}>WARNING: Low Tire Pressure Detected!</Text>
           <Text style={styles.alertSubtext}>
             One or more tires below 1.9 bar. Check tire pressure soon.
           </Text>
@@ -653,9 +653,9 @@ See individual agent reports for detailed test cases.
 **Tests Created**: 50 tests  
 **Lines of Code**: ~800 lines  
 
-**Risk Level**: ✅ LOW  
-**Breaking Changes**: ❌ NONE  
-**Ready to Implement**: ✅ YES  
+**Risk Level**:  LOW  
+**Breaking Changes**:  NONE  
+**Ready to Implement**:  YES  
 
 EOFCOMBINED
 
@@ -664,4 +664,4 @@ sed -i "s/\${FEATURE_REQUEST}/$FEATURE_REQUEST/g" "$OUTPUT_FILE"
 sed -i "s/\${TIMESTAMP}/$TIMESTAMP/g" "$OUTPUT_FILE"
 sed -i "s/\${BUILD_NUMBER}/$BUILD_NUMBER/g" "$OUTPUT_FILE"
 
-echo "✅ Combined report generated: $OUTPUT_FILE"
+echo " Combined report generated: $OUTPUT_FILE"
