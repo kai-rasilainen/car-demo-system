@@ -304,7 +304,7 @@ Message Format:
 
 ### Integration Tests
 1. **Data Flow**
-   - Redis → B2 → MongoDB → B1 → Client
+   - Redis -> B2 -> MongoDB -> B1 -> Client
    - End-to-end latency <2 seconds
    - No data loss
 
@@ -323,7 +323,7 @@ Message Format:
 
 ### Integration Tests
 1. **Sensor to Backend**
-   - C5 → Redis → C2 → B2 flow works
+   - C5 -> Redis -> C2 -> B2 flow works
    - Data arrives within 2 seconds
    - All 4 tire pressures transmitted
 
