@@ -1,0 +1,40 @@
+# Development overrides for docker-compose.yml
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  rental-staff-app:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./A-car-demo-frontend/A2-rental-staff-app/src:/app/src:ro
+    command: npm start
+
+  web-server:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./B-car-demo-backend/B1-web-server:/app:ro
+      - /app/node_modules
+    command: npm run dev
+
+  iot-gateway:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./B-car-demo-backend/B2-iot-gateway:/app:ro
+      - /app/node_modules
+    command: npm run dev
+
+  cloud-communication:
+    volumes:
+      - ./C-car-demo-in-car/C1-cloud-communication:/app:ro
+    environment:
+      - DEBUG=1
+
+  data-sensors:
+    volumes:
+      - ./C-car-demo-in-car/C5-data-sensors:/app:ro
+    environment:
+      - DEBUG=1

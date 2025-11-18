@@ -1,6 +1,64 @@
 # Car Demo System - Complete Integration
 
 services:
+  # Frontend Applications
+  rental-staff-app:
+    build:
+      context: ./A-car-demo-frontend/A2-rental-staff-app
+      dockerfile: Dockerfile
+    container_name: car-rental-staff-app
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+      - REACT_APP_WS_URL=ws://localhost:3002
+    networks:
+      - car-network
+    depends_on:
+      - web-server
+      - iot-gateway
+
+  # Backend Services
+  web-server:
+    build:
+      context: ./B-car-demo-backend/B1-web-server
+      dockerfile: Dockerfile
+    container_name: car-web-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/cardata?authSource=admin
+      - POSTGRES_URI=postgresql://postgres:password@postgres:5432/carinfo
+      - REDIS_URI=redis://redis:6379
+      - IOT_GATEWAY_URL=http://iot-gateway:3002
+    networks:
+      - car-network
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+
+  iot-gateway:
+    build:
+      context: ./B-car-demo-backend/B2-iot-gateway
+      dockerfile: Dockerfile
+    container_name: car-iot-gateway
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/cardata?authSource=admin
+      - REDIS_URI=redis://redis:6379
+    networks:
+      - car-network
+    depends_on:
+      - mongodb
+      - redis
+
   # Backend Databases
   mongodb:
     image: mongo:4.4
@@ -46,6 +104,36 @@ services:
       - redis_data:/data
     networks:
       - car-network
+
+  cloud-communication:
+    build:
+      context: ./C-car-demo-in-car/C1-cloud-communication
+      dockerfile: Dockerfile
+    container_name: car-cloud-comm
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - IOT_GATEWAY_URL=http://iot-gateway:3002
+    networks:
+      - car-network
+    depends_on:
+      - redis
+      - iot-gateway
+
+  data-sensors:
+    build:
+      context: ./C-car-demo-in-car/C5-data-sensors
+      dockerfile: Dockerfile
+    container_name: car-data-sensors
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - car-network
+    depends_on:
+      - redis
 
 volumes:
   mongodb_data:
