@@ -22,7 +22,12 @@ class OllamaClient:
             payload = {
                 "model": self.model,
                 "prompt": prompt,
-                "stream": False
+                "stream": False,
+                "format": "json",  # Request JSON format
+                "options": {
+                    "temperature": 0.7,  # Balance creativity and consistency
+                    "top_p": 0.9
+                }
             }
             if system_prompt:
                 payload["system"] = system_prompt
@@ -49,21 +54,18 @@ class Agent:
         system_prompt = f"""You are {self.name}, a {self.role} in a car rental system.
 Your responsibilities: {', '.join(self.responsibilities)}
 
-Analyze the feature request and provide:
-1. Impact on your components
-2. Required changes
-3. Dependencies on other agents (Agent B: Backend, Agent C: In-Car Systems)
-4. Estimated effort
-5. Risks and challenges
+You must respond ONLY with valid JSON. Do not include any explanatory text before or after the JSON.
 
-Respond in JSON format with these keys:
-- impact: string describing impact
-- components: list of affected components
-- changes: list of required changes
-- needs_agent_b: boolean (true if backend changes needed)
-- needs_agent_c: boolean (true if in-car system changes needed)
-- effort_hours: number
-- risks: list of risks
+Required JSON structure:
+{{
+  "impact": "string describing the impact",
+  "components": ["component1", "component2"],
+  "changes": ["change1", "change2"],
+  "needs_agent_b": true or false,
+  "needs_agent_c": true or false,
+  "effort_hours": number,
+  "risks": ["risk1", "risk2"]
+}}
 """
         
         context_str = ""
@@ -72,26 +74,74 @@ Respond in JSON format with these keys:
         
         prompt = f"""Feature Request: {feature_request}{context_str}
 
-Analyze this request from your perspective and determine what's needed.
-Provide your analysis in valid JSON format."""
+Analyze this feature request from your perspective as {self.name}.
+
+Determine:
+1. Impact on your components
+2. What changes are required
+3. Whether you need Agent B (Backend) - set needs_agent_b to true/false
+4. Whether you need Agent C (In-Car Systems) - set needs_agent_c to true/false
+5. Estimated effort in hours
+6. Potential risks
+
+Respond with ONLY a JSON object, no other text:"""
         
         response = self.ollama.generate(prompt, system_prompt)
         
+        # Debug: print raw response
+        print(f"\n--- Raw response from {self.name} ---", file=sys.stderr)
+        print(response[:500], file=sys.stderr)  # First 500 chars
+        print("--- End raw response ---\n", file=sys.stderr)
+        
         # Try to parse JSON from response
         try:
+            # Clean up response - remove markdown code blocks if present
+            cleaned = response.strip()
+            if cleaned.startswith('```'):
+                # Remove markdown code fences
+                lines = cleaned.split('\n')
+                # Remove first line (```json or ```)
+                if lines[0].startswith('```'):
+                    lines = lines[1:]
+                # Remove last line if it's ```
+                if lines and lines[-1].strip() == '```':
+                    lines = lines[:-1]
+                cleaned = '\n'.join(lines)
+            
             # Find JSON in response (might have extra text)
-            start = response.find('{')
-            end = response.rfind('}') + 1
+            start = cleaned.find('{')
+            end = cleaned.rfind('}') + 1
+            
             if start >= 0 and end > start:
-                json_str = response[start:end]
+                json_str = cleaned[start:end]
                 analysis = json.loads(json_str)
+                
+                # Validate required keys
+                required_keys = ['impact', 'components', 'changes', 'needs_agent_b', 'needs_agent_c', 'effort_hours', 'risks']
+                missing_keys = [key for key in required_keys if key not in analysis]
+                
+                if missing_keys:
+                    print(f"Warning: Missing keys in {self.name} response: {missing_keys}", file=sys.stderr)
+                    # Fill in missing keys with defaults
+                    for key in missing_keys:
+                        if key in ['needs_agent_b', 'needs_agent_c']:
+                            analysis[key] = False
+                        elif key == 'effort_hours':
+                            analysis[key] = 0
+                        elif key in ['components', 'changes', 'risks']:
+                            analysis[key] = []
+                        else:
+                            analysis[key] = "Not provided"
+                
                 self.analysis_result = analysis
                 return analysis
             else:
-                # Fallback if no JSON found
+                print(f"Warning: No JSON object found in {self.name} response", file=sys.stderr)
                 return self._create_default_analysis(feature_request)
-        except json.JSONDecodeError:
-            print(f"Warning: Could not parse JSON from {self.name}", file=sys.stderr)
+                
+        except json.JSONDecodeError as e:
+            print(f"Warning: Could not parse JSON from {self.name}: {e}", file=sys.stderr)
+            print(f"Attempted to parse: {json_str[:200] if 'json_str' in locals() else 'N/A'}", file=sys.stderr)
             return self._create_default_analysis(feature_request)
     
     def _create_default_analysis(self, feature_request: str) -> Dict:
