@@ -477,55 +477,73 @@ Be specific and detailed."""
     
     def _create_ascii_mockup(self, feature: str) -> str:
         """Create ASCII art mockup using box-drawing characters"""
-        width = 60
+        width = 70
         
         mockup = []
         
-        # Top border
-        mockup.append("┌" + "─" * (width - 2) + "┐")
+        # Check if feature is tire/pressure related
+        is_tire_feature = any(word in feature.lower() for word in ['tire', 'tyre', 'pressure', 'wheel'])
         
-        # Header
-        mockup.append("│" + " " * (width - 2) + "│")
-        header_text = "  📱 " + feature[:width - 10]
-        mockup.append("│" + header_text + " " * (width - 2 - len(header_text)) + "│")
-        mockup.append("│" + " " * (width - 2) + "│")
-        
-        # Header separator
-        mockup.append("├" + "─" * (width - 2) + "┤")
-        
-        # Navigation/Tab bar
-        mockup.append("│  [Home]  [Settings]  [Profile]" + " " * (width - 38) + "│")
-        mockup.append("├" + "─" * (width - 2) + "┤")
-        
-        # Content area
-        mockup.append("│" + " " * (width - 2) + "│")
-        mockup.append("│  Main Content Area:" + " " * (width - 23) + "│")
-        mockup.append("│" + " " * (width - 2) + "│")
-        
-        # Component box 1
-        mockup.append("│  ┌" + "─" * (width - 8) + "┐" + "  │")
-        mockup.append("│  │ Data Display / Visualization" + " " * (width - 39) + "│" + "  │")
-        mockup.append("│  │" + " " * (width - 8) + "│" + "  │")
-        mockup.append("│  │ ▮▮▮▮▮▮▮▮░░░░░░░░  60%" + " " * (width - 37) + "│" + "  │")
-        mockup.append("│  └" + "─" * (width - 8) + "┘" + "  │")
-        
-        mockup.append("│" + " " * (width - 2) + "│")
-        
-        # Component box 2
-        mockup.append("│  ┌" + "─" * (width - 8) + "┐" + "  │")
-        mockup.append("│  │ Interactive Controls" + " " * (width - 30) + "│" + "  │")
-        mockup.append("│  │" + " " * (width - 8) + "│" + "  │")
-        mockup.append("│  │  [Start] [Stop] [Refresh]" + " " * (width - 38) + "│" + "  │")
-        mockup.append("│  └" + "─" * (width - 8) + "┘" + "  │")
-        
-        mockup.append("│" + " " * (width - 2) + "│")
-        
-        # Status bar
-        mockup.append("├" + "─" * (width - 2) + "┤")
-        mockup.append("│  Status: Active  │  Updated: Just now" + " " * (width - 44) + "│")
-        
-        # Bottom border
-        mockup.append("└" + "─" * (width - 2) + "┘")
+        if is_tire_feature:
+            # Tire pressure specific mockup
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("|                    TIRE PRESSURE MONITOR                         |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("|                                                                  |")
+            mockup.append("|        FRONT LEFT              |             FRONT RIGHT         |")
+            mockup.append("|       .-'''''''-.              |            .-'''''''-.          |")
+            mockup.append("|      /  ___   ___\\             |           /  ___   ___\\         |")
+            mockup.append("|     |  |   | |   |             |          |  |   | |   |         |")
+            mockup.append("|     |  |___| |___|             |          |  |___| |___|         |")
+            mockup.append("|      \\           /             |           \\           /          |")
+            mockup.append("|       '-.......-'              |            '-.......-'           |")
+            mockup.append("|        32.5 PSI                |             32.0 PSI            |")
+            mockup.append("|         [OK]                   |              [OK]               |")
+            mockup.append("|                                |                                 |")
+            mockup.append("|--------------------------------+-------------------------------- |")
+            mockup.append("|                                                                  |")
+            mockup.append("|        REAR LEFT               |             REAR RIGHT          |")
+            mockup.append("|       .-'''''''-.              |            .-'''''''-.          |")
+            mockup.append("|      /  ___   ___\\             |           /  ___   ___\\         |")
+            mockup.append("|     |  |   | |   |             |          |  |   | |   |         |")
+            mockup.append("|     |  |___| |___|             |          |  |___| |___|         |")
+            mockup.append("|      \\           /             |           \\           /          |")
+            mockup.append("|       '-.......-'              |            '-.......-'           |")
+            mockup.append("|        31.8 PSI                |             28.5 PSI            |")
+            mockup.append("|         [OK]                   |             [LOW!]              |")
+            mockup.append("|                                                                  |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("| Status: 1 tire low pressure    | Last Update: 2 seconds ago      |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("| [Refresh] [History] [Alerts] [Settings]                          |")
+            mockup.append("+------------------------------------------------------------------+")
+        else:
+            # Generic feature mockup
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("|  " + feature[:62].center(62) + "  |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("|  [Home]  [Dashboard]  [Settings]  [Profile]                      |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("|                                                                  |")
+            mockup.append("|  Main Content Area:                                              |")
+            mockup.append("|                                                                  |")
+            mockup.append("|  +------------------------------------------------------------+  |")
+            mockup.append("|  | Data Display / Visualization                              |  |")
+            mockup.append("|  |                                                            |  |")
+            mockup.append("|  | [=============>            ] 60%                           |  |")
+            mockup.append("|  |                                                            |  |")
+            mockup.append("|  +------------------------------------------------------------+  |")
+            mockup.append("|                                                                  |")
+            mockup.append("|  +------------------------------------------------------------+  |")
+            mockup.append("|  | Interactive Controls                                       |  |")
+            mockup.append("|  |                                                            |  |")
+            mockup.append("|  |   [Start]    [Stop]    [Refresh]    [Export]              |  |")
+            mockup.append("|  |                                                            |  |")
+            mockup.append("|  +------------------------------------------------------------+  |")
+            mockup.append("|                                                                  |")
+            mockup.append("+------------------------------------------------------------------+")
+            mockup.append("| Status: Active         | Updated: Just now    | Users: 142       |")
+            mockup.append("+------------------------------------------------------------------+")
         
         return "\n".join(mockup)
     
