@@ -252,6 +252,155 @@ class AgentCoordinator:
         
         return results
     
+    def generate_code_examples(self, results: Dict, output_dir: str):
+        """Generate code examples based on analysis"""
+        import os
+        os.makedirs(output_dir, exist_ok=True)
+        
+        feature_request = results['feature_request']
+        
+        print("💻 Generating code examples...")
+        
+        # Generate frontend code examples if Agent A was involved
+        if "agent_a" in results["analyses"]:
+            self._generate_frontend_code(feature_request, output_dir)
+        
+        # Generate backend code examples if Agent B was involved
+        if "agent_b" in results["analyses"]:
+            self._generate_backend_code(feature_request, output_dir)
+        
+        # Generate in-car code examples if Agent C was involved
+        if "agent_c" in results["analyses"]:
+            self._generate_incar_code(feature_request, output_dir)
+        
+        print(f"✅ Code examples saved to {output_dir}/")
+    
+    def _generate_frontend_code(self, feature_request: str, output_dir: str):
+        """Generate frontend code examples using AI"""
+        system_prompt = """You are a React Native expert. Generate clean, production-ready code.
+Output ONLY the code itself with no JSON wrapping, no explanations, no markdown."""
+        
+        prompt = f"""Generate a React Native component for: {feature_request}
+
+Include:
+- Imports
+- Component with hooks (useState, useEffect)
+- API integration with fetch or axios
+- Real-time WebSocket updates
+- Error handling
+- Styled components
+
+Write complete, working code:"""
+        
+        # Temporarily disable JSON format for code generation
+        original_format = None
+        code_response = self.ollama.generate(prompt, system_prompt)
+        
+        # Clean up code fences if present
+        code = code_response.replace('```javascript', '').replace('```jsx', '').replace('```', '').strip()
+        
+        # If still wrapped in JSON, try to extract
+        if code.startswith('{') and '"component"' in code:
+            try:
+                import json
+                data = json.loads(code)
+                code = data.get('component', code)
+            except:
+                pass
+        
+        with open(f"{output_dir}/frontend-component.jsx", 'w') as f:
+            f.write("// Auto-generated React Native component\n")
+            f.write(f"// Feature: {feature_request}\n\n")
+            f.write(code)
+        
+        print("  ✅ Frontend component example created")
+    
+    def _generate_backend_code(self, feature_request: str, output_dir: str):
+        """Generate backend code examples using AI"""
+        system_prompt = """You are a Node.js/Express expert. Generate clean, production-ready code.
+Output ONLY the code itself with no JSON wrapping, no explanations, no markdown."""
+        
+        prompt = f"""Generate Node.js backend code for: {feature_request}
+
+Include:
+- Express.js routes
+- MongoDB schema and operations
+- WebSocket event handlers
+- Input validation
+- Error handling middleware
+
+Write complete, working code:"""
+        
+        code_response = self.ollama.generate(prompt, system_prompt)
+        
+        # Clean up code fences
+        code = code_response.replace('```javascript', '').replace('```js', '').replace('```', '').strip()
+        
+        with open(f"{output_dir}/backend-api.js", 'w') as f:
+            f.write("// Auto-generated Node.js backend code\n")
+            f.write(f"// Feature: {feature_request}\n\n")
+            f.write(code)
+        
+        print("  ✅ Backend API example created")
+    
+    def _generate_incar_code(self, feature_request: str, output_dir: str):
+        """Generate in-car system code examples using AI"""
+        system_prompt = """You are a Python IoT expert. Generate clean, production-ready code.
+Output ONLY the code itself with no JSON wrapping, no explanations, no markdown."""
+        
+        prompt = f"""Generate Python sensor code for: {feature_request}
+
+Include:
+- Sensor data reading/simulation
+- Redis pub/sub integration
+- JSON data formatting
+- Error handling and logging
+- Continuous operation loop
+
+Write complete, working code:"""
+        
+        code_response = self.ollama.generate(prompt, system_prompt)
+        
+        # Clean up code fences
+        code = code_response.replace('```python', '').replace('```py', '').replace('```', '').strip()
+        
+        with open(f"{output_dir}/sensor-integration.py", 'w') as f:
+            f.write("# Auto-generated Python sensor code\n")
+            f.write(f"# Feature: {feature_request}\n\n")
+            f.write(code)
+        
+        print("  ✅ Sensor integration example created")
+    
+    def generate_ui_mockup(self, results: Dict, output_dir: str):
+        """Generate UI description/mockup"""
+        import os
+        os.makedirs(output_dir, exist_ok=True)
+        
+        feature_request = results['feature_request']
+        
+        print("🎨 Generating UI design specifications...")
+        
+        prompt = f"""Create a detailed UI/UX design specification for: {feature_request}
+
+Include:
+1. Screen layout description
+2. Component placement
+3. Color scheme
+4. User interactions
+5. Responsive design notes
+6. Accessibility considerations
+
+Use ASCII art or detailed text description to visualize the UI."""
+        
+        ui_spec = self.ollama.generate(prompt)
+        
+        with open(f"{output_dir}/ui-design-spec.md", 'w') as f:
+            f.write(f"# UI Design Specification\n\n")
+            f.write(f"**Feature**: {feature_request}\n\n")
+            f.write(ui_spec)
+        
+        print(f"  ✅ UI design spec saved")
+    
     def generate_report(self, results: Dict, output_file: str):
         """Generate markdown report from analysis results"""
         with open(output_file, 'w') as f:
@@ -326,6 +475,11 @@ def main():
     ollama_host = sys.argv[3] if len(sys.argv) > 3 else "http://10.0.2.2:11434"
     model = sys.argv[4] if len(sys.argv) > 4 else "llama3:8b"
     
+    # Determine output directory
+    import os
+    output_dir = os.path.dirname(output_file) if output_file else "."
+    code_examples_dir = os.path.join(output_dir, "code-examples")
+    
     # Create coordinator and run analysis
     coordinator = AgentCoordinator(ollama_host, model)
     results = coordinator.coordinate(feature_request)
@@ -333,12 +487,21 @@ def main():
     # Generate report
     coordinator.generate_report(results, output_file)
     
+    # Generate code examples
+    coordinator.generate_code_examples(results, code_examples_dir)
+    
+    # Generate UI mockup
+    coordinator.generate_ui_mockup(results, code_examples_dir)
+    
     # Output JSON for Jenkins to parse
     print("\n" + "="*50)
     print("JSON Results:")
     print(json.dumps(results, indent=2))
     
-    print(f"\n✅ Analysis complete. Report saved to: {output_file}")
+    print(f"\n✅ Analysis complete!")
+    print(f"  📄 Report: {output_file}")
+    print(f"  💻 Code examples: {code_examples_dir}/")
+    print(f"  🎨 UI spec: {code_examples_dir}/ui-design-spec.md")
 
 if __name__ == "__main__":
     main()
