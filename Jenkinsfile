@@ -181,13 +181,25 @@ coordinates between agents, enable USE_AI_COORDINATION parameter.
                 echo "📦 Archiving analysis results..."
                 
                 script {
-                    // Archive the report
-                    archiveArtifacts artifacts: "analysis-reports/**/*.md, analysis-reports/**/*.txt", 
+                    // Archive the report and code examples
+                    archiveArtifacts artifacts: "analysis-reports/**/*.md, analysis-reports/**/*.txt, analysis-reports/**/code-examples/**/*", 
                                      allowEmptyArchive: true
+                    
+                    // List generated files
+                    sh '''
+                        echo ""
+                        echo "📋 Generated Files:"
+                        echo "=================="
+                        if [ -d "${ANALYSIS_DIR}/code-examples" ]; then
+                            echo "💻 Code Examples:"
+                            ls -lh ${ANALYSIS_DIR}/code-examples/
+                        fi
+                    '''
                     
                     echo "✅ Results archived"
                     echo ""
                     echo "📄 Report saved to: ${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}"
+                    echo "💻 Code examples: ${env.ANALYSIS_DIR}/code-examples/"
                 }
             }
         }
@@ -199,9 +211,15 @@ coordinates between agents, enable USE_AI_COORDINATION parameter.
             echo ""
             echo "📊 Results:"
             echo "  - Report: ${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}"
+            echo "  - Code examples: ${env.ANALYSIS_DIR}/code-examples/"
+            echo "    • frontend-component.jsx"
+            echo "    • backend-api.js"
+            echo "    • sensor-integration.py"
+            echo "    • ui-design-spec.md"
             echo "  - Log: ${env.ANALYSIS_DIR}/coordination-log.txt"
             echo ""
             echo "💡 Agents were dynamically coordinated based on AI analysis"
+            echo "💻 Code examples generated automatically"
         }
         failure {
             echo "❌ Feature analysis failed"
