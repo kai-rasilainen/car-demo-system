@@ -15,7 +15,7 @@ class OllamaClient:
         self.host = host
         self.model = model  # Model name from Ollama
     
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: Optional[str] = None, format_json: bool = True) -> str:
         """Generate response from Ollama"""
         try:
             url = f"{self.host}/api/generate"
@@ -23,12 +23,13 @@ class OllamaClient:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
-                "format": "json",  # Request JSON format
                 "options": {
                     "temperature": 0.7,  # Balance creativity and consistency
                     "top_p": 0.9
                 }
             }
+            if format_json:
+                payload["format"] = "json"  # Request JSON format only when needed
             if system_prompt:
                 payload["system"] = system_prompt
             
@@ -42,17 +43,30 @@ class OllamaClient:
             return ""
 
 class Agent:
-    def __init__(self, name: str, role: str, responsibilities: List[str], ollama: OllamaClient):
+    def __init__(self, name: str, component: str, role: str, responsibilities: List[str], 
+                 apis: List[str], downstream_agents: List[str], ollama: OllamaClient):
         self.name = name
+        self.component = component
         self.role = role
         self.responsibilities = responsibilities
+        self.apis = apis  # APIs this agent exposes
+        self.downstream_agents = downstream_agents  # Agents this one can call
         self.ollama = ollama
         self.analysis_result = None
     
     def analyze(self, feature_request: str, context: Dict = None) -> Dict:
         """Analyze feature request using AI"""
-        system_prompt = f"""You are {self.name}, a {self.role} in a car rental system.
+        
+        # Build downstream agents info
+        downstream_info = ""
+        if self.downstream_agents:
+            downstream_info = f"\n\nYou can request help from these downstream agents: {', '.join(self.downstream_agents)}"
+            downstream_info += "\nFor each downstream agent, set needs_<agent_name> to true/false (e.g., needs_a1, needs_b2)"
+        
+        system_prompt = f"""You are {self.name}, a {self.role} responsible for {self.component}.
 Your responsibilities: {', '.join(self.responsibilities)}
+APIs you provide: {', '.join(self.apis) if self.apis else 'None'}
+{downstream_info}
 
 You must respond ONLY with valid JSON. Do not include any explanatory text before or after the JSON.
 
@@ -61,12 +75,15 @@ Required JSON structure:
   "impact": "string describing the impact",
   "components": ["component1", "component2"],
   "changes": ["change1", "change2"],
-  "needs_agent_b": true or false,
-  "needs_agent_c": true or false,
   "effort_hours": number,
-  "risks": ["risk1", "risk2"]
-}}
-"""
+  "risks": ["risk1", "risk2"]"""
+        
+        # Add needs_* fields for downstream agents
+        for agent in self.downstream_agents:
+            agent_key = agent.lower().replace(" ", "_").replace("-", "_")
+            system_prompt += f',\n  "needs_{agent_key}": true or false'
+        
+        system_prompt += "\n}"
         
         context_str = ""
         if context:
@@ -74,15 +91,14 @@ Required JSON structure:
         
         prompt = f"""Feature Request: {feature_request}{context_str}
 
-Analyze this feature request from your perspective as {self.name}.
+Analyze this feature request from your perspective as {self.name} for {self.component}.
 
 Determine:
 1. Impact on your components
-2. What changes are required
-3. Whether you need Agent B (Backend) - set needs_agent_b to true/false
-4. Whether you need Agent C (In-Car Systems) - set needs_agent_c to true/false
-5. Estimated effort in hours
-6. Potential risks
+2. What changes are required in your area
+3. Which downstream agents you need (set needs_<agent> flags)
+4. Estimated effort in hours for your component
+5. Potential risks
 
 Respond with ONLY a JSON object, no other text:"""
         
@@ -116,22 +132,26 @@ Respond with ONLY a JSON object, no other text:"""
                 json_str = cleaned[start:end]
                 analysis = json.loads(json_str)
                 
-                # Validate required keys
-                required_keys = ['impact', 'components', 'changes', 'needs_agent_b', 'needs_agent_c', 'effort_hours', 'risks']
+                # Validate required keys (dynamic based on downstream agents)
+                required_keys = ['impact', 'components', 'changes', 'effort_hours', 'risks']
                 missing_keys = [key for key in required_keys if key not in analysis]
                 
                 if missing_keys:
                     print(f"Warning: Missing keys in {self.name} response: {missing_keys}", file=sys.stderr)
                     # Fill in missing keys with defaults
                     for key in missing_keys:
-                        if key in ['needs_agent_b', 'needs_agent_c']:
-                            analysis[key] = False
-                        elif key == 'effort_hours':
+                        if key == 'effort_hours':
                             analysis[key] = 0
                         elif key in ['components', 'changes', 'risks']:
                             analysis[key] = []
                         else:
                             analysis[key] = "Not provided"
+                
+                # Ensure needs_* fields exist for downstream agents
+                for agent in self.downstream_agents:
+                    agent_key = f"needs_{agent.lower().replace(' ', '_').replace('-', '_')}"
+                    if agent_key not in analysis:
+                        analysis[agent_key] = False
                 
                 self.analysis_result = analysis
                 return analysis
@@ -146,102 +166,180 @@ Respond with ONLY a JSON object, no other text:"""
     
     def _create_default_analysis(self, feature_request: str) -> Dict:
         """Create default analysis structure if AI fails"""
-        return {
+        analysis = {
             "impact": f"Analyzing impact of: {feature_request}",
             "components": ["Unknown"],
             "changes": ["Analysis needed"],
-            "needs_agent_b": False,
-            "needs_agent_c": False,
             "effort_hours": 0,
             "risks": ["AI analysis unavailable"]
         }
+        # Add needs_* fields for downstream agents
+        for agent in self.downstream_agents:
+            agent_key = f"needs_{agent.lower().replace(' ', '_').replace('-', '_')}"
+            analysis[agent_key] = False
+        return analysis
 
 class AgentCoordinator:
     def __init__(self, ollama_host: str = "http://10.0.2.2:11434", model: str = "llama3:8b"):
         self.ollama = OllamaClient(ollama_host, model)
         
-        # Define agents
-        self.agent_a = Agent(
-            name="Agent A",
-            role="Frontend Developer & Coordinator",
-            responsibilities=[
-                "React Native mobile app (A1)",
-                "React web staff app (A2)",
-                "User interface design",
-                "API integration",
-                "Coordinate between all agents"
-            ],
+        # Define component-level agents with their downstream dependencies
+        # Frontend Agents
+        self.agent_a1 = Agent(
+            name="Agent-A1",
+            component="Car User Mobile App",
+            role="React Native Mobile Developer",
+            responsibilities=["User authentication", "Car browsing", "Booking management", "Real-time car status"],
+            apis=["GET /bookings", "POST /booking", "GET /car-status"],
+            downstream_agents=["Agent-B1", "Agent-B2"],
             ollama=self.ollama
         )
         
-        self.agent_b = Agent(
-            name="Agent B",
-            role="Backend Developer",
-            responsibilities=[
-                "REST API server (B1)",
-                "IoT Gateway (B2)",
-                "MongoDB database (B3)",
-                "PostgreSQL database (B4)",
-                "WebSocket communications"
-            ],
+        self.agent_a2 = Agent(
+            name="Agent-A2",
+            component="Rental Staff Web App",
+            role="React Web Developer",
+            responsibilities=["Fleet management UI", "Booking administration", "Staff dashboard", "Reports"],
+            apis=["GET /fleet", "PUT /car-status", "GET /reports"],
+            downstream_agents=["Agent-B1", "Agent-B3", "Agent-B4"],
             ollama=self.ollama
         )
         
-        self.agent_c = Agent(
-            name="Agent C",
-            role="In-Car Systems Developer",
-            responsibilities=[
-                "Cloud communication (C1)",
-                "Redis message broker (C2)",
-                "CAN bus interface (C3)",
-                "Vehicle controller (C4)",
-                "Data sensors (C5)"
-            ],
+        # Backend Agents
+        self.agent_b1 = Agent(
+            name="Agent-B1",
+            component="Web Server (REST API)",
+            role="Node.js Backend Developer",
+            responsibilities=["REST API endpoints", "Authentication", "Business logic", "Data validation"],
+            apis=["/api/bookings", "/api/cars", "/api/users", "/api/fleet"],
+            downstream_agents=["Agent-B3", "Agent-B4", "Agent-B2"],
             ollama=self.ollama
         )
+        
+        self.agent_b2 = Agent(
+            name="Agent-B2",
+            component="IoT Gateway",
+            role="WebSocket/IoT Developer",
+            responsibilities=["WebSocket server", "Real-time updates", "IoT device communication", "Event streaming"],
+            apis=["ws://iot-gateway", "/api/iot/status", "/api/iot/command"],
+            downstream_agents=["Agent-C1", "Agent-C2"],
+            ollama=self.ollama
+        )
+        
+        self.agent_b3 = Agent(
+            name="Agent-B3",
+            component="Realtime Database (MongoDB)",
+            role="MongoDB Database Administrator",
+            responsibilities=["Real-time data storage", "Car status", "IoT data", "Session management"],
+            apis=["mongodb://realtime-db", "Collections: cars, sessions, iot_data"],
+            downstream_agents=[],
+            ollama=self.ollama
+        )
+        
+        self.agent_b4 = Agent(
+            name="Agent-B4",
+            component="Static Database (PostgreSQL)",
+            role="PostgreSQL Database Administrator",
+            responsibilities=["Transactional data", "Users", "Bookings", "Fleet data", "Reports"],
+            apis=["postgresql://static-db", "Tables: users, bookings, fleet, reports"],
+            downstream_agents=[],
+            ollama=self.ollama
+        )
+        
+        # In-Car System Agents
+        self.agent_c1 = Agent(
+            name="Agent-C1",
+            component="Cloud Communication",
+            role="Python Cloud Integration Developer",
+            responsibilities=["Cloud connectivity", "Data synchronization", "Remote commands", "Status updates"],
+            apis=["HTTP client to IoT Gateway", "Redis pub/sub"],
+            downstream_agents=["Agent-C2"],
+            ollama=self.ollama
+        )
+        
+        self.agent_c2 = Agent(
+            name="Agent-C2",
+            component="Central Broker (Redis)",
+            role="Redis/Message Queue Administrator",
+            responsibilities=["Message routing", "Pub/sub channels", "Data buffering", "Event distribution"],
+            apis=["redis://broker", "Channels: car_status, commands, sensor_data"],
+            downstream_agents=["Agent-C3", "Agent-C4", "Agent-C5"],
+            ollama=self.ollama
+        )
+        
+        self.agent_c3 = Agent(
+            name="Agent-C3",
+            component="CAN Bus Interface",
+            role="CAN Bus Integration Developer",
+            responsibilities=["CAN bus communication", "Vehicle network", "Protocol translation"],
+            apis=["CAN interface", "Vehicle data access"],
+            downstream_agents=[],
+            ollama=self.ollama
+        )
+        
+        self.agent_c4 = Agent(
+            name="Agent-C4",
+            component="Vehicle Controller",
+            role="Embedded Systems Developer",
+            responsibilities=["Vehicle control logic", "Command execution", "Safety checks", "State management"],
+            apis=["Control commands", "Vehicle state"],
+            downstream_agents=["Agent-C3"],
+            ollama=self.ollama
+        )
+        
+        self.agent_c5 = Agent(
+            name="Agent-C5",
+            component="Data Sensors",
+            role="IoT Sensor Developer",
+            responsibilities=["Sensor data collection", "GPS", "Fuel level", "Tire pressure", "Diagnostics"],
+            apis=["Sensor readings", "GPS coordinates", "Vehicle telemetry"],
+            downstream_agents=["Agent-C3"],
+            ollama=self.ollama
+        )
+        
+        # Agent registry for lookup
+        self.agents = {
+            "Agent-A1": self.agent_a1,
+            "Agent-A2": self.agent_a2,
+            "Agent-B1": self.agent_b1,
+            "Agent-B2": self.agent_b2,
+            "Agent-B3": self.agent_b3,
+            "Agent-B4": self.agent_b4,
+            "Agent-C1": self.agent_c1,
+            "Agent-C2": self.agent_c2,
+            "Agent-C3": self.agent_c3,
+            "Agent-C4": self.agent_c4,
+            "Agent-C5": self.agent_c5,
+        }
     
     def coordinate(self, feature_request: str) -> Dict:
-        """Coordinate agents to analyze feature request"""
-        print(f"🤖 Starting AI-driven analysis for: {feature_request}")
+        """Coordinate agents to analyze feature request hierarchically"""
+        print(f"🤖 Starting AI-driven hierarchical analysis for: {feature_request}")
         
         results = {
             "feature_request": feature_request,
             "agents_involved": [],
-            "analyses": {}
+            "analyses": {},
+            "call_tree": []
         }
         
-        # Step 1: Agent A analyzes and determines needs
-        print("📊 Agent A: Analyzing request and determining dependencies...")
-        agent_a_result = self.agent_a.analyze(feature_request)
-        results["agents_involved"].append("Agent A")
-        results["analyses"]["agent_a"] = agent_a_result
+        # Determine which frontend agents to start with based on feature keywords
+        start_agents = []
+        if any(word in feature_request.lower() for word in ['mobile', 'app', 'user', 'customer', 'booking']):
+            start_agents.append("Agent-A1")
+        if any(word in feature_request.lower() for word in ['staff', 'admin', 'fleet', 'report', 'dashboard']):
+            start_agents.append("Agent-A2")
         
-        # Step 2: If Agent A needs Backend, invoke Agent B
-        if agent_a_result.get("needs_agent_b", False):
-            print("📊 Agent B: Backend analysis needed...")
-            context = {"agent_a_analysis": agent_a_result}
-            agent_b_result = self.agent_b.analyze(feature_request, context)
-            results["agents_involved"].append("Agent B")
-            results["analyses"]["agent_b"] = agent_b_result
-            
-            # Step 3: If Agent B needs In-Car, invoke Agent C
-            if agent_b_result.get("needs_agent_c", False):
-                print("📊 Agent C: In-car system analysis needed...")
-                context = {
-                    "agent_a_analysis": agent_a_result,
-                    "agent_b_analysis": agent_b_result
-                }
-                agent_c_result = self.agent_c.analyze(feature_request, context)
-                results["agents_involved"].append("Agent C")
-                results["analyses"]["agent_c"] = agent_c_result
+        # If no specific match, start with both frontend agents
+        if not start_agents:
+            start_agents = ["Agent-A1", "Agent-A2"]
         
-        # Step 3 (alternative): If Agent A directly needs Agent C
-        elif agent_a_result.get("needs_agent_c", False):
-            print("📊 Agent C: In-car system analysis needed...")
-            context = {"agent_a_analysis": agent_a_result}
-            agent_c_result = self.agent_c.analyze(feature_request, context)
-            results["agents_involved"].append("Agent C")
-            results["analyses"]["agent_c"] = agent_c_result
+        print(f"📊 Starting with: {', '.join(start_agents)}")
+        
+        # Analyze recursively starting from frontend agents
+        context = {}
+        for agent_name in start_agents:
+            self._analyze_recursive(agent_name, feature_request, context, results, level=0)
         
         # Calculate total effort
         total_effort = sum(
@@ -252,6 +350,38 @@ class AgentCoordinator:
         
         return results
     
+    def _analyze_recursive(self, agent_name: str, feature_request: str, 
+                          context: Dict, results: Dict, level: int):
+        """Recursively analyze feature with agent and its downstream dependencies"""
+        indent = "  " * level
+        agent = self.agents.get(agent_name)
+        
+        if not agent:
+            print(f"{indent}⚠️  Agent {agent_name} not found")
+            return
+        
+        if agent_name in results["agents_involved"]:
+            print(f"{indent}⏭️  {agent_name} already analyzed")
+            return
+        
+        print(f"{indent}📊 {agent_name} ({agent.component}): Analyzing...")
+        
+        # Analyze with current context
+        analysis = agent.analyze(feature_request, context)
+        results["agents_involved"].append(agent_name)
+        results["analyses"][agent_name.lower().replace("-", "_")] = analysis
+        results["call_tree"].append({"agent": agent_name, "level": level})
+        
+        # Update context for downstream agents
+        context[agent_name] = analysis
+        
+        # Check which downstream agents are needed
+        for downstream_agent in agent.downstream_agents:
+            agent_key = f"needs_{downstream_agent.lower().replace('-', '_')}"
+            if analysis.get(agent_key, False):
+                print(f"{indent}  ↳ {agent_name} needs {downstream_agent}")
+                self._analyze_recursive(downstream_agent, feature_request, context, results, level + 1)
+    
     def generate_code_examples(self, results: Dict, output_dir: str):
         """Generate code examples based on analysis"""
         import os
@@ -259,18 +389,21 @@ class AgentCoordinator:
         
         feature_request = results['feature_request']
         
-        print("💻 Generating code examples...")
+        print("🎨 Generating code examples...")
         
-        # Generate frontend code examples if Agent A was involved
-        if "agent_a" in results["analyses"]:
+        # Generate frontend code if any frontend agent (A1 or A2) was involved
+        frontend_agents = [agent for agent in results['agents_involved'] if agent.startswith('Agent-A')]
+        if frontend_agents:
             self._generate_frontend_code(feature_request, output_dir)
         
-        # Generate backend code examples if Agent B was involved
-        if "agent_b" in results["analyses"]:
+        # Generate backend code if any backend agent (B1-B4) was involved
+        backend_agents = [agent for agent in results['agents_involved'] if agent.startswith('Agent-B')]
+        if backend_agents:
             self._generate_backend_code(feature_request, output_dir)
         
-        # Generate in-car code examples if Agent C was involved
-        if "agent_c" in results["analyses"]:
+        # Generate in-car code if any in-car agent (C1-C5) was involved
+        incar_agents = [agent for agent in results['agents_involved'] if agent.startswith('Agent-C')]
+        if incar_agents:
             self._generate_incar_code(feature_request, output_dir)
         
         print(f"✅ Code examples saved to {output_dir}/")
@@ -300,7 +433,7 @@ Include:
 
 Write complete, properly indented working code:"""
         
-        code_response = self.ollama.generate(prompt, system_prompt)
+        code_response = self.ollama.generate(prompt, system_prompt, format_json=False)
         
         # Clean up code fences if present
         code = code_response.replace('```javascript', '').replace('```jsx', '').replace('```typescript', '').replace('```', '').strip()
@@ -359,7 +492,7 @@ Include:
 
 Write complete, properly indented working code:"""
         
-        code_response = self.ollama.generate(prompt, system_prompt)
+        code_response = self.ollama.generate(prompt, system_prompt, format_json=False)
         
         # Clean up code fences
         code = code_response.replace('```javascript', '').replace('```js', '').replace('```', '').strip()
@@ -409,7 +542,7 @@ Include:
 
 Write complete, properly indented PEP 8 compliant code:"""
         
-        code_response = self.ollama.generate(prompt, system_prompt)
+        code_response = self.ollama.generate(prompt, system_prompt, format_json=False)
         
         # Clean up code fences
         code = code_response.replace('```python', '').replace('```py', '').replace('```', '').strip()
@@ -456,7 +589,7 @@ Provide a detailed specification including:
 
 Be specific and detailed."""
         
-        ui_details = self.ollama.generate(prompt)
+        ui_details = self.ollama.generate(prompt, format_json=False)
         
         # Create ASCII art mockup using box-drawing characters
         mockup = self._create_ascii_mockup(feature_request)
@@ -554,62 +687,73 @@ Be specific and detailed."""
             f.write(f"**Feature Request**: {results['feature_request']}\n\n")
             f.write(f"**Agents Involved**: {', '.join(results['agents_involved'])}\n\n")
             f.write(f"**Total Estimated Effort**: {results['total_effort_hours']} hours\n\n")
+            
+            # Show agent call tree
+            if results.get('call_tree'):
+                f.write("## Agent Coordination Flow\n\n")
+                f.write("```\n")
+                for call in results['call_tree']:
+                    indent = "  " * call['level']
+                    f.write(f"{indent}└─ {call['agent']}\n")
+                f.write("```\n\n")
+            
             f.write("---\n\n")
             
-            # Agent A Analysis
-            if "agent_a" in results["analyses"]:
-                a = results["analyses"]["agent_a"]
-                f.write("## Agent A - Frontend Analysis\n\n")
-                f.write(f"**Impact**: {a.get('impact', 'N/A')}\n\n")
-                f.write("**Components Affected**:\n")
-                for comp in a.get('components', []):
-                    f.write(f"- {comp}\n")
-                f.write("\n**Required Changes**:\n")
-                for change in a.get('changes', []):
-                    f.write(f"- {change}\n")
-                f.write(f"\n**Estimated Effort**: {a.get('effort_hours', 0)} hours\n\n")
-                f.write("**Risks**:\n")
-                for risk in a.get('risks', []):
-                    f.write(f"- {risk}\n")
-                f.write("\n---\n\n")
-            
-            # Agent B Analysis
-            if "agent_b" in results["analyses"]:
-                b = results["analyses"]["agent_b"]
-                f.write("## Agent B - Backend Analysis\n\n")
-                f.write(f"**Impact**: {b.get('impact', 'N/A')}\n\n")
-                f.write("**Components Affected**:\n")
-                for comp in b.get('components', []):
-                    f.write(f"- {comp}\n")
-                f.write("\n**Required Changes**:\n")
-                for change in b.get('changes', []):
-                    f.write(f"- {change}\n")
-                f.write(f"\n**Estimated Effort**: {b.get('effort_hours', 0)} hours\n\n")
-                f.write("**Risks**:\n")
-                for risk in b.get('risks', []):
-                    f.write(f"- {risk}\n")
-                f.write("\n---\n\n")
-            
-            # Agent C Analysis
-            if "agent_c" in results["analyses"]:
-                c = results["analyses"]["agent_c"]
-                f.write("## Agent C - In-Car Systems Analysis\n\n")
-                f.write(f"**Impact**: {c.get('impact', 'N/A')}\n\n")
-                f.write("**Components Affected**:\n")
-                for comp in c.get('components', []):
-                    f.write(f"- {comp}\n")
-                f.write("\n**Required Changes**:\n")
-                for change in c.get('changes', []):
-                    f.write(f"- {change}\n")
-                f.write(f"\n**Estimated Effort**: {c.get('effort_hours', 0)} hours\n\n")
-                f.write("**Risks**:\n")
-                for risk in c.get('risks', []):
-                    f.write(f"- {risk}\n")
-                f.write("\n---\n\n")
+            # Write analysis for each agent
+            for agent_name in results['agents_involved']:
+                agent_key = agent_name.lower().replace("-", "_")
+                if agent_key not in results["analyses"]:
+                    continue
+                
+                analysis = results["analyses"][agent_key]
+                agent = self.agents.get(agent_name)
+                
+                if agent:
+                    f.write(f"## {agent_name} - {agent.component}\n\n")
+                    f.write(f"**Role**: {agent.role}\n\n")
+                    f.write(f"**APIs Provided**: {', '.join(agent.apis) if agent.apis else 'None'}\n\n")
+                else:
+                    f.write(f"## {agent_name}\n\n")
+                
+                f.write(f"**Impact**: {analysis.get('impact', 'N/A')}\n\n")
+                
+                if analysis.get('components'):
+                    f.write("**Components Affected**:\n")
+                    for comp in analysis.get('components', []):
+                        f.write(f"- {comp}\n")
+                    f.write("\n")
+                
+                if analysis.get('changes'):
+                    f.write("**Required Changes**:\n")
+                    for change in analysis.get('changes', []):
+                        f.write(f"- {change}\n")
+                    f.write("\n")
+                
+                f.write(f"**Estimated Effort**: {analysis.get('effort_hours', 0)} hours\n\n")
+                
+                if analysis.get('risks'):
+                    f.write("**Risks**:\n")
+                    for risk in analysis.get('risks', []):
+                        f.write(f"- {risk}\n")
+                    f.write("\n")
+                
+                # Show downstream dependencies
+                if agent and agent.downstream_agents:
+                    f.write("**Downstream Dependencies**:\n")
+                    for downstream in agent.downstream_agents:
+                        agent_key = f"needs_{downstream.lower().replace('-', '_')}"
+                        needed = analysis.get(agent_key, False)
+                        status = "✅ Required" if needed else "⏭️ Not needed"
+                        f.write(f"- {downstream}: {status}\n")
+                    f.write("\n")
+                
+                f.write("---\n\n")
             
             f.write("## Summary\n\n")
-            f.write(f"This analysis was generated dynamically using AI.\n")
-            f.write(f"Total effort across all agents: {results['total_effort_hours']} hours\n")
+            f.write(f"This hierarchical analysis was generated dynamically using AI.\n\n")
+            f.write(f"- **Total agents involved**: {len(results['agents_involved'])}\n")
+            f.write(f"- **Total effort**: {results['total_effort_hours']} hours\n")
+            f.write(f"- **Analysis approach**: Each agent only sees downstream agent APIs\n")
 
 def main():
     if len(sys.argv) < 2:
