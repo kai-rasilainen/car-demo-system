@@ -122,3 +122,8 @@ car-demo-venv/
 car-demo-backend/
 car-demo-frontend/
 car-demo-in-car/
+
+# Test outputs
+code-examples/
+test-report.md
+test-analysis-report.md
