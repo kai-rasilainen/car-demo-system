@@ -32,6 +32,22 @@ pipeline {
     }
     
     stages {
+        stage('Clean Workspace') {
+            steps {
+                echo "🧹 Cleaning workspace..."
+                deleteDir()
+                echo "✅ Workspace cleaned"
+            }
+        }
+        
+        stage('Checkout') {
+            steps {
+                echo "📥 Checking out code..."
+                checkout scm
+                echo "✅ Code checked out"
+            }
+        }
+        
         stage('Setup') {
             steps {
                 echo "🤖 AI-Driven Multi-Agent Feature Analysis"
