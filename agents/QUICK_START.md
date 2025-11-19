@@ -2,52 +2,57 @@
 
 ## What is This?
 
-The car demo project has three AI agents that help analyze feature requests and assess their impact across the entire system. **Agent A (Frontend)** is your primary contact point and coordinates with the other agents as needed.
+The car demo project has three independent AI agents operating in geographically distributed locations. They analyze feature requests and assess impact across the entire system. **Agent A (Frontend)** is your single entry point and requests analysis from other agents when needed.
 
-## The Three Agents
+## The Three Distributed Agents
 
-### [UI] Agent A - Frontend Expert & Coordinator (START HERE!)
-- **Role**: Primary entry point for ALL feature requests
-- **Knows**: React Native mobile app, React web app, system coordination
+### [UI] Agent A - Frontend Analysis Agent (ENTRY POINT - START HERE!)
+- **Location**: Cloud Region 1 (e.g., AWS us-east-1)
+- **Role**: Entry point for ALL feature requests
+- **Knows**: React Native mobile app, React web app, frontend architecture
 - **Analyzes**: UI changes, user experience, what APIs/sensors are needed
-- **Coordinates**: Consults with Agents B and C, consolidates responses
-- **Example**: "If we add tire pressure display, I'll analyze the UI needs, ask Agent B for the API, ask Agent C for the sensor, then give you a complete plan"
+- **Communication**: Sends requests to Agents B and C, consolidates their responses
+- **Example**: "If we add tire pressure display, I'll analyze the UI needs, request backend analysis from Agent B, request sensor analysis from Agent C, then consolidate everything into a complete plan"
 
-### [CONFIG] Agent B - Backend Expert (Consultant)
-- **Role**: Backend specialist who responds to Agent A's requests
+### [CONFIG] Agent B - Backend Analysis Agent (Independent Entity)
+- **Location**: Cloud Region 2 (e.g., AWS us-west-2 or different provider)
+- **Role**: Backend specialist operating independently
 - **Knows**: REST APIs, WebSockets, databases (MongoDB + PostgreSQL)
 - **Analyzes**: API design, database changes, performance impact
-- **Example**: "When Agent A asks me about tire pressure data, I'll explain how to add it to MongoDB and expose it via the B1 API"
+- **Communication**: Receives requests from Agent A, performs independent analysis, sends response back
+- **Example**: "When Agent A requests analysis about tire pressure data, I independently assess the backend impact, database changes, and API modifications needed"
 
-### [CAR] Agent C - In-Car Systems Expert (Consultant)
-- **Role**: In-car specialist who responds to Agent A's requests
+### [CAR] Agent C - In-Car Systems Analysis Agent (Independent Entity)
+- **Location**: Edge infrastructure (Vehicle or simulator environment)
+- **Role**: In-car specialist operating at the edge
 - **Knows**: Sensors, data collection, communication protocols
-- **Analyzes**: What sensors are needed, how data flows, simulation complexity
-- **Example**: "When Agent A asks me about tire pressure sensors, I'll explain how to create a simulator that publishes to Redis every 10 seconds"
+- **Analyzes**: Sensor requirements, data flows, edge computing constraints
+- **Communication**: Receives requests from Agent A, performs independent analysis, sends response back
+- **Example**: "When Agent A requests analysis about tire pressure sensors, I independently assess the sensor availability, data format, and edge processing requirements"
 
-## How to Use
+## How to Use the Distributed System
 
-### Step 1: Send Your Request to Agent A
+### Step 1: Send Your Request to Agent A (Entry Point)
 
-**Always start with Agent A** - it's the entry point for everything:
+**Always start with Agent A** - it's the single entry point:
 
 ```
 "I want to add tire pressure monitoring to the car dashboard"
 ```
 
-### Step 2: Agent A Analyzes and Coordinates
+### Step 2: Agent A Coordinates Distributed Analysis
 
 Agent A will:
-1. Analyze what frontend changes are needed
-2. Determine if it needs backend support -> consults Agent B
-3. Determine if it needs sensor data -> consults Agent C
-4. Wait for their responses
-5. Consolidate everything
+1. Analyze frontend changes independently
+2. Determine if backend analysis needed -> sends request to Agent B (different location)
+3. Determine if sensor analysis needed -> sends request to Agent C (edge location)
+4. Wait for responses from distributed agents
+5. Consolidate all responses into final assessment
 
-**What happens behind the scenes:**
+**What happens in the distributed system:**
 
 ```
-You -> Agent A: "Add tire pressure monitoring"
+You -> Agent A (Cloud Region 1): "Add tire pressure monitoring"
       |
 Agent A: "I need tire pressure gauge UI in mobile app (6 hours)"
       |

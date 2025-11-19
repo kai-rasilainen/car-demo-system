@@ -1,66 +1,73 @@
-# AI Agent Coordination System
+# AI Agent System - Distributed Architecture
 
 ## Overview
 
-This document describes the AI agent system for the car demo project. Three specialized agents analyze feature requests and provide impact assessments across the entire system architecture.
+This document describes the AI agent system for the car demo project. Three specialized agents operate as independent entities in geographically distributed locations. Each agent analyzes feature requests from their domain perspective and communicates with other agents when cross-domain coordination is needed.
 
-## Agent Architecture
+## Distributed Agent Architecture
 
 ```
-+-------------------------------------------------------------+
-|                    Feature Request                          |
-|              "Add tire pressure monitoring"                 |
-+------------------+-----------------------------------------+
-                   |
-                   v
-            +-------------+
-            |   Agent A   |
-            |  (Frontend) |
-            | Entry Point |
-            +------+------+
-                   |
-         +---------+---------+
-         |                   |
-         v                   v
-    +---------+         +---------+
-    | Agent B |         | Agent C |
-    | Backend |         |  In-Car |
-    +----+----+         +----+----+
-         |                   |
-         +---------+---------+
-                   v
-            +-------------+
-            |   Agent A   |
-            | Consolidates|
-            +------+------+
-                   v
-        +--------------------+
-        | Consolidated Impact|
-        |   Assessment +     |
-        |   Test Cases       |
-        +--------------------+
+                    User/Client
+                         |
+                         | Feature Request
+                         v
+            +-------------------------+
+            |       Agent A           |
+            |   Frontend Analysis     |
+            |   (Entry Point)         |
+            | Location: Cloud/Region1 |
+            +-------------------------+
+                   |            |
+                   |            |
+    Backend needed?|            | In-car data needed?
+                   |            |
+                   v            v
+         +--------------+   +--------------+
+         |   Agent B    |   |   Agent C    |
+         |   Backend    |   |   In-Car     |
+         |   Analysis   |   |   Analysis   |
+         | Location:    |   | Location:    |
+         | Cloud/Region2|   | Edge/Vehicle |
+         +--------------+   +--------------+
+                   |            |
+                   |            |
+                   +-----+------+
+                         |
+                         v
+            +-------------------------+
+            |       Agent A           |
+            |   Consolidates Results  |
+            |   Provides Assessment   |
+            +-------------------------+
 ```
 
-**Architecture Flow**:
-1. All feature requests go to **Agent A (Frontend)** as the entry point
-2. Agent A analyzes frontend impact first
-3. Agent A identifies if backend changes are needed -> consults Agent B
-4. Agent A identifies if in-car changes are needed -> consults Agent C
+**Distributed Architecture**:
+1. **Agent A (Frontend)** - Cloud-based, entry point for all requests
+2. **Agent B (Backend)** - Cloud-based, separate infrastructure
+3. **Agent C (In-Car)** - Edge-based, vehicle systems or simulator
+
+**Communication Flow**:
+1. User sends feature request to **Agent A** (Frontend)
+2. Agent A analyzes frontend impact independently
+3. Agent A sends requests to Agent B and/or Agent C if needed
+4. Agents B and C perform independent analysis and respond to Agent A
 5. Agent A consolidates all responses and provides final assessment
 
 ## Agent Roles
 
-### Agent A - Frontend Component Agent (Entry Point & Coordinator)
+### Agent A - Frontend Analysis Agent (Entry Point)
 **File**: `agents/agent-a-frontend.md`
+**Location**: Cloud infrastructure (e.g., AWS/Azure Region 1)
 
 **Primary Responsibilities**:
 - **Entry point for all feature requests**
-- Analyze UI/UX implications
+- Analyze UI/UX implications independently
 - Assess API integration requirements
 - Identify state management needs
-- **Coordinate with Agents B and C when needed**
-- **Consolidate all agent responses into final assessment**
+- **Request analysis from Agents B and C when cross-domain impact exists**
+- **Consolidate responses from distributed agents into final assessment**
 - Recommend frontend test cases
+- Provide go/no-go recommendation
 
 **Components**:
 - A1 Car User App (React Native)
@@ -71,15 +78,18 @@ This document describes the AI agent system for the car demo project. Three spec
 - REST API consumption
 - Mobile and web UI patterns
 - Frontend testing strategies
-- **Cross-component coordination**
+- **Distributed system communication**
 
-### Agent B - Backend Component Agent
+### Agent B - Backend Analysis Agent
 **File**: `agents/agent-b-backend.md`
+**Location**: Cloud infrastructure (e.g., AWS/Azure Region 2)
 
 **Responsibilities**:
-- Analyze API design implications
+- Analyze API design implications independently
 - Assess database schema changes
 - Identify data flow requirements
+- Evaluate backend service impact
+- Respond to Agent A with backend analysis
 - Recommend backend test cases
 
 **Components**:
@@ -93,97 +103,117 @@ This document describes the AI agent system for the car demo project. Three spec
 - Database design (SQL + NoSQL)
 - API design and documentation
 - Backend testing strategies
+- Microservices architecture
 
-### Agent C - In-Car Component Agent
+### Agent C - In-Car Systems Analysis Agent
 **File**: `agents/agent-c-in-car.md`
+**Location**: Edge infrastructure (Vehicle/Simulator)
 
 **Responsibilities**:
-- Analyze sensor requirements
+- Analyze sensor requirements independently
 - Assess communication protocols
 - Identify simulation complexity
+- Evaluate vehicle system impact
+- Respond to Agent A with in-car analysis
 - Recommend in-car system test cases
 
 **Components**:
 - C1 Cloud Communication (Python)
-- C2 Central Broker (Node.js)
+- C2 Central Broker (Node.js + Redis)
 - C5 Data Sensors (Python)
 
 **Key Expertise**:
 - Sensor data handling
 - Redis pub/sub patterns
 - WebSocket communication
+- Edge computing constraints
 - IoT system testing
 
-## Feature Analysis Workflow
+## Distributed Feature Analysis Workflow
 
-### Step 1: Feature Request to Agent A
-All feature requests start with Agent A (Frontend):
+### Geographic Distribution
+
+**Agent Locations**:
+- **Agent A**: Cloud Region 1 (e.g., AWS us-east-1)
+- **Agent B**: Cloud Region 2 (e.g., AWS us-west-2 or separate cloud provider)
+- **Agent C**: Edge infrastructure (Vehicle hardware or local simulator)
+
+**Communication**: Agents communicate via RESTful APIs or message queues
+
+### Step 1: Feature Request to Agent A (Entry Point)
+All feature requests start with Agent A (Frontend) as the single entry point:
 
 ```markdown
 Feature: Add tire pressure monitoring
 
-Agent A receives request and asks:
+Agent A (Cloud Region 1) receives request and analyzes:
 1. Does this affect the UI? -> YES (need gauge display)
 2. Do I need new API data? -> YES (need tire pressure from backend)
 3. Will backend need new sensors? -> PROBABLY (need to ask Agent C)
 
-Agent A's initial assessment:
+Agent A's independent assessment:
 - UI Impact: Medium (new gauge component in 2 apps)
 - API Needs: New field in existing endpoint
 - Estimated frontend effort: 6 hours
 
-Next: Consult Agent B about API feasibility
+Next: Send analysis request to Agent B (Backend)
 ```
 
-### Step 2: Agent A Consults Agent B
-Agent A sends request to Agent B:
+### Step 2: Agent A Requests Analysis from Agent B
+Agent A sends request to Agent B (separate geographic location):
 
 ```markdown
-FROM: Agent A (Frontend)
-TO: Agent B (Backend)
+FROM: Agent A (Cloud Region 1 - Frontend)
+TO: Agent B (Cloud Region 2 - Backend)
+PROTOCOL: REST API / Message Queue
 
-I need the following for "tire pressure monitoring" feature:
-
+REQUEST:
+Feature: "tire pressure monitoring"
 API Requirement:
 - Modify GET /api/car/:licensePlate
 - Add field: tirePressure { frontLeft, frontRight, rearLeft, rearRight }
 - Data type: Numbers (bar, 1.5-4.0 range)
 - Update frequency: Every 10 seconds
 
-Question: Can backend provide this data?
-Where does the data come from?
+QUESTIONS:
+- Can backend provide this data?
+- Where does the data come from?
+- What is the backend effort?
 ```
 
-Agent B responds:
+Agent B (independent analysis) responds:
 
 ```markdown
-FROM: Agent B (Backend)
-TO: Agent A (Frontend)
+FROM: Agent B (Cloud Region 2 - Backend)
+TO: Agent A (Cloud Region 1 - Frontend)
+PROTOCOL: REST API / Message Queue
 
-[OK] YES - Backend can provide this data
+RESPONSE:
+STATUS: [OK] YES - Backend can provide this data
 
 Implementation:
 - B1: Add tirePressure field to API response (2 hours)
 - B2: Accept and store tire pressure from sensors (2 hours)
 - B3: Add field to MongoDB car_data collection (no migration needed)
 
-Data Source: Needs new sensor from in-car systems (Agent C)
+Data Source: Requires sensor data from Agent C (in-car systems)
 
 Backend Effort: 4 hours
 Dependencies: Agent C must provide tire pressure sensor data via Redis
 
-Next: Check with Agent C about sensor availability
+Note: I need to verify with Agent C about sensor availability
 ```
 
-### Step 3: Agent A Consults Agent C
-Agent A sends request to Agent C:
+### Step 3: Agent A Requests Analysis from Agent C
+Agent A sends request to Agent C (edge location):
 
 ```markdown
-FROM: Agent A (Frontend)
-TO: Agent C (In-Car)
+FROM: Agent A (Cloud Region 1 - Frontend)
+TO: Agent C (Edge - In-Car Systems)
+PROTOCOL: REST API / Message Queue
 
-I need the following sensor data for "tire pressure monitoring":
-
+REQUEST:
+Feature: "tire pressure monitoring"
 Sensor Requirement:
 - Type: tire_pressure
 - Data: 4 values (frontLeft, frontRight, rearLeft, rearRight)
@@ -191,16 +221,21 @@ Sensor Requirement:
 - Update Frequency: Every 10 seconds
 - Format: JSON via Redis
 
-Question: Can in-car systems provide this sensor data?
+QUESTIONS:
+- Can in-car systems provide this sensor data?
+- What is the implementation effort?
+- Any vehicle compatibility issues?
 ```
 
-Agent C responds:
+Agent C (independent analysis at edge) responds:
 
 ```markdown
-FROM: Agent C (In-Car)
-TO: Agent A (Frontend)
+FROM: Agent C (Edge - In-Car Systems)
+TO: Agent A (Cloud Region 1 - Frontend)
+PROTOCOL: REST API / Message Queue
 
-[OK] YES - Can provide tire pressure sensor data
+RESPONSE:
+STATUS: [OK] YES - Can provide tire pressure sensor data
 
 Implementation:
 - C5: Create tire pressure sensor simulator (3 hours)
@@ -223,35 +258,36 @@ Ready to implement: Yes
 Data will be available via: sensors:tire_pressure Redis channel
 ```
 
-### Step 4: Agent A Consolidates Response
-Agent A receives responses from B and C, consolidates everything:
-
-### Step 4: Agent A Consolidates Response
-Agent A receives responses from B and C, consolidates everything:
+### Step 4: Agent A Consolidates Distributed Responses
+Agent A (Cloud Region 1) receives responses from Agent B (Cloud Region 2) and Agent C (Edge), then consolidates:
 
 ```markdown
 ## Feature: Add Tire Pressure Monitoring
 
-### Final Assessment by Agent A
+### Final Consolidated Assessment by Agent A
+
+RECEIVED FROM:
+- Agent B (Cloud Region 2): [OK] Backend feasible, 4 hours
+- Agent C (Edge): [OK] Sensor data available, 4 hours
 
 #### Overall Impact: LOW-MEDIUM [OK]
 
-**Total Estimated Effort**: 14 hours
-- Frontend (A1 + A2): 6 hours
-- Backend (B1 + B2): 4 hours
-- In-Car (C5 + C2): 4 hours
+**Total Estimated Effort**: 14 hours (across 3 distributed agents)
+- Agent A - Frontend (A1 + A2): 6 hours
+- Agent B - Backend (B1 + B2): 4 hours
+- Agent C - In-Car (C5 + C2): 4 hours
 
 **Breaking Changes**: None (additive change only)
 
-**Implementation Order**:
-1. **Week 1, Day 1-2**: C5 sensor + C2 broker (4 hours)
-2. **Week 1, Day 2-3**: B2 ingestion + B1 API (4 hours)
-3. **Week 1, Day 3-4**: A1 mobile + A2 web UI (6 hours)
-4. **Week 1, Day 5**: Integration testing (2 hours)
+**Implementation Order** (Distributed Execution):
+1. **Week 1, Day 1-2**: Agent C implements sensor (4 hours)
+2. **Week 1, Day 2-3**: Agent B implements backend (4 hours)
+3. **Week 1, Day 3-4**: Agent A implements frontend (6 hours)
+4. **Week 1, Day 5**: Cross-agent integration testing (2 hours)
 
-#### Component Breakdown
+#### Component Breakdown by Agent
 
-**Frontend (Agent A)**:
+**Agent A - Frontend** (Cloud Region 1):
 - A1 Mobile: Add tire pressure gauge component
 - A2 Web: Add tire pressure indicators to dashboard
 - Both: Show warnings for low pressure (<1.9 bar)
@@ -259,7 +295,7 @@ Agent A receives responses from B and C, consolidates everything:
 - Effort: 6 hours
 - Risk: Low
 
-**Backend (Agent B)**:
+**Agent B - Backend** (Cloud Region 2):
 - B1: Add tirePressure field to GET /api/car/:licensePlate
 - B2: Accept tire pressure in WebSocket messages
 - B3: Add tirePressure to MongoDB car_data collection
