@@ -681,46 +681,46 @@ Be specific and detailed."""
         return "\n".join(mockup)
     
     def format_analysis_output(self, results: Dict) -> str:
-        """Format analysis results with nice box-drawing characters"""
+        """Format analysis results with ASCII box-drawing characters"""
         lines = []
         
         # Header
         feature = results.get('feature_request', 'Unknown Feature')
         header_width = max(70, len(feature) + 10)
         
-        lines.append("┌" + "─" * (header_width - 2) + "┐")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         # Center "Feature Request"
         title = "Feature Request"
         title_padding = (header_width - len(title) - 2) // 2
-        lines.append("│" + " " * title_padding + title + " " * (header_width - len(title) - title_padding - 2) + "│")
+        lines.append("|" + " " * title_padding + title + " " * (header_width - len(title) - title_padding - 2) + "|")
         
         # Center the feature name with quotes
         feature_text = f'"{feature}"'
         feature_padding = (header_width - len(feature_text) - 2) // 2
-        lines.append("│" + " " * feature_padding + feature_text + " " * (header_width - len(feature_text) - feature_padding - 2) + "│")
+        lines.append("|" + " " * feature_padding + feature_text + " " * (header_width - len(feature_text) - feature_padding - 2) + "|")
         
-        lines.append("├" + "─" * (header_width - 2) + "┤")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         # Summary section
         agents_count = len(results.get('agents_involved', []))
         total_effort = results.get('total_effort_hours', 0)
         
-        lines.append("│" + f" Agents Involved: {agents_count}".ljust(header_width - 2) + "│")
-        lines.append("│" + f" Total Effort: {total_effort} hours".ljust(header_width - 2) + "│")
-        lines.append("├" + "─" * (header_width - 2) + "┤")
+        lines.append("|" + f" Agents Involved: {agents_count}".ljust(header_width - 2) + "|")
+        lines.append("|" + f" Total Effort: {total_effort} hours".ljust(header_width - 2) + "|")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         # Agent coordination tree
-        lines.append("│" + " Agent Coordination Flow".ljust(header_width - 2) + "│")
-        lines.append("├" + "─" * (header_width - 2) + "┤")
+        lines.append("|" + " Agent Coordination Flow".ljust(header_width - 2) + "|")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         if results.get('call_tree'):
             for call in results['call_tree']:
                 indent_str = "  " * call['level']
-                tree_line = f" {indent_str}└─ {call['agent']}"
-                lines.append("│" + tree_line.ljust(header_width - 2) + "│")
+                tree_line = f" {indent_str}+-- {call['agent']}"
+                lines.append("|" + tree_line.ljust(header_width - 2) + "|")
         
-        lines.append("├" + "─" * (header_width - 2) + "┤")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         # Individual agent analyses
         for agent_name in results.get('agents_involved', []):
@@ -734,21 +734,21 @@ Be specific and detailed."""
             # Agent header
             role = agent.role if agent else "Unknown Role"
             component = agent.component if agent else "Unknown Component"
-            lines.append("│" + f" [AI] {agent_name} - {role}".ljust(header_width - 2) + "│")
-            lines.append("│" + f" Component: {component}".ljust(header_width - 2) + "│")
+            lines.append("|" + f" [AI] {agent_name} - {role}".ljust(header_width - 2) + "|")
+            lines.append("|" + f" Component: {component}".ljust(header_width - 2) + "|")
             
             # Impact and effort
             impact = analysis.get('impact', 'N/A')
             effort = analysis.get('effort_hours', 0)
-            lines.append("│" + f" Impact: {impact}"[:header_width - 3].ljust(header_width - 2) + "│")
-            lines.append("│" + f" Effort: {effort} hours".ljust(header_width - 2) + "│")
+            lines.append("|" + f" Impact: {impact}"[:header_width - 3].ljust(header_width - 2) + "|")
+            lines.append("|" + f" Effort: {effort} hours".ljust(header_width - 2) + "|")
             
             # Changes needed
             if analysis.get('changes'):
-                lines.append("│" + " Changes:".ljust(header_width - 2) + "│")
+                lines.append("|" + " Changes:".ljust(header_width - 2) + "|")
                 for change in analysis.get('changes', [])[:3]:  # Limit to 3 changes for display
-                    change_line = f"   • {change}"[:header_width - 3]
-                    lines.append("│" + change_line.ljust(header_width - 2) + "│")
+                    change_line = f"   - {change}"[:header_width - 3]
+                    lines.append("|" + change_line.ljust(header_width - 2) + "|")
             
             # Downstream dependencies
             if agent and agent.downstream_agents:
@@ -760,13 +760,13 @@ Be specific and detailed."""
                 
                 if deps_needed:
                     deps_line = f" Needs: {', '.join(deps_needed)}"[:header_width - 3]
-                    lines.append("│" + deps_line.ljust(header_width - 2) + "│")
+                    lines.append("|" + deps_line.ljust(header_width - 2) + "|")
             
-            lines.append("├" + "─" * (header_width - 2) + "┤")
+            lines.append("+" + "-" * (header_width - 2) + "+")
         
         # Footer
-        lines.append("│" + " Analysis generated by AI Agent Coordinator".ljust(header_width - 2) + "│")
-        lines.append("└" + "─" * (header_width - 2) + "┘")
+        lines.append("|" + " Analysis generated by AI Agent Coordinator".ljust(header_width - 2) + "|")
+        lines.append("+" + "-" * (header_width - 2) + "+")
         
         return "\n".join(lines)
 

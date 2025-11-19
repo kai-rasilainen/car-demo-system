@@ -7,38 +7,38 @@ This document describes the AI agent system for the car demo project. Three spec
 ## Agent Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Feature Request                           │
-│              "Add tire pressure monitoring"                  │
-└──────────────────┬──────────────────────────────────────────┘
-                   │
-                   ▼
-            ┌──────────────┐
-            │   Agent A    │
-            │  (Frontend)  │
-            │ Entry Point  │
-            └──────┬───────┘
-                   │
-         ┌─────────┴─────────┐
-         │                   │
-         ▼                   ▼
-    ┌─────────┐         ┌─────────┐
-    │ Agent B │         │ Agent C │
-    │ Backend │         │  In-Car │
-    └────┬────┘         └────┬────┘
-         │                   │
-         └─────────┬─────────┘
-                   ▼
-            ┌──────────────┐
-            │   Agent A    │
-            │ Consolidates │
-            └──────┬───────┘
-                   ▼
-        ┌──────────────────────┐
-        │  Consolidated Impact  │
-        │    Assessment +       │
-        │    Test Cases         │
-        └──────────────────────┘
++-------------------------------------------------------------+
+|                    Feature Request                          |
+|              "Add tire pressure monitoring"                 |
++------------------+-----------------------------------------+
+                   |
+                   v
+            +-------------+
+            |   Agent A   |
+            |  (Frontend) |
+            | Entry Point |
+            +------+------+
+                   |
+         +---------+---------+
+         |                   |
+         v                   v
+    +---------+         +---------+
+    | Agent B |         | Agent C |
+    | Backend |         |  In-Car |
+    +----+----+         +----+----+
+         |                   |
+         +---------+---------+
+                   v
+            +-------------+
+            |   Agent A   |
+            | Consolidates|
+            +------+------+
+                   v
+        +--------------------+
+        | Consolidated Impact|
+        |   Assessment +     |
+        |   Test Cases       |
+        +--------------------+
 ```
 
 **Architecture Flow**:
