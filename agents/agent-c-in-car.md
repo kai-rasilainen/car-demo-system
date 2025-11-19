@@ -176,12 +176,12 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 - **Timeout**: [How long before timeout]
 
 **Command Flow**:
-1. Cloud (B2) → C1 via WebSocket
-2. C1 → Redis channel `car:{licensePlate}:commands`
+1. Cloud (B2) -> C1 via WebSocket
+2. C1 -> Redis channel `car:{licensePlate}:commands`
 3. C2 subscribes and receives command
-4. C2 → Redis channel `car:{licensePlate}:active_commands`
+4. C2 -> Redis channel `car:{licensePlate}:active_commands`
 5. Car systems (simulated) receive and execute
-6. Response → C2 → C1 → B2
+6. Response -> C2 -> C1 -> B2
 
 #### Redis Infrastructure
 
@@ -276,10 +276,10 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 
 ### Integration Tests
 
-- [ ] Test C5 → C2 data flow (Redis)
-- [ ] Test C2 → C1 data flow (Redis)
-- [ ] Test C1 → B2 data flow (WebSocket)
-- [ ] Test command flow B2 → C1 → C2
+- [ ] Test C5 -> C2 data flow (Redis)
+- [ ] Test C2 -> C1 data flow (Redis)
+- [ ] Test C1 -> B2 data flow (WebSocket)
+- [ ] Test command flow B2 -> C1 -> C2
 - [ ] Test multiple sensors publishing simultaneously
 - [ ] Test data consistency across components
 
@@ -581,7 +581,7 @@ describe('Door status handling', () => {
 # test_door_integration.py
 @pytest.mark.asyncio
 async def test_door_status_to_cloud_flow():
-    """Test complete flow: C5 → C2 → C1 → Cloud"""
+    """Test complete flow: C5 -> C2 -> C1 -> Cloud"""
     
     # 1. Publish door status from C5
     door_data = {

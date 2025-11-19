@@ -45,6 +45,6 @@ When analyzing feature requests, Agent A1 considers:
 
 ## Decision Making
 Agent A1 determines downstream needs based on:
-- Does the feature require user data or bookings? → Need Agent-B1
-- Does the feature need real-time car information? → Need Agent-B2
-- Is this UI-only change? → No downstream agents needed
+- Does the feature require user data or bookings? -> Need Agent-B1
+- Does the feature need real-time car information? -> Need Agent-B2
+- Is this UI-only change? -> No downstream agents needed

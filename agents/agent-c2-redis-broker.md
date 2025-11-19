@@ -47,7 +47,7 @@ When analyzing feature requests, Agent C2 considers:
 
 ## Decision Making
 Agent C2 determines downstream needs based on:
-- CAN bus communication required? → Need Agent-C3
-- Vehicle control commands involved? → Need Agent-C4
-- Sensor data collection needed? → Need Agent-C5
-- Pure message routing changes? → No downstream agents needed
+- CAN bus communication required? -> Need Agent-C3
+- Vehicle control commands involved? -> Need Agent-C4
+- Sensor data collection needed? -> Need Agent-C5
+- Pure message routing changes? -> No downstream agents needed

@@ -65,8 +65,8 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 - `POST /api/car/:licensePlate/command` - Send command
 
 **WebSocket Protocol**:
-- Client → Server: `{ type: 'register', licensePlate: 'ABC-123' }`
-- Server → Client: `{ type: 'command', command: 'unlock', timestamp: '...' }`
+- Client -> Server: `{ type: 'register', licensePlate: 'ABC-123' }`
+- Server -> Client: `{ type: 'command', command: 'unlock', timestamp: '...' }`
 - Bidirectional sensor data streaming
 
 **Dependencies**:
@@ -231,7 +231,7 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 #### API Integration
 - [ ] Test B1 endpoints with real database connections
 - [ ] Test B2 endpoints with WebSocket client
-- [ ] Test data flow from B2 → MongoDB → B1
+- [ ] Test data flow from B2 -> MongoDB -> B1
 - [ ] Test Redis pub/sub between B1 and B2
 - [ ] Test concurrent request handling
 - [ ] Test error propagation
@@ -245,8 +245,8 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 
 ### E2E Tests
 
-- [ ] Full data flow: Sensor → B2 → MongoDB → B1 → Frontend
-- [ ] Command flow: Frontend → B1 → Redis → B2 → Car
+- [ ] Full data flow: Sensor -> B2 -> MongoDB -> B1 -> Frontend
+- [ ] Command flow: Frontend -> B1 -> Redis -> B2 -> Car
 - [ ] Health check cascade (all components)
 - [ ] Error recovery scenarios
 - [ ] Load testing with realistic traffic

@@ -46,6 +46,6 @@ When analyzing feature requests, Agent C4 considers:
 
 ## Decision Making
 Agent C4 determines downstream needs based on:
-- Vehicle hardware control required? → Need Agent-C3
-- Pure control logic changes? → No downstream agents needed
+- Vehicle hardware control required? -> Need Agent-C3
+- Pure control logic changes? -> No downstream agents needed
 - Always considers safety implications for any changes

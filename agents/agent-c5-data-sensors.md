@@ -48,7 +48,7 @@ When analyzing feature requests, Agent C5 considers:
 
 ## Decision Making
 Agent C5 determines downstream needs based on:
-- Data collection only? → Need Agent-C3 for sensor communication
-- Data streaming required? → Need Agent-C2 for message publishing
+- Data collection only? -> Need Agent-C3 for sensor communication
+- Data streaming required? -> Need Agent-C2 for message publishing
 - Complex features usually need both downstream agents
 - Considers data processing pipeline for any sensor-related changes

@@ -39,26 +39,26 @@ The car demo project has three AI agents that help analyze feature requests and 
 
 Agent A will:
 1. Analyze what frontend changes are needed
-2. Determine if it needs backend support → consults Agent B
-3. Determine if it needs sensor data → consults Agent C
+2. Determine if it needs backend support -> consults Agent B
+3. Determine if it needs sensor data -> consults Agent C
 4. Wait for their responses
 5. Consolidate everything
 
 **What happens behind the scenes:**
 
 ```
-You → Agent A: "Add tire pressure monitoring"
-      ↓
+You -> Agent A: "Add tire pressure monitoring"
+      |
 Agent A: "I need tire pressure gauge UI in mobile app (6 hours)"
-      ↓
-Agent A → Agent B: "Can you provide tire pressure API data?"
-      ↓
-Agent B → Agent A: "Yes, I'll add it to MongoDB and API (4 hours)"
-      ↓
-Agent A → Agent C: "Can you provide tire pressure sensor?"
-      ↓
-Agent C → Agent A: "Yes, I'll create sensor simulator (4 hours)"
-      ↓
+      |
+Agent A -> Agent B: "Can you provide tire pressure API data?"
+      |
+Agent B -> Agent A: "Yes, I'll add it to MongoDB and API (4 hours)"
+      |
+Agent A -> Agent C: "Can you provide tire pressure sensor?"
+      |
+Agent C -> Agent A: "Yes, I'll create sensor simulator (4 hours)"
+      |
 Agent A: "Here's the complete plan for all 3 components..."
 ```
 
@@ -233,10 +233,10 @@ Expected: [What should happen]
 ---
 
 Which agent should investigate?
-- UI issue → Agent A
-- API error → Agent B
-- Sensor data problem → Agent C
-- Unknown → Ask all three
+- UI issue -> Agent A
+- API error -> Agent B
+- Sensor data problem -> Agent C
+- Unknown -> Ask all three
 ```
 
 ### For Performance Question

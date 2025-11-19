@@ -51,7 +51,7 @@ When analyzing feature requests, Agent B1 considers:
 
 ## Decision Making
 Agent B1 determines downstream needs based on:
-- Real-time data operations? → Need Agent-B3
-- Persistent/transactional data? → Need Agent-B4
-- Car control or IoT commands? → Need Agent-B2
-- Pure business logic changes? → No downstream agents needed
+- Real-time data operations? -> Need Agent-B3
+- Persistent/transactional data? -> Need Agent-B4
+- Car control or IoT commands? -> Need Agent-B2
+- Pure business logic changes? -> No downstream agents needed

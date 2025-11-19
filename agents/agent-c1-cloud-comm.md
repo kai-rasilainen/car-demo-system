@@ -45,5 +45,5 @@ When analyzing feature requests, Agent C1 considers:
 
 ## Decision Making
 Agent C1 determines downstream needs based on:
-- Message routing to vehicle systems required? → Need Agent-C2
-- Pure cloud communication changes? → No downstream agents needed
+- Message routing to vehicle systems required? -> Need Agent-C2
+- Pure cloud communication changes? -> No downstream agents needed

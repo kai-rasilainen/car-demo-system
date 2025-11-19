@@ -48,7 +48,7 @@ When analyzing feature requests, Agent A2 considers:
 
 ## Decision Making
 Agent A2 determines downstream needs based on:
-- Administrative operations (auth, users, bookings)? → Need Agent-B1
-- Real-time fleet monitoring? → Need Agent-B3
-- Reports or historical data? → Need Agent-B4
-- Pure UI/admin workflow changes? → No downstream agents needed
+- Administrative operations (auth, users, bookings)? -> Need Agent-B1
+- Real-time fleet monitoring? -> Need Agent-B3
+- Reports or historical data? -> Need Agent-B4
+- Pure UI/admin workflow changes? -> No downstream agents needed

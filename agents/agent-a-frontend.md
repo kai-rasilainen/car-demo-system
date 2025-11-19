@@ -77,12 +77,12 @@ Agent A first analyzes from frontend perspective:
 ### 3. Identify Dependencies
 
 **Question 1: Do I need new API data or endpoints?**
-- YES → Consult Agent B (Backend)
-- NO → Might be frontend-only
+- YES -> Consult Agent B (Backend)
+- NO -> Might be frontend-only
 
 **Question 2: Do I need new sensor data or car commands?**
-- YES → Consult Agent C (In-Car)
-- NO → Data might come from existing sources
+- YES -> Consult Agent C (In-Car)
+- NO -> Data might come from existing sources
 
 ### 4. Consult Agent B (if needed)
 ```markdown
@@ -295,7 +295,7 @@ Agent A combines:
   - B1: Add `tirePressure` field to `GET /api/car/:licensePlate` response
   - B2: Add tire pressure to WebSocket messages
 - **Modified Endpoints**: Existing car data endpoints need tire pressure field
-- **Data Flow**: C5 sensors → Redis → B2 → MongoDB → B1 → Frontend
+- **Data Flow**: C5 sensors -> Redis -> B2 -> MongoDB -> B1 -> Frontend
 - **Real-time Requirements**: WebSocket updates for live tire pressure (optional)
 
 **State Management**:
@@ -346,7 +346,7 @@ Agent A combines:
 
 ## Communication Protocol
 
-### Requesting Backend Support (Agent A → Agent B)
+### Requesting Backend Support (Agent A -> Agent B)
 
 **Template**:
 ```markdown
@@ -386,7 +386,7 @@ CONTEXT:
 - Timeline
 - Concerns or limitations
 
-### Requesting In-Car Support (Agent A → Agent C)
+### Requesting In-Car Support (Agent A -> Agent C)
 
 **Template**:
 ```markdown

@@ -44,8 +44,8 @@ This document describes the AI agent system for the car demo project. Three spec
 **Architecture Flow**:
 1. All feature requests go to **Agent A (Frontend)** as the entry point
 2. Agent A analyzes frontend impact first
-3. Agent A identifies if backend changes are needed → consults Agent B
-4. Agent A identifies if in-car changes are needed → consults Agent C
+3. Agent A identifies if backend changes are needed -> consults Agent B
+4. Agent A identifies if in-car changes are needed -> consults Agent C
 5. Agent A consolidates all responses and provides final assessment
 
 ## Agent Roles
@@ -123,9 +123,9 @@ All feature requests start with Agent A (Frontend):
 Feature: Add tire pressure monitoring
 
 Agent A receives request and asks:
-1. Does this affect the UI? → YES (need gauge display)
-2. Do I need new API data? → YES (need tire pressure from backend)
-3. Will backend need new sensors? → PROBABLY (need to ask Agent C)
+1. Does this affect the UI? -> YES (need gauge display)
+2. Do I need new API data? -> YES (need tire pressure from backend)
+3. Will backend need new sensors? -> PROBABLY (need to ask Agent C)
 
 Agent A's initial assessment:
 - UI Impact: Medium (new gauge component in 2 apps)
@@ -463,7 +463,7 @@ incrementally without breaking existing functionality. Estimated delivery: 2-3 d
 
 ## Agent Communication Protocols
 
-### Agent A → Agent B Communication
+### Agent A -> Agent B Communication
 
 **When to Consult Agent B**:
 - New API endpoints needed
@@ -533,7 +533,7 @@ CONCERNS:
 [Any issues or limitations]
 ```
 
-### Agent A → Agent C Communication
+### Agent A -> Agent C Communication
 
 **When to Consult Agent C**:
 - New sensor data needed
@@ -708,58 +708,58 @@ NOTES:
 
 ```
 Feature Request Arrives
-    ↓
-┌─────────────────────┐
-│   Agent A Receives  │
-│   (Entry Point)     │
-└──────────┬──────────┘
-           ↓
+    |
++---------------------+
+|   Agent A Receives  |
+|   (Entry Point)     |
++----------┬----------+
+           |
     Does it affect UI?
-           ↓
-       ┌───┴───┐
-      Yes      No → [Unusual - verify it's really a frontend request]
-       ↓
-┌──────────────────┐
-│ Agent A analyzes │
-│ frontend impact  │
-└──────┬───────────┘
-       ↓
+           |
+       +---┴---+
+      Yes      No -> [Unusual - verify it's really a frontend request]
+       |
++------------------+
+| Agent A analyzes |
+| frontend impact  |
++------┬-----------+
+       |
    Need new API data?
-       ↓
-    ┌──┴──┐
+       |
+    +--┴--+
    Yes    No
-    ↓      ↓
-┌───────────────┐    ┌─────────────────┐
-│ Consult       │    │ Frontend-only   │
-│ Agent B       │    │ implementation  │
-│ about API     │    └─────────────────┘
-└───────┬───────┘
-        ↓
+    |      |
++---------------+    +-----------------+
+| Consult       |    | Frontend-only   |
+| Agent B       |    | implementation  |
+| about API     |    +-----------------+
++-------┬-------+
+        |
     Agent B responds
-        ↓
+        |
     Need new sensor data?
-        ↓
-     ┌──┴──┐
+        |
+     +--┴--+
     Yes    No
-     ↓      ↓
-┌───────────────┐    ┌─────────────────┐
-│ Consult       │    │ Backend provides│
-│ Agent C       │    │ from existing   │
-│ about sensors │    │ data sources    │
-└───────┬───────┘    └─────────────────┘
-        ↓
+     |      |
++---------------+    +-----------------+
+| Consult       |    | Backend provides|
+| Agent C       |    | from existing   |
+| about sensors |    | data sources    |
++-------┬-------+    +-----------------+
+        |
     Agent C responds
-        ↓
-┌─────────────────────┐
-│ Agent A consolidates│
-│ all responses       │
-└──────────┬──────────┘
-           ↓
-    ┌──────────────┐
-    │ Final Report │
-    │ with effort, │
-    │ risks, steps │
-    └──────────────┘
+        |
++---------------------+
+| Agent A consolidates|
+| all responses       |
++----------┬----------+
+           |
+    +--------------+
+    | Final Report |
+    | with effort, |
+    | risks, steps |
+    +--------------+
 ```
 
 **Agent A Decision Points**:
@@ -840,8 +840,8 @@ Feature Request Arrives
 
 2. **Agent A's Analysis Process**:
    - Analyzes frontend requirements
-   - Identifies API needs → Consults Agent B if needed
-   - Identifies sensor needs → Consults Agent C if needed
+   - Identifies API needs -> Consults Agent B if needed
+   - Identifies sensor needs -> Consults Agent C if needed
    - Waits for responses from B and C
    - Consolidates everything into final report
 
@@ -854,9 +854,9 @@ Feature Request Arrives
    - Go/No-Go recommendation
 
 4. **Make Decision**:
-   - [OK] Green light → Proceed with implementation
-   - [WARN] Yellow light → Proceed with extra planning
-   - [STOP] Red light → Consider alternatives
+   - [OK] Green light -> Proceed with implementation
+   - [WARN] Yellow light -> Proceed with extra planning
+   - [STOP] Red light -> Consider alternatives
 
 5. **Implementation**:
    - Follow implementation order from Agent A
@@ -872,12 +872,12 @@ Feature Request Arrives
    - New API endpoints?
    - Data modifications?
    - Performance concerns?
-   → If YES: Send request to Agent B
+   -> If YES: Send request to Agent B
 4. Identify if you need in-car support:
    - New sensors?
    - New commands?
    - Data collection changes?
-   → If YES: Send request to Agent C
+   -> If YES: Send request to Agent C
 5. Wait for responses from B and/or C
 6. Consolidate all responses into comprehensive report
 7. Provide final go/no-go recommendation
@@ -959,24 +959,24 @@ After feature implementation:
 ### Communication Flow
 ```
 Feature Request
-    ↓
+    |
 Agent A (analyzes)
-    ↓
-Agent A → Agent B (if API needed)
-    ↓
-Agent A → Agent C (if sensors needed)
-    ↓
-Agent B → Agent A (responds)
-    ↓
-Agent C → Agent A (responds)
-    ↓
+    |
+Agent A -> Agent B (if API needed)
+    |
+Agent A -> Agent C (if sensors needed)
+    |
+Agent B -> Agent A (responds)
+    |
+Agent C -> Agent A (responds)
+    |
 Agent A (consolidates)
-    ↓
+    |
 Final Report to User
 ```
 
 ### Who to Start With
-- **ALL feature requests** → Start with Agent A
+- **ALL feature requests** -> Start with Agent A
 - Agent A decides if B or C consultation is needed
 - Never start with Agent B or C directly
 

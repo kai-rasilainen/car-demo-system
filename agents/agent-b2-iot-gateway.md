@@ -47,6 +47,6 @@ When analyzing feature requests, Agent B2 considers:
 
 ## Decision Making
 Agent B2 determines downstream needs based on:
-- Vehicle communication required? → Need Agent-C1
-- Message routing/pub-sub needed? → Need Agent-C2
-- Pure WebSocket/real-time logic changes? → No downstream agents needed
+- Vehicle communication required? -> Need Agent-C1
+- Message routing/pub-sub needed? -> Need Agent-C2
+- Pure WebSocket/real-time logic changes? -> No downstream agents needed
