@@ -299,10 +299,10 @@ Backend Architecture and Impact Analysis Agent for car-demo-backend components (
 #### Impact Assessment
 
 **Backend Components Affected**:
-- ✅ B1 Web Server - Add tire pressure data to car data API
-- ✅ B2 IoT Gateway - Receive and store tire pressure data
-- ✅ B3 MongoDB - Store tire pressure time series
-- ⚠️ B4 PostgreSQL - Optionally add tire specs to cars table
+- [OK] B1 Web Server - Add tire pressure data to car data API
+- [OK] B2 IoT Gateway - Receive and store tire pressure data
+- [OK] B3 MongoDB - Store tire pressure time series
+- [WARN] B4 PostgreSQL - Optionally add tire specs to cars table
 
 **API Changes**:
 
@@ -535,7 +535,7 @@ it('should handle 1000 tire pressure updates per second', async () => {
 
 **Response to Agent A (Frontend)**:
 ```
-✅ BACKEND SUPPORT AVAILABLE
+[OK] BACKEND SUPPORT AVAILABLE
 
 The requested feature can be supported by the backend with the following changes:
 
@@ -637,7 +637,7 @@ Please assess impact on In-Car components (C1, C2, C5)
 
 ### Feature is Backend-Ready
 ```
-✅ BACKEND READY
+[OK] BACKEND READY
 
 This feature can be implemented with existing backend infrastructure.
 
@@ -649,7 +649,7 @@ Frontend can proceed immediately.
 
 ### Feature Requires Database Migration
 ```
-⚠️ DATABASE MIGRATION REQUIRED
+[WARN] DATABASE MIGRATION REQUIRED
 
 This feature requires database schema changes.
 
@@ -670,7 +670,7 @@ Risk: [Assessment]
 
 ### Feature Has High Complexity
 ```
-🔴 HIGH COMPLEXITY BACKEND CHANGE
+[STOP] HIGH COMPLEXITY BACKEND CHANGE
 
 This feature has significant backend complexity.
 

@@ -24,7 +24,7 @@ docker-compose rm -f
 echo "🧹 Cleaning up unused Docker resources..."
 docker system prune -f
 
-echo "✅ Cleanup complete!"
+echo "[OK] Cleanup complete!"
 echo ""
 echo "🚀 To restart: ./scripts/docker-start.sh"
 echo "🛠️  For development: ./scripts/docker-dev.sh"

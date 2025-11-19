@@ -6,20 +6,20 @@ The car demo project has three AI agents that help analyze feature requests and 
 
 ## The Three Agents
 
-### 🎨 Agent A - Frontend Expert & Coordinator (START HERE!)
+### [UI] Agent A - Frontend Expert & Coordinator (START HERE!)
 - **Role**: Primary entry point for ALL feature requests
 - **Knows**: React Native mobile app, React web app, system coordination
 - **Analyzes**: UI changes, user experience, what APIs/sensors are needed
 - **Coordinates**: Consults with Agents B and C, consolidates responses
 - **Example**: "If we add tire pressure display, I'll analyze the UI needs, ask Agent B for the API, ask Agent C for the sensor, then give you a complete plan"
 
-### ⚙️ Agent B - Backend Expert (Consultant)
+### [CONFIG] Agent B - Backend Expert (Consultant)
 - **Role**: Backend specialist who responds to Agent A's requests
 - **Knows**: REST APIs, WebSockets, databases (MongoDB + PostgreSQL)
 - **Analyzes**: API design, database changes, performance impact
 - **Example**: "When Agent A asks me about tire pressure data, I'll explain how to add it to MongoDB and expose it via the B1 API"
 
-### 🚗 Agent C - In-Car Systems Expert (Consultant)
+### [CAR] Agent C - In-Car Systems Expert (Consultant)
 - **Role**: In-car specialist who responds to Agent A's requests
 - **Knows**: Sensors, data collection, communication protocols
 - **Analyzes**: What sensors are needed, how data flows, simulation complexity
@@ -76,14 +76,14 @@ You'll get ONE complete analysis from Agent A:
   3. A1+A2 UI (6 hours)
 - **Test cases**: Detailed list
 - **Risks**: Any concerns
-- **Recommendation**: ✅ Proceed
+- **Recommendation**: [OK] Proceed
 
 ### Step 4: Decide and Implement
 
 Based on Agent A's consolidated report:
-- ✅ **Green light** - Proceed with implementation
-- ⚠️ **Yellow light** - Proceed with caution, extra planning needed
-- 🔴 **Red light** - Too complex, consider alternatives
+- [OK] **Green light** - Proceed with implementation
+- [WARN] **Yellow light** - Proceed with caution, extra planning needed
+- [STOP] **Red light** - Too complex, consider alternatives
 
 ## Example Feature Requests
 
@@ -91,7 +91,7 @@ Based on Agent A's consolidated report:
 **Request**: "Add tire pressure monitoring to car display"
 
 **Quick Answer**:
-- ✅ **Low complexity**
+- [OK] **Low complexity**
 - Affects all 3 components
 - ~19 hours total work
 - No breaking changes
@@ -101,7 +101,7 @@ Based on Agent A's consolidated report:
 **Request**: "Add trip history with route playback"
 
 **Quick Answer**:
-- ⚠️ **Medium complexity**
+- [WARN] **Medium complexity**
 - Needs GPS history storage in database
 - Needs map visualization in frontend
 - ~40 hours total work
@@ -112,7 +112,7 @@ Based on Agent A's consolidated report:
 **Request**: "Add real-time video streaming from car camera"
 
 **Quick Answer**:
-- 🔴 **High complexity**
+- [STOP] **High complexity**
 - Requires significant bandwidth
 - Complex backend streaming infrastructure
 - Mobile app performance concerns
@@ -298,5 +298,5 @@ If you need clarification on agent outputs:
 **Remember**: 
 - 🎯 **Always start with Agent A** - it's your single point of contact
 - 🤝 Agent A coordinates with B and C behind the scenes
-- 📊 You get ONE consolidated report with everything you need
-- ✅ Agent A provides the final go/no-go recommendation
+- [INFO] You get ONE consolidated report with everything you need
+- [OK] Agent A provides the final go/no-go recommendation

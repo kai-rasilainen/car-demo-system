@@ -8,7 +8,7 @@ echo ""
 # Check if Ollama is running
 echo "1. Checking Ollama availability on Windows host..."
 if curl -s http://10.0.2.2:11434/api/tags > /dev/null 2>&1; then
-    echo "   ✅ Ollama is running on Windows (10.0.2.2:11434)"
+    echo "   [OK] Ollama is running on Windows (10.0.2.2:11434)"
 else
     echo "   ❌ Ollama is not accessible"
     echo "   Please ensure Ollama is running on Windows"
@@ -20,7 +20,7 @@ fi
 echo ""
 echo "2. Checking for llama3:8b model..."
 if curl -s http://10.0.2.2:11434/api/tags | grep -q "llama3:8b"; then
-    echo "   ✅ llama3:8b model found"
+    echo "   [OK] llama3:8b model found"
 else
     echo "   ❌ llama3:8b model not found"
     echo "   On Windows, run: ollama pull llama3:8b"
@@ -45,9 +45,9 @@ EXIT_CODE=$?
 
 echo ""
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "✅ Test completed successfully!"
+    echo "[OK] Test completed successfully!"
     echo ""
-    echo "📄 Report generated: test-analysis-report.md"
+    echo "[DOC] Report generated: test-analysis-report.md"
     echo ""
     echo "Preview:"
     echo "========="

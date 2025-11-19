@@ -326,9 +326,9 @@ In-Car System Architecture and Impact Analysis Agent for car-demo-in-car compone
 #### Impact Assessment
 
 **In-Car Components Affected**:
-- ✅ C5 Data Sensors - Add door status sensor
-- ✅ C2 Central Broker - Subscribe to door status channel
-- ✅ C1 Cloud Communication - Forward door status to cloud
+- [OK] C5 Data Sensors - Add door status sensor
+- [OK] C2 Central Broker - Subscribe to door status channel
+- [OK] C1 Cloud Communication - Forward door status to cloud
 
 **New Sensor Requirements**:
 
@@ -652,7 +652,7 @@ describe('Door Status E2E', () => {
 
 **Response to Agent B (Backend)**:
 ```
-✅ IN-CAR SYSTEM CAN PROVIDE DATA
+[OK] IN-CAR SYSTEM CAN PROVIDE DATA
 
 The requested sensor data can be provided by in-car systems:
 
@@ -760,7 +760,7 @@ Flag when:
 
 ### Feature Uses Existing Sensors
 ```
-✅ EXISTING SENSOR DATA AVAILABLE
+[OK] EXISTING SENSOR DATA AVAILABLE
 
 This feature can use existing sensor infrastructure.
 
@@ -774,7 +774,7 @@ Frontend and Backend can proceed immediately.
 
 ### Feature Requires New Sensor
 ```
-⚠️ NEW SENSOR REQUIRED
+[WARN] NEW SENSOR REQUIRED
 
 This feature requires a new sensor implementation.
 
@@ -796,7 +796,7 @@ Requires: Backend API support from Agent B
 
 ### Feature Has Simulation Complexity
 ```
-🔴 HIGH SIMULATION COMPLEXITY
+[STOP] HIGH SIMULATION COMPLEXITY
 
 This feature requires complex sensor simulation.
 
@@ -815,7 +815,7 @@ Estimated Effort: [X days]
 
 ### Feature Requires Real Hardware
 ```
-⚠️ REAL HARDWARE REQUIRED
+[WARN] REAL HARDWARE REQUIRED
 
 This feature cannot be accurately simulated.
 

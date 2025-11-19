@@ -136,7 +136,7 @@ Agent A combines:
 - Complexity: Low/Medium/High
 - Total Effort: [X hours]
 - Breaking Changes: Yes/No
-- Recommendation: ✅ PROCEED / ⚠️ CAUTION / 🔴 STOP
+- Recommendation: [OK] PROCEED / [WARN] CAUTION / [STOP] STOP
 
 ### Component Breakdown
 [Frontend + Backend + In-Car details]
@@ -279,8 +279,8 @@ Agent A combines:
 #### Impact Assessment
 
 **Frontend Components Affected**:
-- ✅ A1 Car User App - Show tire pressure on car status screen
-- ✅ A2 Rental Staff App - Show tire pressure in fleet dashboard and car details
+- [OK] A1 Car User App - Show tire pressure on car status screen
+- [OK] A2 Rental Staff App - Show tire pressure in fleet dashboard and car details
 
 **UI/UX Changes**:
 - **New Screens**: None
@@ -493,7 +493,7 @@ Please assess impact on In-Car components (C1, C2, C5)
 
 ### Feature is Frontend-Only
 ```
-✅ FRONTEND-ONLY FEATURE
+[OK] FRONTEND-ONLY FEATURE
 
 This feature can be implemented entirely in the frontend without backend changes.
 
@@ -507,7 +507,7 @@ Proceed with implementation.
 
 ### Feature Requires Backend Support
 ```
-⚠️ BACKEND CHANGES REQUIRED
+[WARN] BACKEND CHANGES REQUIRED
 
 This feature requires backend modifications.
 
@@ -526,7 +526,7 @@ Recommendation: Coordinate with Agent B before proceeding.
 
 ### Feature Has High Complexity
 ```
-🔴 HIGH COMPLEXITY FEATURE
+[STOP] HIGH COMPLEXITY FEATURE
 
 This feature has significant complexity and risks.
 

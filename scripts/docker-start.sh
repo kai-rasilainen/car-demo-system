@@ -8,9 +8,9 @@ echo "================================================"
 docker-compose up --build -d
 
 echo ""
-echo "✅ Services starting..."
+echo "[OK] Services starting..."
 echo ""
-echo "📊 Service Status:"
+echo "[INFO] Service Status:"
 docker-compose ps
 
 echo ""

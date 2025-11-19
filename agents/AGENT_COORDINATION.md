@@ -160,7 +160,7 @@ Agent B responds:
 FROM: Agent B (Backend)
 TO: Agent A (Frontend)
 
-✅ YES - Backend can provide this data
+[OK] YES - Backend can provide this data
 
 Implementation:
 - B1: Add tirePressure field to API response (2 hours)
@@ -200,7 +200,7 @@ Agent C responds:
 FROM: Agent C (In-Car)
 TO: Agent A (Frontend)
 
-✅ YES - Can provide tire pressure sensor data
+[OK] YES - Can provide tire pressure sensor data
 
 Implementation:
 - C5: Create tire pressure sensor simulator (3 hours)
@@ -234,7 +234,7 @@ Agent A receives responses from B and C, consolidates everything:
 
 ### Final Assessment by Agent A
 
-#### Overall Impact: LOW-MEDIUM ✅
+#### Overall Impact: LOW-MEDIUM [OK]
 
 **Total Estimated Effort**: 14 hours
 - Frontend (A1 + A2): 6 hours
@@ -301,7 +301,7 @@ B1 API -> Frontend Apps
 - **Risk**: API backwards compatibility
   - **Mitigation**: tirePressure is optional field, old clients ignore it
 
-#### Go/No-Go Decision: ✅ PROCEED
+#### Go/No-Go Decision: [OK] PROCEED
 
 **Reasoning**: 
 - Low complexity across all components
@@ -427,7 +427,7 @@ B1 API -> Frontend Apps
 ```markdown
 ## Feature: Add Tire Pressure Monitoring
 
-### Overall Impact: MEDIUM ✅
+### Overall Impact: MEDIUM [OK]
 
 **Total Estimated Effort**: 19 hours
 - Frontend: 8 hours
@@ -455,7 +455,7 @@ B1 API -> Frontend Apps
 - Low pressure alerts should not be too sensitive (avoid false alarms)
 - Need proper validation (pressure can't be negative or > 4.0 bar)
 
-**Go/No-Go**: ✅ PROCEED
+**Go/No-Go**: [OK] PROCEED
 
 This is a medium-complexity, high-value safety feature that can be implemented
 incrementally without breaking existing functionality. Estimated delivery: 2-3 days.
@@ -509,7 +509,7 @@ FROM: Agent B (Backend)
 TO: Agent A (Frontend)
 RE: [Feature Name]
 
-STATUS: ✅ YES / ⚠️ PARTIAL / ❌ NO
+STATUS: [OK] YES / [WARN] PARTIAL / ❌ NO
 
 IMPLEMENTATION PLAN:
 - B1 Changes: [API modifications]
@@ -581,7 +581,7 @@ FROM: Agent C (In-Car)
 TO: Agent A (Frontend)
 RE: [Feature Name]
 
-STATUS: ✅ YES / ⚠️ PARTIAL / ❌ NO
+STATUS: [OK] YES / [WARN] PARTIAL / ❌ NO
 
 IMPLEMENTATION PLAN:
 - C5 Sensor: [New sensor or modification]
@@ -687,7 +687,7 @@ TO: Agent C (Backend)
 RE: Tire Pressure Monitoring
 
 RESPONSE:
-✅ Can provide tire pressure data
+[OK] Can provide tire pressure data
 
 IMPLEMENTATION:
 - Sensor: C5 tire_pressure_sensor.py
@@ -790,7 +790,7 @@ Feature Request Arrives
 
 ## Risk Levels and Responses
 
-### Low Risk (✅ PROCEED)
+### Low Risk ([OK] PROCEED)
 - Additive changes only
 - No breaking changes
 - Well-understood technology
@@ -799,7 +799,7 @@ Feature Request Arrives
 
 **Action**: Proceed with standard development
 
-### Medium Risk (⚠️ PROCEED WITH CAUTION)
+### Medium Risk ([WARN] PROCEED WITH CAUTION)
 - Some breaking changes (manageable)
 - Cross-component dependencies
 - Moderate complexity
@@ -812,7 +812,7 @@ Feature Request Arrives
 - Consider phased rollout
 - Schedule review checkpoints
 
-### High Risk (🔴 DO NOT PROCEED / MAJOR PLANNING REQUIRED)
+### High Risk ([STOP] DO NOT PROCEED / MAJOR PLANNING REQUIRED)
 - Major breaking changes
 - Complex cross-component coordination
 - New technology/paradigms
@@ -854,9 +854,9 @@ Feature Request Arrives
    - Go/No-Go recommendation
 
 4. **Make Decision**:
-   - ✅ Green light → Proceed with implementation
-   - ⚠️ Yellow light → Proceed with extra planning
-   - 🔴 Red light → Consider alternatives
+   - [OK] Green light → Proceed with implementation
+   - [WARN] Yellow light → Proceed with extra planning
+   - [STOP] Red light → Consider alternatives
 
 5. **Implementation**:
    - Follow implementation order from Agent A
