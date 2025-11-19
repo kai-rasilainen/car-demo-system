@@ -712,48 +712,48 @@ Feature Request Arrives
 +---------------------+
 |   Agent A Receives  |
 |   (Entry Point)     |
-+----------┬----------+
++----------+----------+
            |
     Does it affect UI?
            |
-       +---┴---+
+       +---+---+
       Yes      No -> [Unusual - verify it's really a frontend request]
        |
 +------------------+
 | Agent A analyzes |
 | frontend impact  |
-+------┬-----------+
++------+-----------+
        |
    Need new API data?
        |
-    +--┴--+
+    +--+--+
    Yes    No
     |      |
 +---------------+    +-----------------+
 | Consult       |    | Frontend-only   |
 | Agent B       |    | implementation  |
 | about API     |    +-----------------+
-+-------┬-------+
++-------+-------+
         |
     Agent B responds
         |
     Need new sensor data?
         |
-     +--┴--+
+     +--+--+
     Yes    No
      |      |
 +---------------+    +-----------------+
 | Consult       |    | Backend provides|
 | Agent C       |    | from existing   |
 | about sensors |    | data sources    |
-+-------┬-------+    +-----------------+
++-------+-------+    +-----------------+
         |
     Agent C responds
         |
 +---------------------+
 | Agent A consolidates|
 | all responses       |
-+----------┬----------+
++----------+----------+
            |
     +--------------+
     | Final Report |
