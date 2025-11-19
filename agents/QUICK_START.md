@@ -283,20 +283,20 @@ If you need clarification on agent outputs:
 
 ## Summary: When to Use Each Agent
 
-| Situation | Who to Contact | Why |
-|-----------|----------------|-----|
-| "I want to add a new feature" | **Agent A** | Entry point for everything |
-| "What will users see?" | **Agent A** | Coordinates UI analysis |
-| "How does the API work?" | **Agent A** | Will consult Agent B if needed |
-| "Where does the data come from?" | **Agent A** | Will consult Agent C if needed |
-| "How much work is this?" | **Agent A** | Gets estimates from all agents |
-| "Is this feasible?" | **Agent A** | Consolidates all assessments |
-| "Should we build this?" | **Agent A** | Provides final recommendation |
+| Situation                        | Who to Contact | Why                                 |
+|----------------------------------|----------------|-------------------------------------|
+| "I want to add a new feature"    | **Agent A**    | Entry point for everything          |
+| "What will users see?"           | **Agent A**    | Coordinates UI analysis             |
+| "How does the API work?"         | **Agent A**    | Will consult Agent B if needed      |
+| "Where does the data come from?" | **Agent A**    | Will consult Agent C if needed      |
+| "How much work is this?"         | **Agent A**    | Gets estimates from all agents      |
+| "Is this feasible?"              | **Agent A**    | Consolidates all assessments        |
+| "Should we build this?"          | **Agent A**    | Provides final recommendation       |
 
 ---
 
 **Remember**: 
-- 🎯 **Always start with Agent A** - it's your single point of contact
-- 🤝 Agent A coordinates with B and C behind the scenes
+- [TARGET] **Always start with Agent A** - it's your single point of contact
+- [TEAM] Agent A coordinates with B and C behind the scenes
 - [INFO] You get ONE consolidated report with everything you need
 - [OK] Agent A provides the final go/no-go recommendation
