@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the AI agent system for the car demo project. Three specialized agents operate as independent entities in geographically distributed locations. Each agent analyzes feature requests from their domain perspective and communicates with other agents when cross-domain coordination is needed.
+This document describes the AI agent system for the car demo project. Three specialized agents operate as independent entities. Each agent analyzes feature requests from their domain perspective and communicates with other agents when cross-domain coordination is needed.
 
 ## Distributed Agent Architecture
 
@@ -15,7 +15,6 @@ This document describes the AI agent system for the car demo project. Three spec
             |       Agent A           |
             |   Frontend Analysis     |
             |   (Entry Point)         |
-            | Location: Cloud/Region1 |
             +-------------------------+
                    |            |
                    |            |
@@ -26,8 +25,6 @@ This document describes the AI agent system for the car demo project. Three spec
          |   Agent B    |   |   Agent C    |
          |   Backend    |   |   In-Car     |
          |   Analysis   |   |   Analysis   |
-         | Location:    |   | Location:    |
-         | Cloud/Region2|   | Edge/Vehicle |
          +--------------+   +--------------+
                    |            |
                    |            |
@@ -41,10 +38,10 @@ This document describes the AI agent system for the car demo project. Three spec
             +-------------------------+
 ```
 
-**Distributed Architecture**:
-1. **Agent A (Frontend)** - Cloud-based, entry point for all requests
-2. **Agent B (Backend)** - Cloud-based, separate infrastructure
-3. **Agent C (In-Car)** - Edge-based, vehicle systems or simulator
+**Independent Agent Architecture**:
+1. **Agent A (Frontend)** - Entry point for all requests
+2. **Agent B (Backend)** - Independent backend analysis
+3. **Agent C (In-Car)** - Independent in-car systems analysis
 
 **Communication Flow**:
 1. User sends feature request to **Agent A** (Frontend)
@@ -57,7 +54,6 @@ This document describes the AI agent system for the car demo project. Three spec
 
 ### Agent A - Frontend Analysis Agent (Entry Point)
 **File**: `agents/agent-a-frontend.md`
-**Location**: Cloud infrastructure (e.g., AWS/Azure Region 1)
 
 **Primary Responsibilities**:
 - **Entry point for all feature requests**
@@ -82,7 +78,6 @@ This document describes the AI agent system for the car demo project. Three spec
 
 ### Agent B - Backend Analysis Agent
 **File**: `agents/agent-b-backend.md`
-**Location**: Cloud infrastructure (e.g., AWS/Azure Region 2)
 
 **Responsibilities**:
 - Analyze API design implications independently
@@ -107,7 +102,6 @@ This document describes the AI agent system for the car demo project. Three spec
 
 ### Agent C - In-Car Systems Analysis Agent
 **File**: `agents/agent-c-in-car.md`
-**Location**: Edge infrastructure (Vehicle/Simulator)
 
 **Responsibilities**:
 - Analyze sensor requirements independently
@@ -126,19 +120,10 @@ This document describes the AI agent system for the car demo project. Three spec
 - Sensor data handling
 - Redis pub/sub patterns
 - WebSocket communication
-- Edge computing constraints
+- System constraints
 - IoT system testing
 
 ## Distributed Feature Analysis Workflow
-
-### Geographic Distribution
-
-**Agent Locations**:
-- **Agent A**: Cloud Region 1 (e.g., AWS us-east-1)
-- **Agent B**: Cloud Region 2 (e.g., AWS us-west-2 or separate cloud provider)
-- **Agent C**: Edge infrastructure (Vehicle hardware or local simulator)
-
-**Communication**: Agents communicate via RESTful APIs or message queues
 
 ### Step 1: Feature Request to Agent A (Entry Point)
 All feature requests start with Agent A (Frontend) as the single entry point:
@@ -146,7 +131,7 @@ All feature requests start with Agent A (Frontend) as the single entry point:
 ```markdown
 Feature: Add tire pressure monitoring
 
-Agent A (Cloud Region 1) receives request and analyzes:
+Agent A receives request and analyzes:
 1. Does this affect the UI? -> YES (need gauge display)
 2. Do I need new API data? -> YES (need tire pressure from backend)
 3. Will backend need new sensors? -> PROBABLY (need to ask Agent C)
@@ -160,11 +145,11 @@ Next: Send analysis request to Agent B (Backend)
 ```
 
 ### Step 2: Agent A Requests Analysis from Agent B
-Agent A sends request to Agent B (separate geographic location):
+Agent A sends request to Agent B:
 
 ```markdown
-FROM: Agent A (Cloud Region 1 - Frontend)
-TO: Agent B (Cloud Region 2 - Backend)
+FROM: Agent A (Frontend)
+TO: Agent B (Backend)
 PROTOCOL: REST API / Message Queue
 
 REQUEST:
@@ -184,8 +169,8 @@ QUESTIONS:
 Agent B (independent analysis) responds:
 
 ```markdown
-FROM: Agent B (Cloud Region 2 - Backend)
-TO: Agent A (Cloud Region 1 - Frontend)
+FROM: Agent B (Backend)
+TO: Agent A (Frontend)
 PROTOCOL: REST API / Message Queue
 
 RESPONSE:
@@ -205,11 +190,11 @@ Note: I need to verify with Agent C about sensor availability
 ```
 
 ### Step 3: Agent A Requests Analysis from Agent C
-Agent A sends request to Agent C (edge location):
+Agent A sends request to Agent C:
 
 ```markdown
-FROM: Agent A (Cloud Region 1 - Frontend)
-TO: Agent C (Edge - In-Car Systems)
+FROM: Agent A (Frontend)
+TO: Agent C (In-Car Systems)
 PROTOCOL: REST API / Message Queue
 
 REQUEST:
@@ -227,11 +212,11 @@ QUESTIONS:
 - Any vehicle compatibility issues?
 ```
 
-Agent C (independent analysis at edge) responds:
+Agent C (independent analysis) responds:
 
 ```markdown
-FROM: Agent C (Edge - In-Car Systems)
-TO: Agent A (Cloud Region 1 - Frontend)
+FROM: Agent C (In-Car Systems)
+TO: Agent A (Frontend)
 PROTOCOL: REST API / Message Queue
 
 RESPONSE:
@@ -240,7 +225,7 @@ STATUS: [OK] YES - Can provide tire pressure sensor data
 Implementation:
 - C5: Create tire pressure sensor simulator (3 hours)
 - C2: Subscribe to sensors:tire_pressure channel (1 hour)
-- C1: Forward to cloud via WebSocket (no changes needed)
+- C1: Forward via WebSocket (no changes needed)
 
 Data Format:
 {
@@ -259,7 +244,7 @@ Data will be available via: sensors:tire_pressure Redis channel
 ```
 
 ### Step 4: Agent A Consolidates Distributed Responses
-Agent A (Cloud Region 1) receives responses from Agent B (Cloud Region 2) and Agent C (Edge), then consolidates:
+Agent A receives responses from Agent B and Agent C, then consolidates:
 
 ```markdown
 ## Feature: Add Tire Pressure Monitoring
@@ -267,8 +252,8 @@ Agent A (Cloud Region 1) receives responses from Agent B (Cloud Region 2) and Ag
 ### Final Consolidated Assessment by Agent A
 
 RECEIVED FROM:
-- Agent B (Cloud Region 2): [OK] Backend feasible, 4 hours
-- Agent C (Edge): [OK] Sensor data available, 4 hours
+- Agent B: [OK] Backend feasible, 4 hours
+- Agent C: [OK] Sensor data available, 4 hours
 
 #### Overall Impact: LOW-MEDIUM [OK]
 
@@ -287,7 +272,7 @@ RECEIVED FROM:
 
 #### Component Breakdown by Agent
 
-**Agent A - Frontend** (Cloud Region 1):
+**Agent A - Frontend**:
 - A1 Mobile: Add tire pressure gauge component
 - A2 Web: Add tire pressure indicators to dashboard
 - Both: Show warnings for low pressure (<1.9 bar)
@@ -295,7 +280,7 @@ RECEIVED FROM:
 - Effort: 6 hours
 - Risk: Low
 
-**Agent B - Backend** (Cloud Region 2):
+**Agent B - Backend**:
 - B1: Add tirePressure field to GET /api/car/:licensePlate
 - B2: Accept tire pressure in WebSocket messages
 - B3: Add tirePressure to MongoDB car_data collection
@@ -303,7 +288,7 @@ RECEIVED FROM:
 - Effort: 4 hours
 - Risk: Low
 
-**In-Car (Agent C)**:
+**Agent C - In-Car**:
 - C5: Create tire pressure sensor simulator
 - C2: Subscribe to sensors:tire_pressure channel
 - Redis: Publish to sensors:tire_pressure every 10 seconds
@@ -432,7 +417,7 @@ B1 API -> Frontend Apps
 - Subscribe to sensors:tire_pressure
 - Store in car:{licensePlate}:sensors hash
 - Include in latest_data aggregation
-- Forward to cloud via C1
+- Forward via C1
 
 **C1 Cloud Communication**:
 - Forward tirePressure in sensor_data messages
@@ -622,7 +607,7 @@ STATUS: [OK] YES / [WARN] PARTIAL / [NO] NO
 IMPLEMENTATION PLAN:
 - C5 Sensor: [New sensor or modification]
 - C2 Broker: [Message routing changes]
-- C1 Communication: [Cloud sync changes]
+- C1 Communication: [Data sync changes]
 - Effort: [X hours]
 
 DATA SPECIFICATION:

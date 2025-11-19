@@ -2,21 +2,18 @@
 
 ## Overview
 
-This document describes the API communication protocol between geographically distributed agents when processing a user feature request. The agents communicate via RESTful APIs or message queues to perform independent analysis and consolidate results.
+This document describes the API communication protocol between independent agents when processing a user feature request. The agents communicate via RESTful APIs or message queues to perform independent analysis and consolidate results.
 
 ## Agent Endpoints
 
 ### Agent A - Frontend Analysis (Entry Point)
-**Location**: Cloud Region 1 (e.g., AWS us-east-1)
-**Base URL**: `https://agent-a.cloud-region-1.example.com/api/v1`
+**Base URL**: `https://agent-a.example.com/api/v1`
 
 ### Agent B - Backend Analysis
-**Location**: Cloud Region 2 (e.g., AWS us-west-2)
-**Base URL**: `https://agent-b.cloud-region-2.example.com/api/v1`
+**Base URL**: `https://agent-b.example.com/api/v1`
 
 ### Agent C - In-Car Systems Analysis
-**Location**: Edge Infrastructure (Vehicle/Simulator)
-**Base URL**: `https://agent-c.edge.example.com/api/v1`
+**Base URL**: `https://agent-c.example.com/api/v1`
 
 ---
 
@@ -52,7 +49,7 @@ User Request
 ### Request
 ```http
 POST /api/v1/feature-request
-Host: agent-a.cloud-region-1.example.com
+Host: agent-a.example.com
 Content-Type: application/json
 Authorization: Bearer <token>
 
@@ -75,7 +72,7 @@ Content-Type: application/json
   "status": "processing",
   "message": "Feature request accepted. Agent A is analyzing...",
   "estimated_completion": "2025-11-19T10:05:00Z",
-  "tracking_url": "https://agent-a.cloud-region-1.example.com/api/v1/status/req-2025-11-19-001"
+  "tracking_url": "https://agent-a.example.com/api/v1/status/req-2025-11-19-001"
 }
 ```
 
@@ -88,7 +85,7 @@ After Agent A performs its independent frontend analysis, it determines that bac
 ### Request
 ```http
 POST /api/v1/analyze-backend
-Host: agent-b.cloud-region-2.example.com
+Host: agent-b.example.com
 Content-Type: application/json
 Authorization: Bearer <agent-a-token>
 X-Request-ID: req-2025-11-19-001
@@ -235,7 +232,7 @@ After receiving Agent B's response, Agent A also sends a request to Agent C.
 ### Request
 ```http
 POST /api/v1/analyze-incar
-Host: agent-c.edge.example.com
+Host: agent-c.example.com
 Content-Type: application/json
 Authorization: Bearer <agent-a-token>
 X-Request-ID: req-2025-11-19-001
@@ -317,7 +314,7 @@ X-Response-Time: 1.8s
         "task": "Subscribe to tire pressure sensor channel",
         "details": [
           "Add subscription to 'sensors:tire_pressure'",
-          "Forward data to cloud via C1"
+          "Forward data via C1"
         ],
         "effort_hours": 1,
         "language": "Node.js"
@@ -543,9 +540,9 @@ X-Total-Analysis-Time: 5.2s
   },
   
   "code_examples_available": true,
-  "code_examples_url": "https://agent-a.cloud-region-1.example.com/api/v1/code-examples/req-2025-11-19-001",
+  "code_examples_url": "https://agent-a.example.com/api/v1/code-examples/req-2025-11-19-001",
   
-  "implementation_plan_url": "https://agent-a.cloud-region-1.example.com/api/v1/implementation-plan/req-2025-11-19-001",
+  "implementation_plan_url": "https://agent-a.example.com/api/v1/implementation-plan/req-2025-11-19-001",
   
   "next_steps": [
     "Review consolidated assessment",
@@ -566,7 +563,7 @@ Users can poll the status of their request while agents are processing.
 ### Request
 ```http
 GET /api/v1/status/req-2025-11-19-001
-Host: agent-a.cloud-region-1.example.com
+Host: agent-a.example.com
 Authorization: Bearer <token>
 ```
 
@@ -694,7 +691,7 @@ Agents can register webhooks to be notified when analysis is complete:
 ### Register Webhook
 ```http
 POST /api/v1/webhooks
-Host: agent-a.cloud-region-1.example.com
+Host: agent-a.example.com
 Content-Type: application/json
 
 {
@@ -715,7 +712,7 @@ X-Webhook-Signature: sha256=...
   "event": "analysis_complete",
   "request_id": "req-2025-11-19-001",
   "timestamp": "2025-11-19T10:03:00Z",
-  "result_url": "https://agent-a.cloud-region-1.example.com/api/v1/results/req-2025-11-19-001"
+  "result_url": "https://agent-a.example.com/api/v1/results/req-2025-11-19-001"
 }
 ```
 

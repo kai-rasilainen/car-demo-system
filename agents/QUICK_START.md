@@ -2,12 +2,11 @@
 
 ## What is This?
 
-The car demo project has three independent AI agents operating in geographically distributed locations. They analyze feature requests and assess impact across the entire system. **Agent A (Frontend)** is your single entry point and requests analysis from other agents when needed.
+The car demo project has three independent AI agents. They analyze feature requests and assess impact across the entire system. **Agent A (Frontend)** is your single entry point and requests analysis from other agents when needed.
 
-## The Three Distributed Agents
+## The Three Independent Agents
 
 ### [UI] Agent A - Frontend Analysis Agent (ENTRY POINT - START HERE!)
-- **Location**: Cloud Region 1 (e.g., AWS us-east-1)
 - **Role**: Entry point for ALL feature requests
 - **Knows**: React Native mobile app, React web app, frontend architecture
 - **Analyzes**: UI changes, user experience, what APIs/sensors are needed
@@ -15,7 +14,6 @@ The car demo project has three independent AI agents operating in geographically
 - **Example**: "If we add tire pressure display, I'll analyze the UI needs, request backend analysis from Agent B, request sensor analysis from Agent C, then consolidate everything into a complete plan"
 
 ### [CONFIG] Agent B - Backend Analysis Agent (Independent Entity)
-- **Location**: Cloud Region 2 (e.g., AWS us-west-2 or different provider)
 - **Role**: Backend specialist operating independently
 - **Knows**: REST APIs, WebSockets, databases (MongoDB + PostgreSQL)
 - **Analyzes**: API design, database changes, performance impact
@@ -23,14 +21,13 @@ The car demo project has three independent AI agents operating in geographically
 - **Example**: "When Agent A requests analysis about tire pressure data, I independently assess the backend impact, database changes, and API modifications needed"
 
 ### [CAR] Agent C - In-Car Systems Analysis Agent (Independent Entity)
-- **Location**: Edge infrastructure (Vehicle or simulator environment)
-- **Role**: In-car specialist operating at the edge
+- **Role**: In-car specialist operating independently
 - **Knows**: Sensors, data collection, communication protocols
-- **Analyzes**: Sensor requirements, data flows, edge computing constraints
+- **Analyzes**: Sensor requirements, data flows, system constraints
 - **Communication**: Receives requests from Agent A, performs independent analysis, sends response back
-- **Example**: "When Agent A requests analysis about tire pressure sensors, I independently assess the sensor availability, data format, and edge processing requirements"
+- **Example**: "When Agent A requests analysis about tire pressure sensors, I independently assess the sensor availability, data format, and processing requirements"
 
-## How to Use the Distributed System
+## How to Use the System
 
 ### Step 1: Send Your Request to Agent A (Entry Point)
 
@@ -40,19 +37,19 @@ The car demo project has three independent AI agents operating in geographically
 "I want to add tire pressure monitoring to the car dashboard"
 ```
 
-### Step 2: Agent A Coordinates Distributed Analysis
+### Step 2: Agent A Coordinates Analysis
 
 Agent A will:
 1. Analyze frontend changes independently
-2. Determine if backend analysis needed -> sends request to Agent B (different location)
-3. Determine if sensor analysis needed -> sends request to Agent C (edge location)
-4. Wait for responses from distributed agents
+2. Determine if backend analysis needed -> sends request to Agent B
+3. Determine if sensor analysis needed -> sends request to Agent C
+4. Wait for responses from independent agents
 5. Consolidate all responses into final assessment
 
-**What happens in the distributed system:**
+**What happens:**
 
 ```
-You -> Agent A (Cloud Region 1): "Add tire pressure monitoring"
+You -> Agent A: "Add tire pressure monitoring"
       |
 Agent A: "I need tire pressure gauge UI in mobile app (6 hours)"
       |
