@@ -509,7 +509,7 @@ FROM: Agent B (Backend)
 TO: Agent A (Frontend)
 RE: [Feature Name]
 
-STATUS: [OK] YES / [WARN] PARTIAL / ❌ NO
+STATUS: [OK] YES / [WARN] PARTIAL / [NO] NO
 
 IMPLEMENTATION PLAN:
 - B1 Changes: [API modifications]
@@ -581,7 +581,7 @@ FROM: Agent C (In-Car)
 TO: Agent A (Frontend)
 RE: [Feature Name]
 
-STATUS: [OK] YES / [WARN] PARTIAL / ❌ NO
+STATUS: [OK] YES / [WARN] PARTIAL / [NO] NO
 
 IMPLEMENTATION PLAN:
 - C5 Sensor: [New sensor or modification]
