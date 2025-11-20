@@ -7,41 +7,54 @@ This document describes the AI agent system for the car demo project. Three spec
 ## Distributed Agent Architecture
 
 ```
-                    User/Client
-                         |
-                         | Feature Request
-                         v
-            +-------------------------+
-            |       Agent A           |
-            |   Frontend Analysis     |
-            |   (Entry Point)         |
-            +-------------------------+
-                   |            |
-                   |            |
-    Backend needed?|            | In-car data needed?
-                   |            |
-                   v            v
-         +--------------+   +--------------+
-         |   Agent B    |   |   Agent C    |
-         |   Backend    |   |   In-Car     |
-         |   Analysis   |   |   Analysis   |
-         +--------------+   +--------------+
-                   |            |
-                   |            |
-                   +-----+------+
-                         |
-                         v
-            +-------------------------+
-            |       Agent A           |
-            |   Consolidates Results  |
-            |   Provides Assessment   |
-            +-------------------------+
+                           User/Client
+                                |
+                                | Feature Request
+                                v
+            +-------------------------------------------+
+            |            Agent A (Frontend)             |
+            |              Entry Point                  |
+            +-------------------------------------------+
+            |  A1: Car User App (React Native)          |
+            |  A2: Rental Staff App (React Web)         |
+            +-------------------------------------------+
+                       |                    |
+                       |                    |
+        Backend needed?|                    | In-car data needed?
+                       |                    |
+                       v                    v
+         +-------------------------+   +-------------------------+
+         |    Agent B (Backend)    |   |    Agent C (In-Car)     |
+         +-------------------------+   +-------------------------+
+         | B1: Web Server (REST)   |   | C1: Cloud Comm          |
+         | B2: IoT Gateway (WS)    |   | C2: Central Broker      |
+         | B3: Realtime DB (Mongo) |   | C5: Data Sensors        |
+         | B4: Static DB (Postgres)|   +-------------------------+
+         +-------------------------+              |
+                       |                          |
+                       +-----------+--------------+
+                                   |
+                                   v
+            +-------------------------------------------+
+            |            Agent A (Frontend)             |
+            |          Consolidates Results             |
+            |          Provides Assessment              |
+            +-------------------------------------------+
 ```
 
-**Independent Agent Architecture**:
-1. **Agent A (Frontend)** - Entry point for all requests
-2. **Agent B (Backend)** - Independent backend analysis
-3. **Agent C (In-Car)** - Independent in-car systems analysis
+**Hierarchical Agent Architecture**:
+1. **Agent A (Frontend Layer)** - Entry point for all requests
+   - **A1**: Car User Mobile App (React Native)
+   - **A2**: Rental Staff Web App (React)
+2. **Agent B (Backend Layer)** - Independent backend analysis
+   - **B1**: Web Server (Node.js/Express REST API)
+   - **B2**: IoT Gateway (WebSocket + REST)
+   - **B3**: Realtime Database (MongoDB)
+   - **B4**: Static Database (PostgreSQL)
+3. **Agent C (In-Car Layer)** - Independent in-car systems analysis
+   - **C1**: Cloud Communication (Python async)
+   - **C2**: Central Broker (Redis pub/sub)
+   - **C5**: Data Sensors (Python sensor simulation)
 
 **Communication Flow**:
 1. User sends feature request to **Agent A** (Frontend)
@@ -65,15 +78,39 @@ This document describes the AI agent system for the car demo project. Three spec
 - Recommend frontend test cases
 - Provide go/no-go recommendation
 
-**Components**:
-- A1 Car User App (React Native)
-- A2 Rental Staff App (React Web)
+**Subcomponents**:
+
+#### A1: Car User Mobile App
+- **Technology**: React Native (Expo)
+- **Purpose**: Mobile app for car rental customers
+- **Port**: N/A (mobile application)
+- **Key Features**: 
+  - User authentication and profile management
+  - Car browsing and search
+  - Booking management (create, view, modify)
+  - Real-time car status monitoring
+  - In-app notifications
+- **APIs Used**: B1 Web Server REST API
+- **File Location**: `A-car-demo-frontend/A1-car-user-app/`
+
+#### A2: Rental Staff Web App
+- **Technology**: React (Create React App)
+- **Purpose**: Web application for rental company staff
+- **Port**: 3000
+- **Key Features**:
+  - Fleet management dashboard
+  - Booking administration
+  - Customer management
+  - Reports and analytics
+  - Real-time vehicle tracking
+- **APIs Used**: B1 Web Server, B2 IoT Gateway (WebSocket)
+- **File Location**: `A-car-demo-frontend/A2-rental-staff-app/`
 
 **Key Expertise**:
 - React/React Native development
 - REST API consumption
 - Mobile and web UI patterns
-- Frontend testing strategies
+- Frontend testing strategies (Jest, React Native Testing Library)
 - **Distributed system communication**
 
 ### Agent B - Backend Analysis Agent
@@ -87,17 +124,80 @@ This document describes the AI agent system for the car demo project. Three spec
 - Respond to Agent A with backend analysis
 - Recommend backend test cases
 
-**Components**:
-- B1 Web Server (REST API)
-- B2 IoT Gateway (WebSocket + REST)
-- B3 MongoDB (Realtime Database)
-- B4 PostgreSQL (Static Database)
+**Subcomponents**:
+
+#### B1: Web Server (REST API)
+- **Technology**: Node.js + Express
+- **Purpose**: Main REST API server for the application
+- **Port**: 3001
+- **Key Features**:
+  - User authentication (JWT)
+  - Car fleet management endpoints
+  - Booking CRUD operations
+  - Business logic layer
+  - API documentation (Swagger)
+- **Databases Used**: B3 (MongoDB), B4 (PostgreSQL)
+- **APIs Provided**: 
+  - `GET/POST /api/cars`
+  - `GET/POST /api/bookings`
+  - `GET /api/users`
+  - `POST /api/commands/{carId}`
+- **File Location**: `B-car-demo-backend/B1-web-server/`
+
+#### B2: IoT Gateway
+- **Technology**: Node.js + WebSocket + Socket.io
+- **Purpose**: Real-time communication hub for IoT devices and clients
+- **Port**: 3002 (REST), WebSocket on same port
+- **Key Features**:
+  - WebSocket server for real-time updates
+  - IoT device command routing
+  - Event streaming to frontend clients
+  - Sensor data ingestion
+  - Connection management
+- **Databases Used**: B3 (MongoDB) for caching
+- **Communication**: C2 (Central Broker) via Redis pub/sub
+- **APIs Provided**:
+  - `POST /api/sensor-data`
+  - `GET /api/sensor-data/latest`
+  - `WS /` (WebSocket connection)
+- **File Location**: `B-car-demo-backend/B2-iot-gateway/`
+
+#### B3: Realtime Database (MongoDB)
+- **Technology**: MongoDB
+- **Purpose**: NoSQL database for real-time, frequently changing data
+- **Port**: 27017
+- **Key Collections**:
+  - `cars`: Real-time car status (battery, location, temperature)
+  - `sessions`: Active user sessions
+  - `iot_data`: Sensor data cache
+  - `events`: Real-time event log
+- **Characteristics**: 
+  - Flexible schema for IoT data
+  - High write throughput
+  - TTL indexes for auto-expiring data
+- **File Location**: `B-car-demo-backend/B3-realtime-database/`
+
+#### B4: Static Database (PostgreSQL)
+- **Technology**: PostgreSQL
+- **Purpose**: Relational database for transactional, structured data
+- **Port**: 5432
+- **Key Tables**:
+  - `users`: User accounts and profiles
+  - `bookings`: Booking records
+  - `fleet`: Car fleet master data
+  - `reports`: Analytics and reports
+- **Characteristics**:
+  - ACID compliance
+  - Complex queries and joins
+  - Data integrity constraints
+- **File Location**: `B-car-demo-backend/B4-static-database/`
 
 **Key Expertise**:
 - Node.js/Express development
 - Database design (SQL + NoSQL)
 - API design and documentation
-- Backend testing strategies
+- WebSocket and real-time communication
+- Backend testing strategies (Jest, Supertest)
 - Microservices architecture
 
 ### Agent C - In-Car Systems Analysis Agent
@@ -111,17 +211,63 @@ This document describes the AI agent system for the car demo project. Three spec
 - Respond to Agent A with in-car analysis
 - Recommend in-car system test cases
 
-**Components**:
-- C1 Cloud Communication (Python)
-- C2 Central Broker (Node.js + Redis)
-- C5 Data Sensors (Python)
+**Subcomponents**:
+
+#### C1: Cloud Communication
+- **Technology**: Python (asyncio, aiohttp, websockets)
+- **Purpose**: Bridge between in-car systems and cloud backend
+- **Port**: N/A (client-side connector)
+- **Key Features**:
+  - Async communication with B2 IoT Gateway
+  - WebSocket client for real-time updates
+  - Data aggregation from C2 Central Broker
+  - Retry logic and connection management
+  - Authentication with cloud services
+- **Communication**: 
+  - Reads from C2 (Redis) via `get_latest_data_from_c2()`
+  - Sends to B2 (IoT Gateway) via WebSocket
+- **File Location**: `C-car-demo-in-car/C1-cloud-communication/`
+
+#### C2: Central Broker
+- **Technology**: Redis (pub/sub messaging)
+- **Purpose**: Central message broker for in-car component communication
+- **Port**: 6379
+- **Key Features**:
+  - Pub/sub messaging between car components
+  - Data caching and aggregation
+  - Channel-based routing (sensors:*, vehicle:*, commands:*)
+  - Message persistence with TTL
+  - High-throughput message handling
+- **Channels**:
+  - `sensors:temperature` - Temperature sensor data
+  - `sensors:gps` - GPS location data
+  - `sensors:battery` - Battery status
+  - `vehicle:status` - General vehicle status
+  - `commands:*` - Command routing to vehicle systems
+- **Communication**: Receives from C5, publishes to C1
+- **File Location**: `C-car-demo-in-car/C2-central-broker/`
+
+#### C5: Data Sensors
+- **Technology**: Python (sensor simulation)
+- **Purpose**: Simulates vehicle sensors and generates test data
+- **Port**: N/A (data generator)
+- **Key Features**:
+  - Temperature sensor simulation
+  - GPS location simulation (with realistic movement)
+  - Battery status simulation
+  - Speed and acceleration simulation
+  - Tire pressure simulation
+  - Configurable data generation rates
+- **Communication**: Publishes to C2 (Redis) on sensor channels
+- **File Location**: `C-car-demo-in-car/C5-data-sensors/`
 
 **Key Expertise**:
-- Sensor data handling
+- Sensor data handling and simulation
 - Redis pub/sub patterns
 - WebSocket communication
-- System constraints
-- IoT system testing
+- Python async programming
+- System constraints and embedded systems
+- IoT system testing (pytest, pytest-asyncio)
 
 ## Distributed Feature Analysis Workflow
 
