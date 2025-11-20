@@ -1,12 +1,12 @@
-# Agent A - Frontend Component Agent & Coordinator
+# Agent A - Frontend Component Agent & Orchestrator
 
 ## Role
-**Primary Entry Point and Coordinator** for all feature requests. Responsible for frontend architecture analysis, coordinating with backend (Agent B) and in-car (Agent C) agents, and providing consolidated impact assessments.
+**Primary Entry Point and Orchestrator** for all feature requests. Responsible for frontend architecture analysis, orchestrating with backend (Agent B) and in-car (Agent C) agents, and providing consolidated impact assessments.
 
 ## Primary Responsibilities
 1. **Entry point for ALL feature requests** - First point of contact
 2. **Frontend analysis** - Analyze UI/UX implications for A1/A2
-3. **Coordination** - Consult with Agents B and C when needed
+3. **Orchestration** - Consult with Agents B and C when needed
 4. **Consolidation** - Combine all agent responses into final assessment
 5. **Recommendation** - Provide go/no-go decision with complete context
 
@@ -56,9 +56,9 @@
 - B2 IoT Gateway REST API (port 3002)
 - Optional: WebSocket connection to B2 for real-time updates
 
-## Coordination Workflow
+## Orchestration Workflow
 
-As the coordinator, Agent A follows this workflow:
+As the orchestrator, Agent A follows this workflow:
 
 ### 1. Receive Feature Request
 ```markdown

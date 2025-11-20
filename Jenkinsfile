@@ -8,9 +8,9 @@ pipeline {
             description: 'Describe the feature you want to analyze - will be sent to Agent A who will coordinate with other agents as needed'
         )
         booleanParam(
-            name: 'USE_AI_COORDINATION',
+            name: 'USE_AI_AGENTS',
             defaultValue: true,
-            description: 'Use AI to dynamically coordinate agents and generate analysis (requires Ollama)'
+            description: 'Use AI to dynamically orchestrate agents and generate analysis (requires Ollama)'
         )
         string(
             name: 'OLLAMA_MODEL',
@@ -53,7 +53,7 @@ pipeline {
                 echo "[AI] AI-Driven Multi-Agent Feature Analysis"
                 echo "=========================================="
                 echo "Request: ${params.FEATURE_REQUEST}"
-                echo "AI Coordination: ${params.USE_AI_COORDINATION}"
+                echo "AI Agents: ${params.USE_AI_AGENTS}"
                 echo "Model: ${params.OLLAMA_MODEL}"
                 echo "Timestamp: ${env.TIMESTAMP}"
                 echo ""
@@ -68,7 +68,7 @@ pipeline {
         
         stage('Validate Ollama') {
             when {
-                expression { params.USE_AI_COORDINATION == true }
+                expression { params.USE_AI_AGENTS == true }
             }
             steps {
                 script {
@@ -97,12 +97,12 @@ pipeline {
             }
         }
         
-        stage('AI Agent Coordination') {
+        stage('AI Agent Analysis') {
             when {
-                expression { params.USE_AI_COORDINATION == true }
+                expression { params.USE_AI_AGENTS == true }
             }
             steps {
-                echo "[AI] Running AI-driven agent coordination..."
+                echo "[AI] Running AI-driven agent analysis..."
                 echo "Agent A will analyze and determine if Agents B or C are needed..."
                 
                 script {
@@ -116,16 +116,16 @@ pipeline {
                                 "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \\
                                 "${OLLAMA_HOST}" \\
                                 "${params.OLLAMA_MODEL}" \\
-                                2>&1 | tee ${ANALYSIS_DIR}/coordination-log.txt
+                                2>&1 | tee ${ANALYSIS_DIR}/agent-log.txt
                             
                             EXIT_CODE=\${PIPESTATUS[0]}
                             
                             if [ \$EXIT_CODE -ne 0 ]; then
-                                echo "[ERROR] AI coordination failed with exit code \$EXIT_CODE"
+                                echo "[ERROR] AI agent analysis failed with exit code \$EXIT_CODE"
                                 exit \$EXIT_CODE
                             fi
                             
-                            echo "[OK] AI coordination completed successfully"
+                            echo "[OK] AI agent analysis completed successfully"
                         """
                         
                         // Read and display the results
@@ -135,7 +135,7 @@ pipeline {
                         echo report.take(500) + "..."
                         
                     } catch (Exception e) {
-                        error("AI coordination failed: ${e.message}")
+                        error("AI agent analysis failed: ${e.message}")
                     }
                 }
             }
@@ -143,7 +143,7 @@ pipeline {
         
         stage('Generate Implementation Plan') {
             when {
-                expression { params.USE_AI_COORDINATION == true }
+                expression { params.USE_AI_AGENTS == true }
             }
             steps {
                 echo "[PLAN] Generating suggested implementation plan..."
@@ -164,8 +164,8 @@ analysis_dir = "${ANALYSIS_DIR}"
 output_file = "${params.OUTPUT_FILE}"
 plan_file = os.path.join(analysis_dir, "implementation-plan.md")
 
-# Parse the coordination log to extract JSON results
-log_file = os.path.join(analysis_dir, "coordination-log.txt")
+# Parse the agent log to extract JSON results
+log_file = os.path.join(analysis_dir, "agent-log.txt")
 json_data = None
 
 if os.path.exists(log_file):
@@ -334,7 +334,7 @@ PYTHON_SCRIPT
         
         stage('Fallback: Manual Analysis') {
             when {
-                expression { params.USE_AI_COORDINATION == false }
+                expression { params.USE_AI_AGENTS == false }
             }
             steps {
                 echo "[DOC] Running manual (hardcoded) analysis..."
@@ -344,11 +344,11 @@ PYTHON_SCRIPT
 
 **Feature Request**: ${params.FEATURE_REQUEST}
 **Generated**: ${env.TIMESTAMP}
-**Mode**: Manual (AI coordination disabled)
+**Mode**: Manual (AI agents disabled)
 
 ## Note
 This is a fallback manual analysis. For dynamic AI-driven analysis that automatically 
-coordinates between agents, enable USE_AI_COORDINATION parameter.
+orchestrates agents, enable USE_AI_AGENTS parameter.
 
 ## Agent A - Frontend Analysis
 - Mobile app changes needed
@@ -356,9 +356,9 @@ coordinates between agents, enable USE_AI_COORDINATION parameter.
 - API integration required
 
 ## Next Steps
-1. Enable AI coordination for detailed analysis
+1. Enable AI agents for detailed analysis
 2. Ensure Ollama is running
-3. Re-run pipeline with USE_AI_COORDINATION=true
+3. Re-run pipeline with USE_AI_AGENTS=true
 """
                     
                     writeFile file: "${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}", text: manualReport
@@ -415,9 +415,9 @@ coordinates between agents, enable USE_AI_COORDINATION parameter.
             echo "    • backend-api.js"
             echo "    • sensor-integration.py"
             echo "    • ui-design-spec.md"
-            echo "  - Coordination Log: ${env.ANALYSIS_DIR}/coordination-log.txt"
+            echo "  - Agent Log: ${env.ANALYSIS_DIR}/agent-log.txt"
             echo ""
-            echo "[AI] Agents were dynamically coordinated based on AI analysis"
+            echo "[AI] Agents were dynamically orchestrated based on AI analysis"
             echo "[CODE] Code examples generated automatically"
             echo "[PLAN] Step-by-step implementation plan created"
         }

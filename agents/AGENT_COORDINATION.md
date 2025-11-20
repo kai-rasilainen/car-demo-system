@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the AI agent system for the car demo project. Three specialized agents operate as independent entities. Each agent analyzes feature requests from their domain perspective and communicates with other agents when cross-domain coordination is needed.
+This document describes the AI agent system for the car demo project. Three specialized agents operate as independent entities. Each agent analyzes feature requests from their domain perspective and communicates with other agents when cross-domain orchestration is needed.
 
 ## Distributed Agent Architecture
 
@@ -835,7 +835,7 @@ Feature Request Arrives
 
 ### High Risk ([STOP] DO NOT PROCEED / MAJOR PLANNING REQUIRED)
 - Major breaking changes
-- Complex cross-component coordination
+- Complex cross-component orchestration
 - New technology/paradigms
 - > 7 days effort
 - Safety/security critical

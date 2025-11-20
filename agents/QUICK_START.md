@@ -124,10 +124,10 @@ Based on Agent A's consolidated report:
 ## Common Questions
 
 ### Q: Do I always start with Agent A?
-**A**: YES! Agent A is the entry point for ALL feature requests. It will coordinate with Agents B and C if needed.
+**A**: YES! Agent A is the entry point for ALL feature requests. It will orchestrate with Agents B and C if needed.
 
 ### Q: Can I talk directly to Agent B or Agent C?
-**A**: No - always go through Agent A. Agent A knows when to involve them and will handle the coordination.
+**A**: No - always go through Agent A. Agent A knows when to involve them and will handle the orchestration.
 
 ### Q: What if my feature is backend-only or sensor-only?
 **A**: Still start with Agent A. It will quickly determine that and consult the appropriate agent. Agent A ensures nothing is missed.
@@ -273,7 +273,7 @@ Agent A: Frontend rendering limits?
 
 - **Read full agent documents** in `agents/` folder for detailed capabilities
 - **Try with a simple feature** to see how it works
-- **Review coordination document** (`AGENT_COORDINATION.md`) for complex features
+- **Review agent document** (`AGENT_COORDINATION.md`) for complex features
 - **Provide feedback** to improve agent accuracy
 
 ## Getting Help
@@ -281,7 +281,7 @@ Agent A: Frontend rendering limits?
 If you need clarification on agent outputs:
 - Check the individual agent document (agent-a-frontend.md, etc.)
 - Review example analyses in each document
-- Look at AGENT_COORDINATION.md for communication protocols
+- Look at AGENT_COORDINATION.md for orchestration protocols
 
 ## Summary: When to Use Each Agent
 

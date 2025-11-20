@@ -1,4 +1,4 @@
-# AI Agent Coordination - Quick Reference
+# AI Agent System - Quick Reference
 
 ## Architecture
 ```
@@ -55,7 +55,7 @@ cp Jenkinsfile.ai Jenkinsfile
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | FEATURE_REQUEST | "Add tire pressure..." | Feature description |
-| USE_AI_COORDINATION | true | Use AI (vs manual) |
+| USE_AI_AGENTS | true | Use AI (vs manual) |
 | OLLAMA_MODEL | llama2 | Model to use |
 | OUTPUT_FILE | ai-feature-analysis.md | Output filename |
 
@@ -63,10 +63,10 @@ cp Jenkinsfile.ai Jenkinsfile
 
 | File | Purpose |
 |------|---------|
-| `scripts/ai-agent-coordinator.py` | AI coordination engine |
+| `scripts/ai-agent-coordinator.py` | AI orchestration engine |
 | `Jenkinsfile.ai` | New AI-driven pipeline |
 | `Jenkinsfile.backup` | Original pipeline |
-| `AI_AGENT_COORDINATION.md` | Full docs |
+| `AI_AGENT_SYSTEM.md` | Full docs |
 | `IMPLEMENTATION_SUMMARY.md` | Implementation details |
 
 ## Agents
@@ -85,7 +85,7 @@ cp Jenkinsfile.ai Jenkinsfile
 | Model not found | Pull: `ollama pull llama2` |
 | Timeout | Increase timeout in .py |
 | Bad JSON from AI | Use codellama model |
-| No AI available | Set USE_AI_COORDINATION=false |
+| No AI available | Set USE_AI_AGENTS=false |
 
 ## Output
 
@@ -93,7 +93,7 @@ cp Jenkinsfile.ai Jenkinsfile
 ```
 analysis-reports/
 ├── ai-feature-analysis.md    # Main report
-└── coordination-log.txt       # Execution log
+└── agent-log.txt              # Execution log
 ```
 
 ### Report Structure
@@ -127,7 +127,7 @@ ollama serve
 
 # 3. Deploy
 cp Jenkinsfile.ai Jenkinsfile
-git commit -am "AI coordination"
+git commit -am "AI agent system"
 git push
 
 # 4. Run in Jenkins

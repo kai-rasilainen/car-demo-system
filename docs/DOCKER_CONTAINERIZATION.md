@@ -167,7 +167,7 @@ All services include health checks:
 The containerized system fully supports the AI Agent Coordinator:
 
 - All agents (A1, A2, B1-B4, C1-C5) now have their corresponding containerized services
-- Agent coordination works across the containerized network
+- Agent orchestration works across the containerized network
 - Generated code examples reflect the containerized architecture
 - Jenkins pipeline can build and test containerized components
 

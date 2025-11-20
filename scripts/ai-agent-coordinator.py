@@ -710,8 +710,8 @@ Be specific and detailed."""
         lines.append("|" + f" Total Effort: {total_effort} hours".ljust(header_width - 2) + "|")
         lines.append("+" + "-" * (header_width - 2) + "+")
         
-        # Agent coordination tree
-        lines.append("|" + " Agent Coordination Flow".ljust(header_width - 2) + "|")
+        # Agent orchestration tree
+        lines.append("|" + " Agent Orchestration Flow".ljust(header_width - 2) + "|")
         lines.append("+" + "-" * (header_width - 2) + "+")
         
         if results.get('call_tree'):
@@ -780,7 +780,7 @@ Be specific and detailed."""
             
             # Show agent call tree
             if results.get('call_tree'):
-                f.write("## Agent Coordination Flow\n\n")
+                f.write("## Agent Orchestration Flow\n\n")
                 f.write("```\n")
                 for call in results['call_tree']:
                     indent = "  " * call['level']

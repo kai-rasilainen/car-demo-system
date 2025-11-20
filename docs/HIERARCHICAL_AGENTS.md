@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Agent Coordination system now uses a **hierarchical structure** where each component has its own dedicated agent. Each agent only knows about the APIs of its downstream dependencies, creating a clean separation of concerns.
+The AI Agent System uses a **hierarchical structure** where each component has its own dedicated agent. Each agent only knows about the APIs of its downstream dependencies, creating a clean separation of concerns.
 
 ## Agent Structure
 
@@ -126,16 +126,16 @@ Each agent makes an **independent AI-driven decision** about whether it needs he
 1. **Realistic Modeling**: Mimics real-world team structure where each developer knows their domain and APIs
 2. **Scalability**: Easy to add new agents without modifying existing ones
 3. **Clear Boundaries**: Each agent has well-defined responsibilities
-4. **Dynamic Coordination**: AI decides the coordination flow, not hardcoded rules
+4. **Dynamic Orchestration**: AI decides the agent flow, not hardcoded rules
 5. **API-Focused**: Agents interact through defined APIs, just like real systems
 
 ## Output
 
 The system generates:
-1. **Analysis Report**: Shows which agents were involved, their analyses, and the coordination flow
+1. **Analysis Report**: Shows which agents were involved, their analyses, and the agent flow
 2. **Code Examples**: Frontend (JSX), backend (JS), and sensor (Python) code
 3. **UI Mockup**: ASCII art interface design
-4. **Call Tree**: Visual representation of agent coordination hierarchy
+4. **Call Tree**: Visual representation of agent hierarchy
 
 ## Configuration
 
