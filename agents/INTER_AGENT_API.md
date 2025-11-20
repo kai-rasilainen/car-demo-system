@@ -4,7 +4,7 @@
 
 This document describes the API communication protocol between independent agents and their subcomponents when processing a user feature request. 
 
-**Communication Architecture**: Strict hierarchical layering (A → B → C)
+**Communication Architecture**: Strict hierarchical layering (A -> B -> C)
 - **Agent A** only communicates with **Agent B**
 - **Agent B** communicates with **Agent A** (upstream) and **Agent C** (downstream)
 - **Agent C** only communicates with **Agent B**
@@ -35,44 +35,44 @@ The agents communicate via RESTful APIs or message queues to perform independent
 ## Component Communication Map
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend Layer (Agent A)                  │
-├─────────────────────────────────────────────────────────────┤
-│  A1: Car User App          A2: Rental Staff App             │
-│  (React Native)            (React Web)                       │
-│       │                         │                            │
-│       └─────────┬───────────────┘                            │
-└─────────────────┼──────────────────────────────────────────┘
-                  │ REST API calls
-┌─────────────────┼──────────────────────────────────────────┐
-│                 ▼         Backend Layer (Agent B)           │
-├─────────────────────────────────────────────────────────────┤
-│  B1: Web Server (REST API) ◄──► B3: MongoDB (Realtime)     │
-│  Port 3001                 │     Port 27017                 │
-│       │                    │                                 │
-│       └──► B4: PostgreSQL (Static)                          │
-│            Port 5432                                         │
-│                                                              │
-│  B2: IoT Gateway (WebSocket) ◄──► B3: MongoDB (Cache)      │
-│  Port 3002                   │                              │
-│       │                      │                              │
-└───────┼──────────────────────┼──────────────────────────────┘
-        │ WebSocket            │ Redis pub/sub
-┌───────┼──────────────────────┼──────────────────────────────┐
-│       ▼                      ▼  In-Car Layer (Agent C)      │
-├─────────────────────────────────────────────────────────────┤
-│  C1: Cloud Communication                                     │
-│  (Python async, WebSocket client)                           │
-│       │                                                      │
-│       ▼ get_latest_data_from_c2()                          │
-│  C2: Central Broker (Redis pub/sub)                         │
-│  Port 6379                                                   │
-│  Channels: sensors:*, vehicle:*, commands:*                 │
-│       ▲                                                      │
-│       │ publish sensor data                                 │
-│  C5: Data Sensors (Python simulation)                       │
-│  (Temperature, GPS, Battery, Speed, Tire Pressure)          │
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|                    Frontend Layer (Agent A)                 |
++-------------------------------------------------------------+
+|  A1: Car User App          A2: Rental Staff App            |
+|  (React Native)            (React Web)                      |
+|       |                         |                           |
+|       +-------------+-----------+                           |
++---------------------+---------------------------------------+
+                      | REST API calls
++---------------------v---------------------------------------+
+|                             Backend Layer (Agent B)         |
++-------------------------------------------------------------+
+|  B1: Web Server (REST API) <---> B3: MongoDB (Realtime)    |
+|  Port 3001                 |     Port 27017                |
+|       |                    |                                |
+|       +---> B4: PostgreSQL (Static)                        |
+|            Port 5432                                        |
+|                                                             |
+|  B2: IoT Gateway (WebSocket) <---> B3: MongoDB (Cache)     |
+|  Port 3002                   |                             |
+|       |                      |                             |
++-------+----------------------+-----------------------------+
+        | WebSocket            | Redis pub/sub
++-------v----------------------v-----------------------------+
+|                             In-Car Layer (Agent C)          |
++-------------------------------------------------------------+
+|  C1: Cloud Communication                                    |
+|  (Python async, WebSocket client)                          |
+|       |                                                     |
+|       v get_latest_data_from_c2()                          |
+|  C2: Central Broker (Redis pub/sub)                        |
+|  Port 6379                                                  |
+|  Channels: sensors:*, vehicle:*, commands:*                |
+|       ^                                                     |
+|       | publish sensor data                                |
+|  C5: Data Sensors (Python simulation)                      |
+|  (Temperature, GPS, Battery, Speed, Tire Pressure)         |
++-------------------------------------------------------------+
 ```
 
 ## Agent Endpoints
@@ -376,7 +376,7 @@ X-Response-Time: 2.3s
   
   "test_requirements": [
     "B1: Unit tests for API endpoint with tire pressure field",
-    "B2: Integration tests for Redis → B2 → B3 data flow",
+    "B2: Integration tests for Redis -> B2 -> B3 data flow",
     "B2: WebSocket streaming test",
     "B3: MongoDB write/read performance test",
     "B2: Load testing for real-time updates with 1000+ cars"
@@ -434,7 +434,7 @@ X-Correlation-ID: corr-2025-11-19-001
     "unit": "bar",
     "range": "1.5-4.0",
     "update_frequency": "10 seconds",
-    "communication_flow": "C5 → C2 (Redis) → C1 → B2",
+    "communication_flow": "C5 -> C2 (Redis) -> C1 -> B2",
     "redis_channel": "sensors:tire_pressure",
     "target_backend_component": "B2 IoT Gateway"
   },
@@ -503,7 +503,7 @@ X-Response-Time: 1.8s
       "details": [
         "Existing get_latest_data_from_c2() already fetches all sensor data from C2",
         "Existing WebSocket connection to B2 handles all sensor types",
-        "Data automatically flows: C5 → C2 → C1 → B2"
+        "Data automatically flows: C5 -> C2 -> C1 -> B2"
       ],
       "effort_hours": 0,
       "reason": "Generic sensor data pipeline already in place"
@@ -511,7 +511,7 @@ X-Response-Time: 1.8s
   },
   
   "data_flow": {
-    "path": "C5 → C2 (Redis pub/sub) → C1 (async fetch) → B2 (WebSocket)",
+    "path": "C5 -> C2 (Redis pub/sub) -> C1 (async fetch) -> B2 (WebSocket)",
     "redis_channel": "sensors:tire_pressure",
     "message_format": {
       "type": "sensor_data",
@@ -561,7 +561,7 @@ X-Response-Time: 1.8s
     "C5: Test realistic value generation and fluctuation",
     "C2: Integration test for sensors:tire_pressure channel",
     "C2: Test message aggregation and forwarding",
-    "E2E: Test complete flow C5 → C2 → C1 → B2 → B1 → A1"
+    "E2E: Test complete flow C5 -> C2 -> C1 -> B2 -> B1 -> A1"
   ],
   
   "hardware_notes": "For production with real vehicles, requires TPMS (Tire Pressure Monitoring System) integration via CAN bus. Current simulation sufficient for demo.",
@@ -607,7 +607,7 @@ X-Response-Time: 4.5s
     "c2_broker": "Add Redis channel - 1 hr",
     "c1_communication": "No changes needed",
     "incar_total": "4 hours",
-    "data_flow": "C5 → C2 → C1 → B2 → B3 → B1"
+    "data_flow": "C5 -> C2 -> C1 -> B2 -> B3 -> B1"
   },
   
   "complete_backend_effort": {
@@ -968,102 +968,102 @@ X-Webhook-Signature: sha256=...
 
 ### Tire Pressure Monitoring - End-to-End Flow
 
-**Agent Communication Flow**: User → A → B → C (then back: C → B → A → User)
+**Agent Communication Flow**: User -> A -> B -> C (then back: C -> B -> A -> User)
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                      User Layer                                     │
-│                                                                     │
-│  👤 User opens A1 (Mobile) or A2 (Web) app                         │
-│     Requests tire pressure for car "ABC-123"                       │
-└─────────────────────────┬──────────────────────────────────────────┘
-                          │ HTTP GET /api/car/ABC-123
-┌─────────────────────────▼──────────────────────────────────────────┐
-│                  Frontend Layer (Agent A)                           │
-│              [NO] Cannot talk to Agent C directly                   │
-├─────────────────────────────────────────────────────────────────────┤
-│  A1: Mobile App (React Native)                                      │
-│     - Displays tire pressure gauge                                  │
-│     - Shows warning if pressure < 2.0 bar                          │
-│                                                                     │
-│  A2: Staff Web App (React)                                         │
-│     - Fleet monitoring dashboard                                    │
-│     - Real-time alerts for all vehicles                            │
-└─────────────────────────┬──────────────────────────────────────────┘
-                          │ API Call: GET /api/car/ABC-123
-                          │ (Agent A only talks to Agent B)
-┌─────────────────────────▼──────────────────────────────────────────┐
-│                   Backend Layer (Agent B)                           │
-│         [YES] Can talk to Agent A (up) and Agent C (down)           │
-├─────────────────────────────────────────────────────────────────────┤
-│  B1: Web Server (Express) Port 3001                                │
-│     - Receives API request from A                                   │
-│     - Queries B3 for car data                                       │
-│     - Returns JSON with tirePressure field                          │
-│          │                                                          │
-│          ▼ MongoDB query                                            │
-│  B3: MongoDB Port 27017                                            │
-│     - Collection: cars                                              │
-│     - Document: {                                                   │
-│         licensePlate: "ABC-123",                                    │
-│         tirePressure: {                                             │
-│           frontLeft: 2.3,                                           │
-│           frontRight: 2.4,                                          │
-│           rearLeft: 2.2,                                            │
-│           rearRight: 2.2,                                           │
-│           timestamp: "2025-11-19T10:02:00Z"                        │
-│         }                                                           │
-│       }                                                             │
-│                                                                     │
-│  B2: IoT Gateway (WebSocket) Port 3002                             │
-│     - Receives sensor data from C1                                  │
-│     - Updates B3 MongoDB in real-time                              │
-│     - Streams updates to A2 via WebSocket                          │
-│          ▲ WebSocket connection from C1                             │
-└──────────┼─────────────────────────────────────────────────────────┘
-           │ sensor data stream (B requests from C)
-┌──────────▼─────────────────────────────────────────────────────────┐
-│                  In-Car Layer (Agent C)                             │
-│              [NO] Cannot talk to Agent A directly                   │
-│              [YES] Only responds to Agent B requests                │
-│                  In-Car Layer (Agent C)                             │
-├─────────────────────────────────────────────────────────────────────┤
-│  C1: Cloud Communication (Python async)                            │
-│     - get_latest_data_from_c2() every 10 sec                       │
-│     - Reads from C2 Redis                                           │
-│     - Sends to B2 via WebSocket                                     │
-│          ▲                                                          │
-│          │ Redis GET                                                │
-│  C2: Central Broker (Redis) Port 6379                              │
-│     - Pub/Sub channels:                                             │
-│       • sensors:tire_pressure                                       │
-│     - Stores latest tire pressure data                              │
-│     - Key: sensors:tire_pressure:ABC-123                           │
-│          ▲                                                          │
-│          │ PUBLISH                                                  │
-│  C5: Data Sensors (Python simulation)                              │
-│     - TirePressureSensor class                                      │
-│     - Generates realistic data every 10 sec:                        │
-│       {                                                             │
-│         carId: "car-001",                                           │
-│         licensePlate: "ABC-123",                                    │
-│         frontLeft: 2.3,  ← Random 2.0-2.5 bar                      │
-│         frontRight: 2.4, ← ±0.1 bar fluctuation                    │
-│         rearLeft: 2.2,   ← Slow leak simulation                    │
-│         rearRight: 2.2,                                             │
-│         timestamp: ISO8601                                          │
-│       }                                                             │
-│     - Publishes to Redis channel                                    │
-└─────────────────────────────────────────────────────────────────────┘
++--------------------------------------------------------------------+
+|                      User Layer                                    |
+|                                                                    |
+|  User opens A1 (Mobile) or A2 (Web) app                           |
+|     Requests tire pressure for car "ABC-123"                      |
++--------------------------+-------------------------------------+
+                           | HTTP GET /api/car/ABC-123
++--------------------------v-------------------------------------+
+|                  Frontend Layer (Agent A)                          |
+|              [NO] Cannot talk to Agent C directly                  |
++--------------------------------------------------------------------+
+|  A1: Mobile App (React Native)                                     |
+|     - Displays tire pressure gauge                                 |
+|     - Shows warning if pressure < 2.0 bar                         |
+|                                                                    |
+|  A2: Staff Web App (React)                                        |
+|     - Fleet monitoring dashboard                                   |
+|     - Real-time alerts for all vehicles                           |
++--------------------------+-------------------------------------+
+                           | API Call: GET /api/car/ABC-123
+                           | (Agent A only talks to Agent B)
++--------------------------v-------------------------------------+
+|                   Backend Layer (Agent B)                          |
+|         [YES] Can talk to Agent A (up) and Agent C (down)          |
++--------------------------------------------------------------------+
+|  B1: Web Server (Express) Port 3001                               |
+|     - Receives API request from A                                  |
+|     - Queries B3 for car data                                      |
+|     - Returns JSON with tirePressure field                         |
+|          |                                                         |
+|          v MongoDB query                                           |
+|  B3: MongoDB Port 27017                                           |
+|     - Collection: cars                                             |
+|     - Document: {                                                  |
+|         licensePlate: "ABC-123",                                   |
+|         tirePressure: {                                            |
+|           frontLeft: 2.3,                                          |
+|           frontRight: 2.4,                                         |
+|           rearLeft: 2.2,                                           |
+|           rearRight: 2.2,                                          |
+|           timestamp: "2025-11-19T10:02:00Z"                       |
+|         }                                                          |
+|       }                                                            |
+|                                                                    |
+|  B2: IoT Gateway (WebSocket) Port 3002                            |
+|     - Receives sensor data from C1                                 |
+|     - Updates B3 MongoDB in real-time                             |
+|     - Streams updates to A2 via WebSocket                         |
+|          ^ WebSocket connection from C1                            |
++----------+----------------------------------------------------------+
+           | sensor data stream (B requests from C)
++----------v----------------------------------------------------------+
+|                  In-Car Layer (Agent C)                            |
+|              [NO] Cannot talk to Agent A directly                  |
+|              [YES] Only responds to Agent B requests               |
+|                  In-Car Layer (Agent C)                            |
++--------------------------------------------------------------------+
+|  C1: Cloud Communication (Python async)                           |
+|     - get_latest_data_from_c2() every 10 sec                      |
+|     - Reads from C2 Redis                                          |
+|     - Sends to B2 via WebSocket                                    |
+|          ^                                                         |
+|          | Redis GET                                               |
+|  C2: Central Broker (Redis) Port 6379                             |
+|     - Pub/Sub channels:                                            |
+|       - sensors:tire_pressure                                      |
+|     - Stores latest tire pressure data                             |
+|     - Key: sensors:tire_pressure:ABC-123                          |
+|          ^                                                         |
+|          | PUBLISH                                                 |
+|  C5: Data Sensors (Python simulation)                             |
+|     - TirePressureSensor class                                     |
+|     - Generates realistic data every 10 sec:                       |
+|       {                                                            |
+|         carId: "car-001",                                          |
+|         licensePlate: "ABC-123",                                   |
+|         frontLeft: 2.3,  <- Random 2.0-2.5 bar                    |
+|         frontRight: 2.4, <- +/-0.1 bar fluctuation                |
+|         rearLeft: 2.2,   <- Slow leak simulation                  |
+|         rearRight: 2.2,                                            |
+|         timestamp: ISO8601                                         |
+|       }                                                            |
+|     - Publishes to Redis channel                                   |
++--------------------------------------------------------------------+
 
 Data Flow Summary:
-  C5 (generate) → C2 (Redis pub/sub) → C1 (async fetch) → 
-  B2 (WebSocket) → B3 (MongoDB store) → B1 (REST API) → 
+  C5 (generate) -> C2 (Redis pub/sub) -> C1 (async fetch) -> 
+  B2 (WebSocket) -> B3 (MongoDB store) -> B1 (REST API) -> 
   A1/A2 (display)
 
 Agent Communication Flow (strict hierarchy):
-  User → A → B → C (for analysis)
-  C → B → A → User (for response)
+  User -> A -> B -> C (for analysis)
+  C -> B -> A -> User (for response)
   
   [NO] A never directly contacts C
   [YES] All C interactions go through B
@@ -1078,7 +1078,7 @@ Latency: < 100ms from C5 to A1/A2
 
 This API protocol enables:
 
-1. [YES] **Strict Hierarchical Architecture**: A → B → C (no A to C direct communication)
+1. [YES] **Strict Hierarchical Architecture**: A -> B -> C (no A to C direct communication)
 2. [YES] **Distributed Components**: Agents operate independently with specialized subcomponents (A1/A2, B1-B4, C1/C2/C5)
 3. [YES] **Layered Orchestration**: Agent B acts as middle layer orchestrator between A and C
 4. [YES] **Consolidated Results**: Agent B consolidates C response, Agent A consolidates B response
@@ -1092,6 +1092,6 @@ The protocol supports the strict hierarchical model where:
 - **Agent A** (A1, A2) is the user entry point and only talks to Agent B
 - **Agent B** (B1, B2, B3, B4) is the orchestration layer, talks to A (upstream) and C (downstream)
 - **Agent C** (C1, C2, C5) handles in-car systems and only responds to Agent B
-- All communication follows the chain: A ↔ B ↔ C (never A ↔ C)
+- All communication follows the chain: A <-> B <-> C (never A <-> C)
 - Agent B shields Agent A from in-car complexity
 - Results flow back through the same hierarchy

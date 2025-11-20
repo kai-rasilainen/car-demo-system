@@ -55,7 +55,7 @@ This document describes the AI agent system for the car demo project. Three spec
             +-------------------------------------------+
 ```
 
-**Hierarchical Agent Architecture** (Strict layering: A → B → C):
+**Hierarchical Agent Architecture** (Strict layering: A -> B -> C):
 1. **Agent A (Frontend Layer)** - Entry point for all requests
    - **A1**: Car User Mobile App (React Native)
    - **A2**: Rental Staff Web App (React)
@@ -436,7 +436,7 @@ Data Format:
 }
 
 Redis Channel: sensors:tire_pressure
-Communication: C5 → C2 → C1 → B2
+Communication: C5 -> C2 -> C1 -> B2
 
 In-Car Effort: 4 hours
 Risks: Low (simulation only, no real hardware)
@@ -450,7 +450,7 @@ Agent B's Consolidated Analysis:
 - Backend changes: B1 (API), B2 (IoT), B3 (DB) = 4 hours
 - In-car changes: C5 (sensors), C2 (broker) = 4 hours
 - Total backend layer effort: 8 hours
-- Data flow verified: C5 → C2 → C1 → B2 → B3 → B1 → API
+- Data flow verified: C5 -> C2 -> C1 -> B2 -> B3 -> B1 -> API
 - Status: FEASIBLE
 ```
 
@@ -472,7 +472,7 @@ Backend Implementation (B1, B2, B3, B4):
 - B4: No changes needed
 
 Data Source: In-car sensor system (handled by backend layer)
-- Sensors will provide data via Redis → C1 → B2 → B3
+- Sensors will provide data via Redis -> C1 -> B2 -> B3
 - Backend will aggregate and expose via REST API
 
 Backend Total Effort: 8 hours (includes in-car orchestration)
@@ -883,7 +883,7 @@ CONCERNS:
 [Any issues or limitations]
 ```
 
-### Agent B ↔ Agent C Communication
+### Agent B <-> Agent C Communication
 
 When Agent B needs clarification from Agent C (routed through Agent A):
 
