@@ -293,7 +293,7 @@ car-demo-system/
 ├── Jenkinsfile.backup          # Old hardcoded pipeline  
 ├── scripts/
 │   └── ai-agent-coordinator.py # AI coordination logic
-└── AI_AGENT_COORDINATION.md    # This file
+└── AI_AGENT_SYSTEM.md          # This file
 ```
 
 ## Comparison: Old vs New
