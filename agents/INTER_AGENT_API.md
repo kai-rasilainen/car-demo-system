@@ -980,7 +980,7 @@ X-Webhook-Signature: sha256=...
                           │ HTTP GET /api/car/ABC-123
 ┌─────────────────────────▼──────────────────────────────────────────┐
 │                  Frontend Layer (Agent A)                           │
-│              ❌ Cannot talk to Agent C directly                    │
+│              [NO] Cannot talk to Agent C directly                   │
 ├─────────────────────────────────────────────────────────────────────┤
 │  A1: Mobile App (React Native)                                      │
 │     - Displays tire pressure gauge                                  │
@@ -994,7 +994,7 @@ X-Webhook-Signature: sha256=...
                           │ (Agent A only talks to Agent B)
 ┌─────────────────────────▼──────────────────────────────────────────┐
 │                   Backend Layer (Agent B)                           │
-│         ✅ Can talk to Agent A (up) and Agent C (down)            │
+│         [YES] Can talk to Agent A (up) and Agent C (down)           │
 ├─────────────────────────────────────────────────────────────────────┤
 │  B1: Web Server (Express) Port 3001                                │
 │     - Receives API request from A                                   │
@@ -1024,8 +1024,8 @@ X-Webhook-Signature: sha256=...
            │ sensor data stream (B requests from C)
 ┌──────────▼─────────────────────────────────────────────────────────┐
 │                  In-Car Layer (Agent C)                             │
-│              ❌ Cannot talk to Agent A directly                    │
-│              ✅ Only responds to Agent B requests                  │
+│              [NO] Cannot talk to Agent A directly                   │
+│              [YES] Only responds to Agent B requests                │
 │                  In-Car Layer (Agent C)                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │  C1: Cloud Communication (Python async)                            │
@@ -1065,8 +1065,8 @@ Agent Communication Flow (strict hierarchy):
   User → A → B → C (for analysis)
   C → B → A → User (for response)
   
-  ❌ A never directly contacts C
-  ✅ All C interactions go through B
+  [NO] A never directly contacts C
+  [YES] All C interactions go through B
 
 Update Frequency: Every 10 seconds
 Latency: < 100ms from C5 to A1/A2
@@ -1078,15 +1078,15 @@ Latency: < 100ms from C5 to A1/A2
 
 This API protocol enables:
 
-1. ✅ **Strict Hierarchical Architecture**: A → B → C (no A to C direct communication)
-2. ✅ **Distributed Components**: Agents operate independently with specialized subcomponents (A1/A2, B1-B4, C1/C2/C5)
-3. ✅ **Layered Orchestration**: Agent B acts as middle layer orchestrator between A and C
-4. ✅ **Consolidated Results**: Agent B consolidates C response, Agent A consolidates B response
-5. ✅ **Clear Data Flow**: Well-defined paths from sensors through backend to frontend
-6. ✅ **Separation of Concerns**: Frontend (A) doesn't need to know about in-car complexity (C)
-7. ✅ **Error Resilience**: Graceful degradation when agents are unavailable
-8. ✅ **Security**: JWT authentication and rate limiting
-9. ✅ **Traceability**: Request IDs and correlation IDs for debugging
+1. [YES] **Strict Hierarchical Architecture**: A → B → C (no A to C direct communication)
+2. [YES] **Distributed Components**: Agents operate independently with specialized subcomponents (A1/A2, B1-B4, C1/C2/C5)
+3. [YES] **Layered Orchestration**: Agent B acts as middle layer orchestrator between A and C
+4. [YES] **Consolidated Results**: Agent B consolidates C response, Agent A consolidates B response
+5. [YES] **Clear Data Flow**: Well-defined paths from sensors through backend to frontend
+6. [YES] **Separation of Concerns**: Frontend (A) doesn't need to know about in-car complexity (C)
+7. [YES] **Error Resilience**: Graceful degradation when agents are unavailable
+8. [YES] **Security**: JWT authentication and rate limiting
+9. [YES] **Traceability**: Request IDs and correlation IDs for debugging
 
 The protocol supports the strict hierarchical model where:
 - **Agent A** (A1, A2) is the user entry point and only talks to Agent B

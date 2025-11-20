@@ -99,8 +99,8 @@ This document describes the AI agent system for the car demo project. Three spec
 - Provide go/no-go recommendation
 
 **Communication Pattern**:
-- ✅ **Can communicate with**: Agent B only
-- ❌ **Cannot communicate with**: Agent C (must go through B)
+- [YES] **Can communicate with**: Agent B only
+- [NO] **Cannot communicate with**: Agent C (must go through B)
 
 **Subcomponents**:
 
@@ -151,7 +151,7 @@ This document describes the AI agent system for the car demo project. Three spec
 - Recommend backend test cases
 
 **Communication Pattern**:
-- ✅ **Can communicate with**: Agent A (upstream), Agent C (downstream)
+- [YES] **Can communicate with**: Agent A (upstream), Agent C (downstream)
 - **Role**: Middle layer orchestrator - receives from A, may request from C
 
 **Subcomponents**:
@@ -242,8 +242,8 @@ This document describes the AI agent system for the car demo project. Three spec
 - Recommend in-car system test cases
 
 **Communication Pattern**:
-- ✅ **Can communicate with**: Agent B only (upstream)
-- ❌ **Cannot communicate with**: Agent A (must go through B)
+- [YES] **Can communicate with**: Agent B only (upstream)
+- [NO] **Cannot communicate with**: Agent A (must go through B)
 - **Role**: Leaf layer - only responds to B's requests
 
 **Subcomponents**:
