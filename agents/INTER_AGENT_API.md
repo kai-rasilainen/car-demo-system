@@ -2,24 +2,35 @@
 
 ## Overview
 
-This document describes the API communication protocol between independent agents and their subcomponents when processing a user feature request. The agents communicate via RESTful APIs or message queues to perform independent analysis and consolidate results.
+This document describes the API communication protocol between independent agents and their subcomponents when processing a user feature request. 
+
+**Communication Architecture**: Strict hierarchical layering (A → B → C)
+- **Agent A** only communicates with **Agent B**
+- **Agent B** communicates with **Agent A** (upstream) and **Agent C** (downstream)
+- **Agent C** only communicates with **Agent B**
+- **Agent A never directly contacts Agent C**
+
+The agents communicate via RESTful APIs or message queues to perform independent analysis and consolidate results.
 
 ## Agent and Component Hierarchy
 
 ### Agent A - Frontend (Entry Point)
 - **A1**: Car User Mobile App (React Native)
 - **A2**: Rental Staff Web App (React)
+- **Communication**: Can only talk to Agent B
 
-### Agent B - Backend
+### Agent B - Backend (Middle Layer Orchestrator)
 - **B1**: Web Server (Node.js/Express REST API)
 - **B2**: IoT Gateway (WebSocket + REST)
 - **B3**: Realtime Database (MongoDB)
 - **B4**: Static Database (PostgreSQL)
+- **Communication**: Can talk to Agent A (upstream) and Agent C (downstream)
 
-### Agent C - In-Car Systems
+### Agent C - In-Car Systems (Leaf Layer)
 - **C1**: Cloud Communication (Python async)
 - **C2**: Central Broker (Redis pub/sub)
 - **C5**: Data Sensors (Python simulation)
+- **Communication**: Can only talk to Agent B
 
 ## Component Communication Map
 
@@ -91,10 +102,11 @@ User Request
      v
 [1] POST /feature-request -> Agent A
      |
-     +--[2] POST /analyze-backend -> Agent B
-     |       |
-     |       v
-     |  [3] Response <- Agent B
+     v
+[2] POST /analyze-backend -> Agent B
+     |
+     v
+[3] Agent B determines if C needed
      |
      +--[4] POST /analyze-incar -> Agent C
              |
@@ -102,11 +114,19 @@ User Request
         [5] Response <- Agent C
      |
      v
-[6] Consolidation by Agent A
+[6] Agent B consolidates (B analysis + C response)
      |
      v
-[7] Response -> User
+[7] Response <- Agent B (includes C data)
+     |
+     v
+[8] Agent A consolidates (A analysis + B response)
+     |
+     v
+[9] Response -> User
 ```
+
+**Key Point**: Agent A never directly contacts Agent C. All C interactions go through B.
 
 ---
 
@@ -356,49 +376,57 @@ X-Response-Time: 2.3s
   
   "test_requirements": [
     "B1: Unit tests for API endpoint with tire pressure field",
-      "Integration tests for B2 -> B3 data flow",
-      "Load testing for real-time updates"
-    ]
+    "B2: Integration tests for Redis → B2 → B3 data flow",
+    "B2: WebSocket streaming test",
+    "B3: MongoDB write/read performance test",
+    "B2: Load testing for real-time updates with 1000+ cars"
+  ],
+  
+  "incar_dependency": {
+    "required": true,
+    "description": "Need to request sensor data from Agent C",
+    "next_action": "Request analysis from Agent C"
   },
   
-  "recommendation": "proceed",
-  "notes": "Backend implementation is straightforward. Main dependency is on Agent C providing sensor data."
+  "recommendation": "feasible_pending_c_response",
+  "notes": "Backend implementation is straightforward. Will proceed to request Agent C analysis for sensor data availability."
 }
 ```
 
 ---
 
-## 3. Agent A Requests In-Car Analysis from Agent C
+## 3. Agent B Requests In-Car Analysis from Agent C
 
-After receiving Agent B's response (which identified dependency on C5 sensor data), Agent A sends a request to Agent C.
+**IMPORTANT**: Agent B (not Agent A) determines that in-car sensor data is needed and requests analysis from Agent C.
 
 ### Request
 ```http
 POST /api/v1/analyze-incar
 Host: agent-c.example.com
 Content-Type: application/json
-Authorization: Bearer <agent-a-token>
+Authorization: Bearer <agent-b-token>
 X-Request-ID: req-2025-11-19-001
-X-Source-Agent: agent-a
+X-Source-Agent: agent-b
 X-Correlation-ID: corr-2025-11-19-001
 
 {
   "request_id": "req-2025-11-19-001",
   "feature": "Add tire pressure monitoring to car dashboard",
-  "frontend_analysis": {
-    "ui_impact": "medium",
-    "components_affected": [
-      {"component": "A1", "changes": "Add tire pressure gauge"},
-      {"component": "A2", "changes": "Add fleet tire monitoring"}
-    ],
-    "frontend_effort_hours": 7
+  "requesting_agent": "agent-b",
+  "backend_context": {
+    "data_needed": "tire_pressure sensor data",
+    "consuming_component": "B2 IoT Gateway",
+    "storage_component": "B3 MongoDB",
+    "api_endpoint": "GET /api/car/:licensePlate"
   },
-  "backend_requirements": {
-    "data_needed": "tire_pressure",
-    "format": "JSON via Redis (C2 broker)",
-    "frequency": "every 10 seconds",
-    "components_affected": ["B2", "B3"]
+  "sensor_requirements": {
   },
+  "sensor_requirements": {
+    "sensor_type": "tire_pressure",
+    "data_points": ["frontLeft", "frontRight", "rearLeft", "rearRight"],
+    "data_type": "number",
+    "unit": "bar",
+    "range": "1.5-4.0",
   "sensor_requirements": {
     "sensor_type": "tire_pressure",
     "data_points": ["frontLeft", "frontRight", "rearLeft", "rearRight"],
@@ -407,7 +435,8 @@ X-Correlation-ID: corr-2025-11-19-001
     "range": "1.5-4.0",
     "update_frequency": "10 seconds",
     "communication_flow": "C5 → C2 (Redis) → C1 → B2",
-    "redis_channel": "sensors:tire_pressure"
+    "redis_channel": "sensors:tire_pressure",
+    "target_backend_component": "B2 IoT Gateway"
   },
   "questions": [
     "Can C5 sensors provide tire pressure data?",
@@ -420,7 +449,7 @@ X-Correlation-ID: corr-2025-11-19-001
 }
 ```
 
-### Response from Agent C
+### Response from Agent C to Agent B
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -430,32 +459,10 @@ X-Response-Time: 1.8s
 {
   "request_id": "req-2025-11-19-001",
   "agent": "agent-c",
+  "responding_to": "agent-b",
   "analysis_timestamp": "2025-11-19T10:02:15Z",
   "status": "feasible",
   "impact_level": "low-medium",
-  
-  "incar_analysis": {
-    "sensor_availability": {
-      "hardware_available": false,
-      "simulation_required": true,
-      "component": "C5-data-sensors"
-    },
-    
-    "implementation": [
-      {
-        "component": "C5-data-sensors",
-        "task": "Create tire pressure sensor simulator",
-        "details": [
-          "Simulate 4 tire pressure values",
-          "Generate realistic fluctuations (±0.1 bar)",
-          "Publish to Redis channel every 10 seconds",
-          "Include low pressure alerts (<1.9 bar)"
-        ],
-        "effort_hours": 3,
-        "language": "Python"
-      },
-      {
-        "component": "C2-central-broker",
         "task": "Subscribe to tire pressure sensor channel",
   "analysis_timestamp": "2025-11-19T10:02:15Z",
   "status": "feasible",
@@ -566,16 +573,69 @@ X-Response-Time: 1.8s
 
 ---
 
-## 4. Agent A Consolidates and Responds to User
+## 4. Agent B Consolidates B + C Analysis
 
-After receiving responses from both Agent B and Agent C, Agent A consolidates all information.
+Agent B receives Agent C's response and creates a consolidated backend analysis including in-car layer results.
+
+### Consolidated Response from Agent B to Agent A
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Agent: agent-b
+X-Consulted-Agents: agent-c
+X-Response-Time: 4.5s
+
+{
+  "request_id": "req-2025-11-19-001",
+  "agent": "agent-b",
+  "responding_to": "agent-a",
+  "analysis_timestamp": "2025-11-19T10:02:30Z",
+  "status": "feasible",
+  "impact_level": "medium",
+  
+  "backend_summary": {
+    "b1_api": "Modify GET /api/car/:licensePlate - 2.5 hrs",
+    "b2_iot": "Accept sensor data, stream via WebSocket - 4.5 hrs",
+    "b3_database": "Add tirePressure field - 0.75 hrs",
+    "b4_database": "No changes needed",
+    "backend_total": "7.75 hours"
+  },
+  
+  "incar_summary": {
+    "data_source_available": true,
+    "c5_sensors": "Tire pressure simulation - 3 hrs",
+    "c2_broker": "Add Redis channel - 1 hr",
+    "c1_communication": "No changes needed",
+    "incar_total": "4 hours",
+    "data_flow": "C5 → C2 → C1 → B2 → B3 → B1"
+  },
+  
+  "complete_backend_effort": {
+    "total_hours": 11.75,
+    "backend_layer": 7.75,
+    "incar_layer": 4.0,
+    "testing": 2.0
+  },
+  
+  "recommendation": "proceed",
+  "notes": "Complete backend stack (including in-car) can provide tire pressure data. Agent A only needs to consume the REST API - all backend/in-car complexity is handled by Agent B layer."
+}
+```
+
+---
+
+## 5. Agent A Consolidates and Responds to User
+
+After receiving the consolidated response from Agent B (which includes Agent C's analysis), Agent A creates the final assessment.
+
+**Note**: Agent A never directly contacted Agent C - all in-car information came through Agent B.
 
 ### Final Response to User
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
 X-Agent: agent-a
-X-Agents-Consulted: agent-b,agent-c
+X-Consulted-Agents: agent-b
 X-Total-Analysis-Time: 5.2s
 
 {
@@ -586,29 +646,28 @@ X-Total-Analysis-Time: 5.2s
   "recommendation": "proceed",
   
   "consolidated_assessment": {
-    "overall_impact": "low-medium",
+    "overall_impact": "medium",
     "feasibility": "high",
     "breaking_changes": false,
     
     "total_effort": {
-      "hours": 14,
-      "days": 1.75,
+      "hours": 18.75,
+      "days": 2.3,
       "breakdown": {
-        "agent_a_frontend": 6,
-        "agent_b_backend": 4,
-        "agent_c_incar": 4
+        "frontend": 7.0,
+        "backend_complete": 11.75
       }
     },
     
     "implementation_phases": [
       {
         "phase": 1,
-        "name": "In-Car Sensor Implementation",
-        "agent": "agent-c",
-        "duration_hours": 4,
-        "components": ["C5-data-sensors", "C2-central-broker"],
+        "name": "Backend & Sensor Implementation",
+        "owner": "backend-team",
+        "duration_hours": 11.75,
+        "components": ["B1", "B2", "B3", "C5", "C2"],
         "blocking": true,
-        "reason": "Backend and frontend depend on sensor data"
+        "reason": "Frontend depends on API availability"
       },
       {
         "phase": 2,
@@ -909,6 +968,8 @@ X-Webhook-Signature: sha256=...
 
 ### Tire Pressure Monitoring - End-to-End Flow
 
+**Agent Communication Flow**: User → A → B → C (then back: C → B → A → User)
+
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │                      User Layer                                     │
@@ -919,6 +980,7 @@ X-Webhook-Signature: sha256=...
                           │ HTTP GET /api/car/ABC-123
 ┌─────────────────────────▼──────────────────────────────────────────┐
 │                  Frontend Layer (Agent A)                           │
+│              ❌ Cannot talk to Agent C directly                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │  A1: Mobile App (React Native)                                      │
 │     - Displays tire pressure gauge                                  │
@@ -929,11 +991,13 @@ X-Webhook-Signature: sha256=...
 │     - Real-time alerts for all vehicles                            │
 └─────────────────────────┬──────────────────────────────────────────┘
                           │ API Call: GET /api/car/ABC-123
+                          │ (Agent A only talks to Agent B)
 ┌─────────────────────────▼──────────────────────────────────────────┐
 │                   Backend Layer (Agent B)                           │
+│         ✅ Can talk to Agent A (up) and Agent C (down)            │
 ├─────────────────────────────────────────────────────────────────────┤
 │  B1: Web Server (Express) Port 3001                                │
-│     - Receives API request                                          │
+│     - Receives API request from A                                   │
 │     - Queries B3 for car data                                       │
 │     - Returns JSON with tirePressure field                          │
 │          │                                                          │
@@ -955,10 +1019,13 @@ X-Webhook-Signature: sha256=...
 │     - Receives sensor data from C1                                  │
 │     - Updates B3 MongoDB in real-time                              │
 │     - Streams updates to A2 via WebSocket                          │
-│          ▲ WebSocket connection                                     │
+│          ▲ WebSocket connection from C1                             │
 └──────────┼─────────────────────────────────────────────────────────┘
-           │ sensor data stream
+           │ sensor data stream (B requests from C)
 ┌──────────▼─────────────────────────────────────────────────────────┐
+│                  In-Car Layer (Agent C)                             │
+│              ❌ Cannot talk to Agent A directly                    │
+│              ✅ Only responds to Agent B requests                  │
 │                  In-Car Layer (Agent C)                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │  C1: Cloud Communication (Python async)                            │
@@ -994,6 +1061,13 @@ Data Flow Summary:
   B2 (WebSocket) → B3 (MongoDB store) → B1 (REST API) → 
   A1/A2 (display)
 
+Agent Communication Flow (strict hierarchy):
+  User → A → B → C (for analysis)
+  C → B → A → User (for response)
+  
+  ❌ A never directly contacts C
+  ✅ All C interactions go through B
+
 Update Frequency: Every 10 seconds
 Latency: < 100ms from C5 to A1/A2
 ```
@@ -1004,19 +1078,20 @@ Latency: < 100ms from C5 to A1/A2
 
 This API protocol enables:
 
-1. ✅ **Distributed Architecture**: Agents operate independently in different locations
-2. ✅ **Hierarchical Components**: Each agent has specialized subcomponents (A1/A2, B1-B4, C1/C2/C5)
-3. ✅ **Asynchronous Processing**: Requests are processed with status polling
-4. ✅ **Consolidated Results**: Agent A consolidates responses from all agents
+1. ✅ **Strict Hierarchical Architecture**: A → B → C (no A to C direct communication)
+2. ✅ **Distributed Components**: Agents operate independently with specialized subcomponents (A1/A2, B1-B4, C1/C2/C5)
+3. ✅ **Layered Orchestration**: Agent B acts as middle layer orchestrator between A and C
+4. ✅ **Consolidated Results**: Agent B consolidates C response, Agent A consolidates B response
 5. ✅ **Clear Data Flow**: Well-defined paths from sensors through backend to frontend
-6. ✅ **Error Resilience**: Graceful degradation when agents are unavailable
-7. ✅ **Security**: JWT authentication and rate limiting
-8. ✅ **Traceability**: Request IDs and correlation IDs for debugging
+6. ✅ **Separation of Concerns**: Frontend (A) doesn't need to know about in-car complexity (C)
+7. ✅ **Error Resilience**: Graceful degradation when agents are unavailable
+8. ✅ **Security**: JWT authentication and rate limiting
+9. ✅ **Traceability**: Request IDs and correlation IDs for debugging
 
-The protocol supports the distributed agent model where:
-- **Agent A** (A1, A2) is the single entry point for users
-- **Agent B** (B1, B2, B3, B4) provides backend services and data management
-- **Agent C** (C1, C2, C5) handles in-car systems and sensor data
-- All communication is via well-defined REST APIs, WebSocket, and Redis pub/sub
-- Results are consolidated and presented to the user
-
+The protocol supports the strict hierarchical model where:
+- **Agent A** (A1, A2) is the user entry point and only talks to Agent B
+- **Agent B** (B1, B2, B3, B4) is the orchestration layer, talks to A (upstream) and C (downstream)
+- **Agent C** (C1, C2, C5) handles in-car systems and only responds to Agent B
+- All communication follows the chain: A ↔ B ↔ C (never A ↔ C)
+- Agent B shields Agent A from in-car complexity
+- Results flow back through the same hierarchy

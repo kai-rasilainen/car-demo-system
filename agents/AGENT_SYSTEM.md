@@ -18,50 +18,70 @@ This document describes the AI agent system for the car demo project. Three spec
             |  A1: Car User App (React Native)          |
             |  A2: Rental Staff App (React Web)         |
             +-------------------------------------------+
-                       |                    |
-                       |                    |
-        Backend needed?|                    | In-car data needed?
-                       |                    |
-                       v                    v
-         +-------------------------+   +-------------------------+
-         |    Agent B (Backend)    |   |    Agent C (In-Car)     |
-         +-------------------------+   +-------------------------+
-         | B1: Web Server (REST)   |   | C1: Cloud Comm          |
-         | B2: IoT Gateway (WS)    |   | C2: Central Broker      |
-         | B3: Realtime DB (Mongo) |   | C5: Data Sensors        |
-         | B4: Static DB (Postgres)|   +-------------------------+
-         +-------------------------+              |
-                       |                          |
-                       +-----------+--------------+
-                                   |
-                                   v
+                                |
+                                | Backend needed?
+                                v
+                 +-------------------------+
+                 |    Agent B (Backend)    |
+                 +-------------------------+
+                 | B1: Web Server (REST)   |
+                 | B2: IoT Gateway (WS)    |
+                 | B3: Realtime DB (Mongo) |
+                 | B4: Static DB (Postgres)|
+                 +-------------------------+
+                                |
+                                | In-car data needed?
+                                v
+                 +-------------------------+
+                 |    Agent C (In-Car)     |
+                 +-------------------------+
+                 | C1: Cloud Comm          |
+                 | C2: Central Broker      |
+                 | C5: Data Sensors        |
+                 +-------------------------+
+                                |
+                                | Response flows back
+                                v
+                 +-------------------------+
+                 |    Agent B (Backend)    |
+                 |  Consolidates C response|
+                 +-------------------------+
+                                |
+                                v
             +-------------------------------------------+
             |            Agent A (Frontend)             |
-            |          Consolidates Results             |
+            |     Consolidates B response (with C)      |
             |          Provides Assessment              |
             +-------------------------------------------+
 ```
 
-**Hierarchical Agent Architecture**:
+**Hierarchical Agent Architecture** (Strict layering: A → B → C):
 1. **Agent A (Frontend Layer)** - Entry point for all requests
    - **A1**: Car User Mobile App (React Native)
    - **A2**: Rental Staff Web App (React)
-2. **Agent B (Backend Layer)** - Independent backend analysis
+   - **Communication**: Only talks to Agent B, never directly to Agent C
+2. **Agent B (Backend Layer)** - Backend analysis and orchestration
    - **B1**: Web Server (Node.js/Express REST API)
    - **B2**: IoT Gateway (WebSocket + REST)
    - **B3**: Realtime Database (MongoDB)
    - **B4**: Static Database (PostgreSQL)
-3. **Agent C (In-Car Layer)** - Independent in-car systems analysis
+   - **Communication**: Talks to Agent A (upstream) and Agent C (downstream)
+3. **Agent C (In-Car Layer)** - In-car systems analysis
    - **C1**: Cloud Communication (Python async)
    - **C2**: Central Broker (Redis pub/sub)
    - **C5**: Data Sensors (Python sensor simulation)
+   - **Communication**: Only talks to Agent B, never directly to Agent A
 
 **Communication Flow**:
 1. User sends feature request to **Agent A** (Frontend)
 2. Agent A analyzes frontend impact independently
-3. Agent A sends requests to Agent B and/or Agent C if needed
-4. Agents B and C perform independent analysis and respond to Agent A
-5. Agent A consolidates all responses and provides final assessment
+3. Agent A sends request to **Agent B** (Backend) if backend changes needed
+4. Agent B performs backend analysis
+5. **Agent B** determines if in-car data is needed and requests from **Agent C**
+6. Agent C performs in-car analysis and responds to **Agent B**
+7. Agent B consolidates its own analysis + Agent C response
+8. Agent B sends complete backend analysis (including C) back to **Agent A**
+9. Agent A consolidates frontend + backend results and provides final assessment
 
 ## Agent Roles
 
@@ -73,10 +93,14 @@ This document describes the AI agent system for the car demo project. Three spec
 - Analyze UI/UX implications independently
 - Assess API integration requirements
 - Identify state management needs
-- **Request analysis from Agents B and C when cross-domain impact exists**
-- **Consolidate responses from distributed agents into final assessment**
+- **Request analysis from Agent B when backend/in-car impact exists**
+- **Consolidate response from Agent B (which includes C data if needed)**
 - Recommend frontend test cases
 - Provide go/no-go recommendation
+
+**Communication Pattern**:
+- ✅ **Can communicate with**: Agent B only
+- ❌ **Cannot communicate with**: Agent C (must go through B)
 
 **Subcomponents**:
 
@@ -121,8 +145,14 @@ This document describes the AI agent system for the car demo project. Three spec
 - Assess database schema changes
 - Identify data flow requirements
 - Evaluate backend service impact
-- Respond to Agent A with backend analysis
+- **Request analysis from Agent C when in-car data is needed**
+- **Consolidate own analysis + Agent C response**
+- Respond to Agent A with complete backend analysis (including C)
 - Recommend backend test cases
+
+**Communication Pattern**:
+- ✅ **Can communicate with**: Agent A (upstream), Agent C (downstream)
+- **Role**: Middle layer orchestrator - receives from A, may request from C
 
 **Subcomponents**:
 
@@ -208,8 +238,13 @@ This document describes the AI agent system for the car demo project. Three spec
 - Assess communication protocols
 - Identify simulation complexity
 - Evaluate vehicle system impact
-- Respond to Agent A with in-car analysis
+- **Respond to Agent B only** with in-car analysis
 - Recommend in-car system test cases
+
+**Communication Pattern**:
+- ✅ **Can communicate with**: Agent B only (upstream)
+- ❌ **Cannot communicate with**: Agent A (must go through B)
+- **Role**: Leaf layer - only responds to B's requests
 
 **Subcomponents**:
 
@@ -280,7 +315,7 @@ Feature: Add tire pressure monitoring
 Agent A receives request and analyzes:
 1. Does this affect the UI? -> YES (need gauge display)
 2. Do I need new API data? -> YES (need tire pressure from backend)
-3. Will backend need new sensors? -> PROBABLY (need to ask Agent C)
+3. Do I need to involve backend? -> YES
 
 Agent A's independent assessment:
 - UI Impact: Medium (new gauge component in 2 apps)
@@ -288,6 +323,7 @@ Agent A's independent assessment:
 - Estimated frontend effort: 6 hours
 
 Next: Send analysis request to Agent B (Backend)
+Note: Agent A does NOT know about Agent C - only B
 ```
 
 ### Step 2: Agent A Requests Analysis from Agent B
@@ -312,7 +348,44 @@ QUESTIONS:
 - What is the backend effort?
 ```
 
-Agent B (independent analysis) responds:
+### Step 3: Agent B Analyzes and Determines if Agent C Needed
+Agent B performs independent analysis:
+
+```markdown
+Agent B analyzes:
+1. API Change? -> YES (B1: modify REST endpoint)
+2. Database Change? -> YES (B3: add field to MongoDB)
+3. Real-time streaming? -> YES (B2: WebSocket updates)
+4. Where does tire pressure come from? -> In-car sensors (Agent C!)
+
+Agent B's decision:
+- Need to request analysis from Agent C for sensor data
+```
+
+### Step 4: Agent B Requests Analysis from Agent C
+Agent B (NOT Agent A) sends request to Agent C:
+
+```markdown
+FROM: Agent B (Backend)
+TO: Agent C (In-Car)
+PROTOCOL: REST API / Message Queue
+
+REQUEST:
+Feature: "tire pressure monitoring"
+Data Requirement:
+- Sensor type: Tire pressure (TPMS)
+- Data points: frontLeft, frontRight, rearLeft, rearRight
+- Format: JSON via Redis channel
+- Frequency: Every 10 seconds
+- Units: bar (1.5-4.0 range)
+
+QUESTIONS:
+- Can in-car systems provide this sensor data?
+- Is simulation needed or real hardware?
+- What is the in-car implementation effort?
+```
+
+Agent C (independent analysis) responds:
 
 ```markdown
 FROM: Agent B (Backend)
@@ -335,34 +408,9 @@ Dependencies: Agent C must provide tire pressure sensor data via Redis
 Note: I need to verify with Agent C about sensor availability
 ```
 
-### Step 3: Agent A Requests Analysis from Agent C
-Agent A sends request to Agent C:
-
-```markdown
-FROM: Agent A (Frontend)
-TO: Agent C (In-Car Systems)
-PROTOCOL: REST API / Message Queue
-
-REQUEST:
-Feature: "tire pressure monitoring"
-Sensor Requirement:
-- Type: tire_pressure
-- Data: 4 values (frontLeft, frontRight, rearLeft, rearRight)
-- Range: 1.5-4.0 bar
-- Update Frequency: Every 10 seconds
-- Format: JSON via Redis
-
-QUESTIONS:
-- Can in-car systems provide this sensor data?
-- What is the implementation effort?
-- Any vehicle compatibility issues?
-```
-
-Agent C (independent analysis) responds:
-
 ```markdown
 FROM: Agent C (In-Car Systems)
-TO: Agent A (Frontend)
+TO: Agent B (Backend)
 PROTOCOL: REST API / Message Queue
 
 RESPONSE:
@@ -371,10 +419,73 @@ STATUS: [OK] YES - Can provide tire pressure sensor data
 Implementation:
 - C5: Create tire pressure sensor simulator (3 hours)
 - C2: Subscribe to sensors:tire_pressure channel (1 hour)
-- C1: Forward via WebSocket (no changes needed)
+- C1: Forward via WebSocket to B2 (no changes needed)
 
 Data Format:
 {
+  sensor: "tire_pressure",
+  licensePlate: "ABC-123",
+  data: {
+    frontLeft: 2.3,
+    frontRight: 2.4,
+    rearLeft: 2.2,
+    rearRight: 2.2
+  },
+  timestamp: "ISO8601",
+  unit: "bar"
+}
+
+Redis Channel: sensors:tire_pressure
+Communication: C5 → C2 → C1 → B2
+
+In-Car Effort: 4 hours
+Risks: Low (simulation only, no real hardware)
+```
+
+### Step 5: Agent B Consolidates Own + Agent C Analysis
+Agent B receives Agent C's response and consolidates:
+
+```markdown
+Agent B's Consolidated Analysis:
+- Backend changes: B1 (API), B2 (IoT), B3 (DB) = 4 hours
+- In-car changes: C5 (sensors), C2 (broker) = 4 hours
+- Total backend layer effort: 8 hours
+- Data flow verified: C5 → C2 → C1 → B2 → B3 → B1 → API
+- Status: FEASIBLE
+```
+
+### Step 6: Agent B Responds to Agent A (with C data included)
+Agent B sends complete analysis back to Agent A:
+
+```markdown
+FROM: Agent B (Backend)
+TO: Agent A (Frontend)
+PROTOCOL: REST API / Message Queue
+
+RESPONSE:
+STATUS: [OK] Backend can provide tire pressure data
+
+Backend Implementation (B1, B2, B3, B4):
+- B1: Modify GET /api/car/:licensePlate endpoint (2 hours)
+- B2: Accept tire pressure from in-car systems (2 hours)
+- B3: Add tirePressure field to MongoDB (0.5 hours)
+- B4: No changes needed
+
+Data Source: In-car sensor system (handled by backend layer)
+- Sensors will provide data via Redis → C1 → B2 → B3
+- Backend will aggregate and expose via REST API
+
+Backend Total Effort: 8 hours (includes in-car orchestration)
+Status: FEASIBLE
+Dependencies: NONE (backend layer handles in-car communication)
+
+Note: Agent A doesn't need to know about Agent C details
+```
+
+### Step 7: Agent A Consolidates Final Assessment
+Agent A consolidates frontend (6 hrs) + backend (8 hrs):
+
+```markdown
   "frontLeft": 2.3,
   "frontRight": 2.3,
   "rearLeft": 2.2,
