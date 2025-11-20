@@ -96,6 +96,8 @@ The agents communicate via RESTful APIs or message queues to perform independent
 
 ## API Flow Sequence
 
+### High-Level Flow (Agent Level)
+
 ```
 User Request
      |
@@ -127,6 +129,114 @@ User Request
 ```
 
 **Key Point**: Agent A never directly contacts Agent C. All C interactions go through B.
+
+### Detailed Flow (Component/Subagent Level)
+
+```
+User (via A1 Mobile App or A2 Web App)
+     |
+     v
+[1] POST /feature-request -> Agent A (Entry Point)
+     |
+     | Agent A analyzes frontend impact:
+     | - A1 impact (Mobile UI, React Native components)
+     | - A2 impact (Web UI, React components)
+     | - Determines if backend changes needed
+     |
+     v
+[2] POST /analyze-backend -> Agent B
+     |
+     | Agent B analyzes backend impact:
+     | - B1 (Web Server): New API endpoints, route handlers
+     | - B2 (IoT Gateway): WebSocket connections, real-time data
+     | - B3 (MongoDB): Document schemas, collections, indexes
+     | - B4 (PostgreSQL): Tables, relations, migrations
+     |
+     v
+[3] Agent B determines if in-car systems needed
+     |
+     | If YES (requires sensor data, CAN bus, etc.):
+     |
+     v
+[4] POST /analyze-incar -> Agent C
+     |
+     | Agent C analyzes in-car impact:
+     | - C1 (Cloud Communication): Data fetch from C2, WebSocket to B2
+     | - C2 (Central Broker): Redis channels, pub/sub topics, data keys
+     | - C5 (Data Sensors): Sensor types, data generation, publishing
+     |
+     v
+[5] Response <- Agent C
+     |
+     | Returns detailed component analysis:
+     | {
+     |   "components": {
+     |     "C1": { effort, changes, dependencies },
+     |     "C2": { effort, changes, dependencies },
+     |     "C5": { effort, changes, dependencies }
+     |   },
+     |   "total_effort": "4 hours",
+     |   "data_flow": "C5 -> C2 -> C1 -> B2"
+     | }
+     |
+     v
+[6] Agent B consolidates analysis
+     |
+     | Combines B analysis + C response:
+     | {
+     |   "backend_components": {
+     |     "B1": { effort, changes },
+     |     "B2": { effort, changes, needs: ["C1"] },
+     |     "B3": { effort, changes },
+     |     "B4": { effort, changes }
+     |   },
+     |   "incar_components": { /* C analysis included */ },
+     |   "total_backend_effort": "8 hours",
+     |   "data_flow": "C5 -> C2 -> C1 -> B2 -> B3 -> B1"
+     | }
+     |
+     v
+[7] Response <- Agent B (includes C data)
+     |
+     v
+[8] Agent A consolidates final analysis
+     |
+     | Combines A analysis + B response:
+     | {
+     |   "frontend_components": {
+     |     "A1": { effort, changes, depends_on: ["B1"] },
+     |     "A2": { effort, changes, depends_on: ["B1", "B2"] }
+     |   },
+     |   "backend_components": { /* B analysis */ },
+     |   "incar_components": { /* C analysis via B */ },
+     |   "total_effort": "16 hours",
+     |   "complete_data_flow": "C5 -> C2 -> C1 -> B2 -> B3 -> B1 -> A1/A2",
+     |   "implementation_order": [
+     |     "1. C5, C2 (in-car)",
+     |     "2. C1 (in-car comm)",
+     |     "3. B2, B3 (backend real-time)",
+     |     "4. B1 (backend API)",
+     |     "5. A1, A2 (frontend)"
+     |   ]
+     | }
+     |
+     v
+[9] Response -> User
+
+     User sees complete breakdown:
+     - Which specific components (A1, A2, B1-B4, C1, C2, C5) are affected
+     - Effort for each component
+     - Dependencies between components
+     - Implementation order based on component dependencies
+```
+
+**Component Dependencies**:
+- **A1/A2** depends on **B1** (REST API endpoints)
+- **A2** may depend on **B2** (WebSocket for real-time updates)
+- **B1** depends on **B3** (MongoDB) and/or **B4** (PostgreSQL)
+- **B2** depends on **C1** (in-car data source) and **B3** (data storage)
+- **C1** depends on **C2** (message broker)
+- **C2** depends on **C5** (sensor data publishers)
 
 ---
 
