@@ -16,11 +16,11 @@ User Request
      ↓
 Agent A (Frontend & Coordinator)
      ↓ (AI decides)
-     ├─→ Agent B needed? → Agent B (Backend)
-     │                          ↓ (AI decides)
-     │                          └─→ Agent C needed? → Agent C (In-Car)
-     │
-     └─→ Agent C needed directly? → Agent C (In-Car)
+     |--→ Agent B needed? → Agent B (Backend)
+     |                          ↓ (AI decides)
+     |                          `--→ Agent C needed? → Agent C (In-Car)
+     |
+     `--→ Agent C needed directly? → Agent C (In-Car)
 ```
 
 ### Agent Responsibilities
@@ -289,11 +289,11 @@ Edit the `system_prompt` and `prompt` in `Agent.analyze()` method to guide AI be
 
 ```
 car-demo-system/
-├── Jenkinsfile.ai              # New AI-driven pipeline
-├── Jenkinsfile.backup          # Old hardcoded pipeline  
-├── scripts/
-│   └── ai-agent-coordinator.py # AI coordination logic
-└── AI_AGENT_SYSTEM.md          # This file
+|--- Jenkinsfile.ai              # New AI-driven pipeline
+|--- Jenkinsfile.backup          # Old hardcoded pipeline  
+|--- scripts/
+|   `--- ai-agent-coordinator.py # AI coordination logic
+`--- AI_AGENT_SYSTEM.md          # This file
 ```
 
 ## Comparison: Old vs New

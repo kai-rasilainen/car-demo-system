@@ -173,28 +173,28 @@ python test_c2_simulator.py
 
 ```
 car-demo-system/           # 🏠 Main orchestration
-├── car-demo-backend/      # 🔗 Git submodule
-├── car-demo-frontend/     # 🔗 Git submodule  
-├── car-demo-in-car/       # 🔗 Git submodule
-├── scripts/               # 🛠️ Setup automation
-├── activate-python.sh     # 🐍 Python env helper
-├── test-system*.sh        # 🧪 Testing scripts
-└── docker-compose.yml     # 🐳 Database services
+|--- car-demo-backend/      # 🔗 Git submodule
+|--- car-demo-frontend/     # 🔗 Git submodule  
+|--- car-demo-in-car/       # 🔗 Git submodule
+|--- scripts/               # 🛠️ Setup automation
+|--- activate-python.sh     # 🐍 Python env helper
+|--- test-system*.sh        # 🧪 Testing scripts
+`--- docker-compose.yml     # 🐳 Database services
 
 car-demo-backend/          # 🎯 Standalone backend
-├── B1-web-server/         # REST API
-├── B2-iot-gateway/        # WebSocket + MQTT
-├── B3-realtime-database/  # MongoDB
-└── B4-static-database/    # PostgreSQL
+|--- B1-web-server/         # REST API
+|--- B2-iot-gateway/        # WebSocket + MQTT
+|--- B3-realtime-database/  # MongoDB
+`--- B4-static-database/    # PostgreSQL
 
 car-demo-frontend/         # 🎯 Standalone frontend
-├── A1-car-user-app/       # Mobile app
-└── A2-rental-staff-app/   # Web app
+|--- A1-car-user-app/       # Mobile app
+`--- A2-rental-staff-app/   # Web app
 
 car-demo-in-car/           # 🎯 Standalone in-car
-├── C1-cloud-communication/ # Python
-├── C2-central-broker/      # Node.js + Redis
-└── C5-data-sensors/        # Python sensors
+|--- C1-cloud-communication/ # Python
+|--- C2-central-broker/      # Node.js + Redis
+`--- C5-data-sensors/        # Python sensors
 ```
 
 ---

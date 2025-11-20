@@ -8,18 +8,18 @@ This document provides comprehensive testing strategies for the Car Demo System,
 
 ```
 car-demo-system/
-├── car-demo-backend/
-│   ├── B1-web-server/tests/     # B1 API unit tests
-│   ├── B2-iot-gateway/tests/    # B2 IoT unit tests
-│   └── package.json             # Test scripts
-├── car-demo-in-car/
-│   ├── C1-cloud-communication/tests/  # Python unit tests
-│   ├── C2-central-broker/tests/       # C2 Redis unit tests
-│   └── C5-data-sensors/tests/         # Sensor unit tests
-├── tests/
-│   ├── e2e/                     # End-to-end integration tests
-│   └── setup.js                 # Global test setup
-└── run-tests.sh                 # Test runner script
+|--- car-demo-backend/
+|   |--- B1-web-server/tests/     # B1 API unit tests
+|   |--- B2-iot-gateway/tests/    # B2 IoT unit tests
+|   `--- package.json             # Test scripts
+|--- car-demo-in-car/
+|   |--- C1-cloud-communication/tests/  # Python unit tests
+|   |--- C2-central-broker/tests/       # C2 Redis unit tests
+|   `--- C5-data-sensors/tests/         # Sensor unit tests
+|--- tests/
+|   |--- e2e/                     # End-to-end integration tests
+|   `--- setup.js                 # Global test setup
+`--- run-tests.sh                 # Test runner script
 ```
 
 ## 🚀 Quick Start

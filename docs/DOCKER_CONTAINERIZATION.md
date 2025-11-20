@@ -78,32 +78,32 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 ## Service Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Docker Network: car-network             │
-├─────────────────────────────────────────────────────────────┤
-│  Frontend Layer:                                            │
-│  ┌─────────────────┐                                        │
-│  │ rental-staff-app│ :3000 (Nginx + React)                 │
-│  └─────────────────┘                                        │
-├─────────────────────────────────────────────────────────────┤
-│  Backend Layer:                                             │
-│  ┌─────────────┐  ┌─────────────┐                          │
-│  │ web-server  │  │ iot-gateway │                          │
-│  │    :3001    │  │    :3002    │                          │
-│  └─────────────┘  └─────────────┘                          │
-├─────────────────────────────────────────────────────────────┤
-│  Data Layer:                                                │
-│  ┌─────────┐ ┌────────────┐ ┌─────────┐                    │
-│  │ mongodb │ │ postgresql │ │  redis  │                    │
-│  │  :27017 │ │   :5432    │ │  :6379  │                    │
-│  └─────────┘ └────────────┘ └─────────┘                    │
-├─────────────────────────────────────────────────────────────┤
-│  In-Car Layer:                                              │
-│  ┌───────────────────┐ ┌─────────────────┐                 │
-│  │ cloud-communication│ │  data-sensors   │                 │
-│  │    (internal)     │ │   (internal)    │                 │
-│  └───────────────────┘ └─────────────────┘                 │
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|                    Docker Network: car-network             |
+|--------------------------------------------------------------+
+|  Frontend Layer:                                            |
+|  +-----------------+                                        |
+|  | rental-staff-app| :3000 (Nginx + React)                 |
+|  `------------------+                                        |
+|--------------------------------------------------------------+
+|  Backend Layer:                                             |
+|  +-------------+  +-------------+                          |
+|  | web-server  |  | iot-gateway |                          |
+|  |    :3001    |  |    :3002    |                          |
+|  `--------------+  `--------------+                          |
+|--------------------------------------------------------------+
+|  Data Layer:                                                |
+|  +---------+ +------------+ +---------+                    |
+|  | mongodb | | postgresql | |  redis  |                    |
+|  |  :27017 | |   :5432    | |  :6379  |                    |
+|  `----------+ `-------------+ `----------+                    |
+|--------------------------------------------------------------+
+|  In-Car Layer:                                              |
+|  +-------------------+ +-----------------+                 |
+|  | cloud-communication| |  data-sensors   |                 |
+|  |    (internal)     | |   (internal)    |                 |
+|  `--------------------+ `------------------+                 |
+`--------------------------------------------------------------+
 ```
 
 ## Environment Configuration
@@ -136,30 +136,30 @@ All services include health checks:
 ## File Structure
 
 ```
-├── docker-compose.yml              # Main production configuration
-├── docker-compose.dev.yml          # Development overrides
-├── scripts/
-│   ├── docker-start.sh             # Start production environment
-│   ├── docker-dev.sh               # Start development environment
-│   └── docker-cleanup.sh           # Cleanup script
-├── A-car-demo-frontend/A2-rental-staff-app/
-│   ├── Dockerfile                  # React app container
-│   ├── nginx.conf                  # Nginx configuration
-│   └── .dockerignore
-├── B-car-demo-backend/
-│   ├── B1-web-server/
-│   │   ├── Dockerfile              # REST API container
-│   │   └── .dockerignore
-│   └── B2-iot-gateway/
-│       ├── Dockerfile              # IoT gateway container
-│       └── .dockerignore
-└── C-car-demo-in-car/
-    ├── C1-cloud-communication/
-    │   ├── Dockerfile              # Cloud comm container
-    │   └── .dockerignore
-    └── C5-data-sensors/
-        ├── Dockerfile              # Sensors container
-        └── .dockerignore
+|--- docker-compose.yml              # Main production configuration
+|--- docker-compose.dev.yml          # Development overrides
+|--- scripts/
+|   |--- docker-start.sh             # Start production environment
+|   |--- docker-dev.sh               # Start development environment
+|   `--- docker-cleanup.sh           # Cleanup script
+|--- A-car-demo-frontend/A2-rental-staff-app/
+|   |--- Dockerfile                  # React app container
+|   |--- nginx.conf                  # Nginx configuration
+|   `--- .dockerignore
+|--- B-car-demo-backend/
+|   |--- B1-web-server/
+|   |   |--- Dockerfile              # REST API container
+|   |   `--- .dockerignore
+|   `--- B2-iot-gateway/
+|       |--- Dockerfile              # IoT gateway container
+|       `--- .dockerignore
+`--- C-car-demo-in-car/
+    |--- C1-cloud-communication/
+    |   |--- Dockerfile              # Cloud comm container
+    |   `--- .dockerignore
+    `--- C5-data-sensors/
+        |--- Dockerfile              # Sensors container
+        `--- .dockerignore
 ```
 
 ## AI Agent Integration

@@ -17,15 +17,15 @@ All major testing components have been successfully implemented and are function
 ### **Test Organization**
 ```
 car-demo-system/
-├── 🟢 car-demo-backend/
-│   ├── 🟢 B1-web-server/tests/server.test.js     ✅ WORKING
-│   └── 🟢 B2-iot-gateway/tests/server.test.js    ✅ WORKING
-├── 🟢 car-demo-in-car/
-│   ├── 🟢 C1-cloud-communication/tests/          ✅ 11 TESTS PASSING
-│   ├── 🟢 C2-central-broker/tests/server.test.js ✅ WORKING  
-│   └── 🟢 C5-data-sensors/tests/                 ✅ IMPLEMENTED
-├── 🟢 tests/e2e/integration.test.js              ✅ WORKING
-└── 🟢 run-tests.sh                               ✅ FULLY FUNCTIONAL
+|--- 🟢 car-demo-backend/
+|   |--- 🟢 B1-web-server/tests/server.test.js     ✅ WORKING
+|   `--- 🟢 B2-iot-gateway/tests/server.test.js    ✅ WORKING
+|--- 🟢 car-demo-in-car/
+|   |--- 🟢 C1-cloud-communication/tests/          ✅ 11 TESTS PASSING
+|   |--- 🟢 C2-central-broker/tests/server.test.js ✅ WORKING  
+|   `--- 🟢 C5-data-sensors/tests/                 ✅ IMPLEMENTED
+|--- 🟢 tests/e2e/integration.test.js              ✅ WORKING
+`--- 🟢 run-tests.sh                               ✅ FULLY FUNCTIONAL
 ```
 
 ## 🎯 **Unit Tests Status**

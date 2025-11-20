@@ -14,48 +14,48 @@
 **Repo**: `car-demo-frontend`
 ```
 car-demo-frontend/
-├── A1-car-user-app/          # React Native mobile app
-├── A2-rental-staff-app/      # React web app
-├── docker-compose.yml        # Optional: containerized frontends
-├── README.md                 # Frontend-specific setup
-├── .gitignore
-└── scripts/
-    ├── build-all.sh
-    └── dev-start.sh
+|--- A1-car-user-app/          # React Native mobile app
+|--- A2-rental-staff-app/      # React web app
+|--- docker-compose.yml        # Optional: containerized frontends
+|--- README.md                 # Frontend-specific setup
+|--- .gitignore
+`--- scripts/
+    |--- build-all.sh
+    `--- dev-start.sh
 ```
 
 ### 3. Component B - Backend Services & Databases
 **Repo**: `car-demo-backend`
 ```
 car-demo-backend/
-├── B1-web-server/           # Express.js API
-├── B2-iot-gateway/          # Node.js IoT gateway
-├── B3-realtime-database/    # MongoDB setup & queries
-├── B4-static-database/      # PostgreSQL setup & queries
-├── docker-compose.yml       # All backend databases
-├── README.md               # Backend-specific setup
-├── .gitignore
-└── scripts/
-    ├── setup-databases.sh
-    └── start-services.sh
+|--- B1-web-server/           # Express.js API
+|--- B2-iot-gateway/          # Node.js IoT gateway
+|--- B3-realtime-database/    # MongoDB setup & queries
+|--- B4-static-database/      # PostgreSQL setup & queries
+|--- docker-compose.yml       # All backend databases
+|--- README.md               # Backend-specific setup
+|--- .gitignore
+`--- scripts/
+    |--- setup-databases.sh
+    `--- start-services.sh
 ```
 
 ### 4. Component C - In-Car Systems
 **Repo**: `car-demo-in-car`
 ```
 car-demo-in-car/
-├── C1-cloud-communication/   # Python cloud comm
-├── C2-central-broker/        # Redis + Node.js broker
-├── C3-dashboard-ui/          # Future: React dashboard
-├── C4-climate-control/       # Future: Python climate
-├── C5-data-sensors/          # Python sensor simulators
-├── requirements.txt          # Combined Python deps
-├── docker-compose.yml        # Redis and other services
-├── README.md                # In-car systems setup
-├── .gitignore
-└── scripts/
-    ├── setup-python.sh
-    └── start-simulators.sh
+|--- C1-cloud-communication/   # Python cloud comm
+|--- C2-central-broker/        # Redis + Node.js broker
+|--- C3-dashboard-ui/          # Future: React dashboard
+|--- C4-climate-control/       # Future: Python climate
+|--- C5-data-sensors/          # Python sensor simulators
+|--- requirements.txt          # Combined Python deps
+|--- docker-compose.yml        # Redis and other services
+|--- README.md                # In-car systems setup
+|--- .gitignore
+`--- scripts/
+    |--- setup-python.sh
+    `--- start-simulators.sh
 ```
 
 ## 🔗 Inter-Repository Communication

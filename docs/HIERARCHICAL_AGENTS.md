@@ -111,12 +111,12 @@ This creates a realistic separation where:
 
 ```
 Agent-A1 (Mobile App)
-  └─ Needs Agent-B1 (for API endpoint)
-       └─ Needs Agent-B2 (for real-time data)
-            └─ Needs Agent-C1 (for IoT communication)
-                 └─ Needs Agent-C2 (for message broker)
-                      └─ Needs Agent-C5 (for sensor data)
-                           └─ Needs Agent-C3 (for CAN bus access)
+  `-- Needs Agent-B1 (for API endpoint)
+       `-- Needs Agent-B2 (for real-time data)
+            `-- Needs Agent-C1 (for IoT communication)
+                 `-- Needs Agent-C2 (for message broker)
+                      `-- Needs Agent-C5 (for sensor data)
+                           `-- Needs Agent-C3 (for CAN bus access)
 ```
 
 Each agent makes an **independent AI-driven decision** about whether it needs help from downstream agents.

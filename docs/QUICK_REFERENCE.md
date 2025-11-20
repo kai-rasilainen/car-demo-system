@@ -6,11 +6,11 @@ User Request
      ↓
 Agent A (analyzes with AI)
      ↓
-  Needs B? ─YES→ Agent B (analyzes with AI)
-     │              ↓
-     │          Needs C? ─YES→ Agent C (analyzes with AI)
-     │
-     └─ Needs C directly? ─YES→ Agent C (analyzes with AI)
+  Needs B? -YES→ Agent B (analyzes with AI)
+     |              ↓
+     |          Needs C? -YES→ Agent C (analyzes with AI)
+     |
+     `-- Needs C directly? -YES→ Agent C (analyzes with AI)
 ```
 
 ## Commands
@@ -92,8 +92,8 @@ cp Jenkinsfile.ai Jenkinsfile
 ### Success
 ```
 analysis-reports/
-├── ai-feature-analysis.md    # Main report
-└── agent-log.txt              # Execution log
+|--- ai-feature-analysis.md    # Main report
+`--- agent-log.txt              # Execution log
 ```
 
 ### Report Structure

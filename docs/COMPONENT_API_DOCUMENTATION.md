@@ -7,33 +7,33 @@ This document describes the APIs and communication protocols between all compone
 ## Architecture Diagram
 
 ```
-┌─────────────────┐
-│  A1 Car User    │ (React Native Mobile App)
-│     App         │
-└────────┬────────┘
-         │ HTTP/REST
-         │
-┌────────▼────────┐     ┌─────────────────┐
-│  A2 Rental      │────►│  B1 Web Server  │
-│   Staff App     │     │    (Port 3001)  │
-└─────────────────┘     └────────┬────────┘
-        HTTP/REST                │
-                                 │ MongoDB  PostgreSQL  Redis
-                    ┌────────────┼────────────┼──────────┤
-                    │            │            │          │
-              ┌─────▼─────┐ ┌───▼────┐ ┌────▼────┐ ┌──▼────┐
-              │ B2 IoT    │ │   B3   │ │   B4    │ │  C2   │
-              │  Gateway  │ │ MongoDB│ │PostgreSQL│ │ Redis │
-              │(Port 3002)│ │(27017) │ │  (5432) │ │(6379) │
-              └─────┬─────┘ └────────┘ └─────────┘ └───┬───┘
-                    │                                   │
++-----------------+
+|  A1 Car User    | (React Native Mobile App)
+|     App         |
+`---------+--------+
+         | HTTP/REST
+         |
++--------▼--------+     +-----------------+
+|  A2 Rental      |----►|  B1 Web Server  |
+|   Staff App     |     |    (Port 3001)  |
+`------------------+     `---------+--------+
+        HTTP/REST                |
+                                 | MongoDB  PostgreSQL  Redis
+                    +------------+------------+----------+
+                    |            |            |          |
+              +-----▼-----+ +---▼----+ +----▼----+ +--▼----+
+              | B2 IoT    | |   B3   | |   B4    | |  C2   |
+              |  Gateway  | | MongoDB| |PostgreSQL| | Redis |
+              |(Port 3002)| |(27017) | |  (5432) | |(6379) |
+              `------+-----+ `---------+ `----------+ `----+---+
+                    |                                   |
               WebSocket                           Pub/Sub
-              (Port 8081)                              │
-                    │                                   │
-              ┌─────▼─────────────────────────────────▼─────┐
-              │         In-Car Components                    │
-              │  C1 Cloud Comm  │  C5 Data Sensors          │
-              └──────────────────────────────────────────────┘
+              (Port 8081)                              |
+                    |                                   |
+              +-----▼---------------------------------▼-----+
+              |         In-Car Components                    |
+              |  C1 Cloud Comm  |  C5 Data Sensors          |
+              `-----------------------------------------------+
 ```
 
 ---
