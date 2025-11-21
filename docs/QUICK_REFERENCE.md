@@ -92,9 +92,39 @@ cp Jenkinsfile.ai Jenkinsfile
 ### Success
 ```
 analysis-reports/
-|--- ai-feature-analysis.md    # Main report
-`--- agent-log.txt              # Execution log
+|--- ai-feature-analysis.md       # Main report
+|--- agent-log.txt                 # Execution log
+|--- implementation-plan.md        # Step-by-step plan (generated)
+`--- component-tasks/              # Per-component task files
+     |--- task-A1.md
+     |--- task-A2.md
+     |--- task-B1.md
+     |--- task-B2.md
+     |--- task-B3.md
+     |--- task-B4.md
+     |--- task-C1.md
+     |--- task-C2.md
+     `--- task-C5.md
 ```
+
+### Per-Component Task Files
+
+After analysis, Jenkins generates **one task file per component** (A1, A2, B1-B4, C1, C2, C5).  
+Each file includes:
+- Excerpt from the analysis relevant to that component
+- Suggested subtasks (interface changes, tests, deployment notes)
+- Effort estimate placeholder
+- Dependency notes
+
+**Purpose**: Break down the feature into small, focused tasks for each component.  
+Developers (or future automation) can turn these into GitHub issues or PRs.
+
+**Example workflow**:
+1. Jenkins runs AI analysis -> generates `ai-feature-analysis.md`
+2. Jenkins runs `create-component-tasks.py` -> generates 9 task files
+3. Developer reviews `component-tasks/task-B1.md` for backend API changes
+4. Developer creates GitHub issue from the task file
+5. Developer implements small PR for B1 component only
 
 ### Report Structure
 ```markdown
