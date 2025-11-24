@@ -154,10 +154,18 @@ pipeline {
                     try {
                         sh '''#!/bin/bash
                             cd ${WORKSPACE}
+                            
+                            echo "[INFO] Creating component tasks..."
+                            echo "  Input: ${ANALYSIS_DIR}/${params.OUTPUT_FILE}"
+                            echo "  Output: ${ANALYSIS_DIR}/component-tasks"
 
                             python3 scripts/create-component-tasks.py \
                                 "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \
                                 "${ANALYSIS_DIR}/component-tasks"
+                            
+                            echo ""
+                            echo "[INFO] Generated component task files:"
+                            ls -lh ${ANALYSIS_DIR}/component-tasks/ || echo "  (no files created)"
                         '''
 
                         echo "[OK] Component task files created in ${ANALYSIS_DIR}/component-tasks"
@@ -251,6 +259,14 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
                         echo "[PLAN] Implementation Plan:"
                         ls -lh ${ANALYSIS_DIR}/implementation-plan.md 2>/dev/null || echo "  (not generated)"
                         echo ""
+                        if [ -d "${ANALYSIS_DIR}/component-tasks" ]; then
+                            echo "[TASKS] Component Task Files:"
+                            ls -lh ${ANALYSIS_DIR}/component-tasks/
+                            echo "  Total: $(ls ${ANALYSIS_DIR}/component-tasks/ | wc -l) files"
+                        else
+                            echo "[TASKS] Component tasks: (not generated)"
+                        fi
+                        echo ""
                         if [ -d "${ANALYSIS_DIR}/code-examples" ]; then
                             echo "[CODE] Code Examples:"
                             ls -lh ${ANALYSIS_DIR}/code-examples/
@@ -261,6 +277,7 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
                     echo ""
                     echo "[DOC] Report saved to: ${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}"
                     echo "[PLAN] Implementation plan: ${env.ANALYSIS_DIR}/implementation-plan.md"
+                    echo "[TASKS] Component tasks: ${env.ANALYSIS_DIR}/component-tasks/"
                     echo "[CODE] Code examples: ${env.ANALYSIS_DIR}/code-examples/"
                 }
             }
