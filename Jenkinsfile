@@ -152,19 +152,19 @@ pipeline {
 
                 script {
                     try {
-                        sh '''#!/bin/bash
+                        sh """#!/bin/bash
                             set -e
-                            cd ${WORKSPACE}
+                            cd \${WORKSPACE}
                             
                             echo "[INFO] Creating component tasks..."
-                            echo "  Input: ${ANALYSIS_DIR}/${params.OUTPUT_FILE}"
-                            echo "  Output: ${ANALYSIS_DIR}/component-tasks"
+                            echo "  Input: \${ANALYSIS_DIR}/${params.OUTPUT_FILE}"
+                            echo "  Output: \${ANALYSIS_DIR}/component-tasks"
                             
                             # Check if analysis file exists
-                            if [ ! -f "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" ]; then
-                                echo "[ERROR] Analysis file not found: ${ANALYSIS_DIR}/${params.OUTPUT_FILE}"
-                                echo "  Available files in ${ANALYSIS_DIR}:"
-                                ls -la ${ANALYSIS_DIR}/ || echo "  (directory does not exist)"
+                            if [ ! -f "\${ANALYSIS_DIR}/${params.OUTPUT_FILE}" ]; then
+                                echo "[ERROR] Analysis file not found: \${ANALYSIS_DIR}/${params.OUTPUT_FILE}"
+                                echo "  Available files in \${ANALYSIS_DIR}:"
+                                ls -la \${ANALYSIS_DIR}/ || echo "  (directory does not exist)"
                                 exit 1
                             fi
                             
@@ -175,31 +175,31 @@ pipeline {
                             fi
                             
                             # Run the script
-                            python3 scripts/create-component-tasks.py \
-                                "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \
-                                "${ANALYSIS_DIR}/component-tasks"
+                            python3 scripts/create-component-tasks.py \\
+                                "\${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \\
+                                "\${ANALYSIS_DIR}/component-tasks"
                             
-                            EXIT_CODE=$?
-                            if [ $EXIT_CODE -ne 0 ]; then
-                                echo "[ERROR] Script exited with code $EXIT_CODE"
-                                exit $EXIT_CODE
+                            EXIT_CODE=\$?
+                            if [ \$EXIT_CODE -ne 0 ]; then
+                                echo "[ERROR] Script exited with code \$EXIT_CODE"
+                                exit \$EXIT_CODE
                             fi
                             
                             echo ""
                             echo "[INFO] Generated component task files:"
-                            ls -lh ${ANALYSIS_DIR}/component-tasks/ 2>/dev/null || {
+                            ls -lh \${ANALYSIS_DIR}/component-tasks/ 2>/dev/null || {
                                 echo "[ERROR] component-tasks directory not created"
                                 exit 1
                             }
                             
-                            FILE_COUNT=$(ls ${ANALYSIS_DIR}/component-tasks/ | wc -l)
-                            echo "[INFO] Total files created: $FILE_COUNT"
+                            FILE_COUNT=\$(ls \${ANALYSIS_DIR}/component-tasks/ | wc -l)
+                            echo "[INFO] Total files created: \$FILE_COUNT"
                             
-                            if [ $FILE_COUNT -eq 0 ]; then
+                            if [ \$FILE_COUNT -eq 0 ]; then
                                 echo "[ERROR] No task files were created"
                                 exit 1
                             fi
-                        '''
+                        """
 
                         echo "[OK] Component task files created in ${ANALYSIS_DIR}/component-tasks"
 
