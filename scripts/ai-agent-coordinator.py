@@ -855,23 +855,12 @@ def main():
     ollama_host = sys.argv[3] if len(sys.argv) > 3 else "http://10.0.2.2:11434"
     model = sys.argv[4] if len(sys.argv) > 4 else "llama3:8b"
     
-    # Determine output directory
-    import os
-    output_dir = os.path.dirname(output_file) if output_file else "."
-    code_examples_dir = os.path.join(output_dir, "code-examples")
-    
     # Create coordinator and run analysis
     coordinator = AgentCoordinator(ollama_host, model)
     results = coordinator.coordinate(feature_request)
     
     # Generate report
     coordinator.generate_report(results, output_file)
-    
-    # Generate code examples
-    coordinator.generate_code_examples(results, code_examples_dir)
-    
-    # Generate UI mockup
-    coordinator.generate_ui_mockup(results, code_examples_dir)
     
     # Display formatted analysis
     print("\n" + coordinator.format_analysis_output(results))
@@ -883,8 +872,6 @@ def main():
     
     print(f"\n[OK] Analysis complete!")
     print(f"  [DOC] Report: {output_file}")
-    print(f"  [CODE] Code examples: {code_examples_dir}/")
-    print(f"  [UI] UI spec: {code_examples_dir}/ui-design-spec.md")
 
 if __name__ == "__main__":
     main()
