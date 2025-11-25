@@ -46,18 +46,8 @@ python3 scripts/ai-agent-orchestrator.py "feature request" "output.md" "ollama-h
 - `OLLAMA_MODEL`: Which model to use
 - `OUTPUT_FILE`: Report filename
 
-### 3. `AI_AGENT_SYSTEM.md`
-**Purpose**: Complete documentation
-
-**Contains**:
-- Architecture overview
-- Setup instructions
-- Usage examples
-- Troubleshooting guide
-- Extension guide
-
-### 4. `scripts/test-ai-orchestrator.sh`
-**Purpose**: Test script for AI coordinator
+### 3. `scripts/test-ai-orchestrator.sh`
+**Purpose**: Test script for AI orchestrator
 
 **Does**:
 - Checks Ollama availability
