@@ -30,12 +30,12 @@ ollama pull codellama
 ### Test AI Coordinator
 ```bash
 cd car-demo-system
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 ```
 
 ### Run Manually
 ```bash
-python3 scripts/ai-agent-coordinator.py \
+python3 scripts/ai-agent-orchestrator.py \
   "Add tire pressure monitoring" \
   "report.md" \
   "http://localhost:11434"
@@ -63,7 +63,7 @@ cp Jenkinsfile.ai Jenkinsfile
 
 | File | Purpose |
 |------|---------|
-| `scripts/ai-agent-coordinator.py` | AI orchestration engine |
+| `scripts/ai-agent-orchestrator.py` | AI orchestration engine |
 | `Jenkinsfile.ai` | New AI-driven pipeline |
 | `Jenkinsfile.backup` | Original pipeline |
 | `AI_AGENT_SYSTEM.md` | Full docs |
@@ -153,7 +153,7 @@ Developers (or future automation) can turn these into GitHub issues or PRs.
 ollama serve
 
 # 2. Test
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 
 # 3. Deploy
 cp Jenkinsfile.ai Jenkinsfile

@@ -1143,7 +1143,7 @@ Feature Request Arrives
 
 ### For AI Assistants Acting as Agents
 
-**If you are Agent A** (Entry Point & Coordinator):
+**If you are Agent A** (Entry Point & Orchestrator):
 1. Receive all feature requests first
 2. Analyze frontend impact immediately
 3. Identify if you need backend support:
@@ -1260,7 +1260,7 @@ Final Report to User
 
 ### Agent Responsibilities
 
-**Agent A (Coordinator)**:
+**Agent A (Orchestrator)**:
 - Entry point for all requests
 - Frontend impact analysis
 - Consult other agents

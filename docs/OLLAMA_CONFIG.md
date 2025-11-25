@@ -41,21 +41,21 @@ All files are now configured to use:
 - Model: `llama3:8b`
 
 ### Files:
-1. `scripts/ai-agent-coordinator.py` - Default host and model
+1. `scripts/ai-agent-orchestrator.py` - Default host and model
 2. `Jenkinsfile.ai` - Default OLLAMA_HOST and model parameter
-3. `scripts/test-ai-coordinator.sh` - Test script
+3. `scripts/test-ai-orchestrator.sh` - Test script
 
 ## Testing
 
 ### Quick Test
 ```bash
 cd car-demo-system
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 ```
 
 ### Manual Test
 ```bash
-python3 scripts/ai-agent-coordinator.py \
+python3 scripts/ai-agent-orchestrator.py \
   "Add tire pressure monitoring" \
   "test-report.md" \
   "http://10.0.2.2:11434" \
@@ -115,7 +115,7 @@ ipconfig
 
 Then update in files:
 - `OLLAMA_HOST` in `Jenkinsfile.ai`
-- Default host in `ai-agent-coordinator.py`
+- Default host in `ai-agent-orchestrator.py`
 - Test script
 
 ## Performance

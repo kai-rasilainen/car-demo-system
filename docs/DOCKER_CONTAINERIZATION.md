@@ -164,7 +164,7 @@ All services include health checks:
 
 ## AI Agent Integration
 
-The containerized system fully supports the AI Agent Coordinator:
+The containerized system fully supports the AI Agent Orchestrator:
 
 - All agents (A1, A2, B1-B4, C1-C5) now have their corresponding containerized services
 - Agent orchestration works across the containerized network

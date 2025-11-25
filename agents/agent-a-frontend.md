@@ -350,7 +350,7 @@ Agent A combines:
 
 **Template**:
 ```markdown
-FROM: Agent A (Frontend Coordinator)
+FROM: Agent A (Frontend Orchestrator)
 TO: Agent B (Backend)
 RE: [Feature Name]
 
@@ -390,7 +390,7 @@ CONTEXT:
 
 **Template**:
 ```markdown
-FROM: Agent A (Frontend Coordinator)
+FROM: Agent A (Frontend Orchestrator)
 TO: Agent C (In-Car Systems)
 RE: [Feature Name]
 

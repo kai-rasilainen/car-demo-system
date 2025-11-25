@@ -16,23 +16,23 @@
 
 ## New Files Created
 
-### 1. `scripts/ai-agent-coordinator.py`
+### 1. `scripts/ai-agent-orchestrator.py`
 **Purpose**: Core AI orchestration logic
 
 **Features**:
 - `OllamaClient`: Interfaces with Ollama API
 - `Agent`: Represents each agent (A, B, C) with AI analysis
-- `AgentCoordinator`: Orchestrates multi-agent collaboration
+- `AgentOrchestrator`: Orchestrates multi-agent collaboration
 - Dynamic dependency detection
 - Markdown report generation
 
 **Usage**:
 ```bash
-python3 scripts/ai-agent-coordinator.py "feature request" "output.md" "ollama-host"
+python3 scripts/ai-agent-orchestrator.py "feature request" "output.md" "ollama-host"
 ```
 
 ### 2. `Jenkinsfile.ai`
-**Purpose**: New Jenkins pipeline using AI coordination
+**Purpose**: New Jenkins pipeline using AI orchestration
 
 **Key Changes**:
 - Simplified parameters (removed hardcoded options)
@@ -56,7 +56,7 @@ python3 scripts/ai-agent-coordinator.py "feature request" "output.md" "ollama-ho
 - Troubleshooting guide
 - Extension guide
 
-### 4. `scripts/test-ai-coordinator.sh`
+### 4. `scripts/test-ai-orchestrator.sh`
 **Purpose**: Test script for AI coordinator
 
 **Does**:
@@ -132,7 +132,7 @@ ollama pull llama2
 
 # 3. Run test
 cd car-demo-system
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 ```
 
 ### Expected Output
@@ -207,7 +207,7 @@ environment {
 
 **Or pass directly**:
 ```bash
-python3 scripts/ai-agent-coordinator.py \
+python3 scripts/ai-agent-orchestrator.py \
     "request" \
     "output.md" \
     "http://your-host:11434"
@@ -231,7 +231,7 @@ class OllamaClient:
 
 If models are slow:
 ```python
-# In ai-agent-coordinator.py
+# In ai-agent-orchestrator.py
 response = requests.post(url, json=payload, timeout=300)  # 5 min
 ```
 
@@ -285,7 +285,7 @@ response = requests.post(url, json=payload, timeout=300)  # 5 min
 
 ### 1. Test Locally
 ```bash
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 ```
 
 ### 2. Review Generated Report
@@ -294,7 +294,7 @@ cat test-analysis-report.md
 ```
 
 ### 3. Tune Prompts
-- Edit `ai-agent-coordinator.py`
+- Edit `ai-agent-orchestrator.py`
 - Adjust system prompts
 - Add more context
 
@@ -307,7 +307,7 @@ Update `OLLAMA_MODEL` parameter
 
 ### 5. Deploy to Jenkins
 ```bash
-git add scripts/ai-agent-coordinator.py Jenkinsfile.ai AI_AGENT_SYSTEM.md
+git add scripts/ai-agent-orchestrator.py Jenkinsfile.ai AI_AGENT_SYSTEM.md
 git commit -m "Add AI-driven agent system"
 git push
 ```
@@ -316,11 +316,11 @@ git push
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `scripts/ai-agent-coordinator.py` | AI orchestration logic | ✅ Created |
+| `scripts/ai-agent-orchestrator.py` | AI orchestration logic | ✅ Created |
 | `Jenkinsfile.ai` | New AI pipeline | ✅ Created |
 | `Jenkinsfile.backup` | Old pipeline backup | ✅ Created |
 | `AI_AGENT_SYSTEM.md` | Full documentation | ✅ Created |
-| `scripts/test-ai-coordinator.sh` | Test script | ✅ Created |
+| `scripts/test-ai-orchestrator.sh` | Test script | ✅ Created |
 | `IMPLEMENTATION_SUMMARY.md` | This file | ✅ Created |
 
 ## Quick Start
@@ -332,9 +332,9 @@ ollama serve
 # 2. Pull model
 ollama pull llama2
 
-# 3. Test coordinator
+# 3. Test orchestrator
 cd car-demo-system
-./scripts/test-ai-coordinator.sh
+./scripts/test-ai-orchestrator.sh
 
 # 4. If test passes, update Jenkins
 # Option A: Replace Jenkinsfile
@@ -360,7 +360,7 @@ If you encounter issues:
 
 1. **Check Ollama**: `curl http://localhost:11434/api/tags`
 2. **Check model**: `ollama list`
-3. **Test script**: `./scripts/test-ai-coordinator.sh`
+3. **Test script**: `./scripts/test-ai-orchestrator.sh`
 4. **Review logs**: `cat analysis-reports/agent-log.txt`
 5. **Try fallback**: Set `USE_AI_AGENTS=false`
 

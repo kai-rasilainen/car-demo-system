@@ -139,7 +139,7 @@ The system generates:
 
 ## Configuration
 
-All agents are defined in `scripts/ai-agent-coordinator.py` in the `AgentCoordinator.__init__()` method. Each agent specifies:
+All agents are defined in `scripts/ai-agent-orchestrator.py` in the `AgentOrchestrator.__init__()` method. Each agent specifies:
 - `name`: Agent identifier (e.g., "Agent-B1")
 - `component`: Component they're responsible for
 - `role`: Their role/expertise
@@ -150,7 +150,7 @@ All agents are defined in `scripts/ai-agent-coordinator.py` in the `AgentCoordin
 ## Usage
 
 ```bash
-python scripts/ai-agent-coordinator.py "Add tire pressure monitoring" output-dir/
+python scripts/ai-agent-orchestrator.py "Add tire pressure monitoring" output-dir/
 ```
 
 The system automatically:

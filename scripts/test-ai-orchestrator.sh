@@ -1,7 +1,7 @@
 #!/bin/bash
-# Test script for AI Agent Coordinator
+# Test script for AI Agent Orchestrator
 
-echo "🧪 Testing AI Agent Coordinator"
+echo "🧪 Testing AI Agent Orchestrator"
 echo "================================"
 echo ""
 
@@ -27,15 +27,15 @@ else
     exit 1
 fi
 
-# Test the coordinator
+# Test the orchestrator
 echo ""
-echo "3. Running AI coordinator test..."
+echo "3. Running AI orchestrator test..."
 echo "   Request: 'Add tire pressure monitoring to dashboard'"
 echo ""
 
 cd "$(dirname "$0")/.."
 
-python3 scripts/ai-agent-coordinator.py \
+python3 scripts/ai-agent-orchestrator.py \
     "Add tire pressure monitoring to the car dashboard" \
     "test-analysis-report.md" \
     "http://10.0.2.2:11434" \

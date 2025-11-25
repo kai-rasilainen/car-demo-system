@@ -132,7 +132,7 @@ The system generates a comprehensive markdown report with:
 ```bash
 cd car-demo-system
 
-python3 scripts/ai-agent-coordinator.py \
+python3 scripts/ai-agent-orchestrator.py \
   "Add tire pressure monitoring to dashboard" \
   "analysis-report.md" \
   "http://localhost:11434"
@@ -182,7 +182,7 @@ environment {
 
 Or pass as parameter to Python script:
 ```bash
-python3 scripts/ai-agent-coordinator.py "request" "output.md" "http://your-host:11434"
+python3 scripts/ai-agent-orchestrator.py "request" "output.md" "http://your-host:11434"
 ```
 
 ### AI Model Selection
@@ -198,7 +198,7 @@ Choose models based on your needs:
 Edit `OLLAMA_MODEL` parameter in Jenkins or:
 
 ```python
-# In ai-agent-coordinator.py
+# In ai-agent-orchestrator.py
 class OllamaClient:
     def __init__(self, host: str = "http://localhost:11434"):
         self.host = host
@@ -241,7 +241,7 @@ If AI response isn't valid JSON:
 
 Large models may timeout:
 ```python
-# Increase timeout in ai-agent-coordinator.py
+# Increase timeout in ai-agent-orchestrator.py
 response = requests.post(url, json=payload, timeout=300)  # 5 minutes
 ```
 
@@ -250,7 +250,7 @@ response = requests.post(url, json=payload, timeout=300)  # 5 minutes
 ### Add New Agent
 
 ```python
-# In ai-agent-coordinator.py
+# In ai-agent-orchestrator.py
 self.agent_d = Agent(
     name="Agent D",
     role="Your Role",
@@ -292,7 +292,7 @@ car-demo-system/
 |--- Jenkinsfile.ai              # New AI-driven pipeline
 |--- Jenkinsfile.backup          # Old hardcoded pipeline  
 |--- scripts/
-|   `--- ai-agent-coordinator.py # AI coordination logic
+|   `--- ai-agent-orchestrator.py # AI orchestration logic
 `--- AI_AGENT_SYSTEM.md          # This file
 ```
 
@@ -312,7 +312,7 @@ stage('Agent A') {
 ### New Approach (Jenkinsfile.ai)
 ```groovy
 stage('AI Agent Coordination') {
-    sh "python3 scripts/ai-agent-coordinator.py ..."
+    sh "python3 scripts/ai-agent-orchestrator.py ..."
     // AI generates analysis dynamically
 }
 ```
@@ -325,8 +325,8 @@ stage('AI Agent Coordination') {
    ollama serve
    ollama pull llama2
    
-   # Test coordinator directly
-   python3 scripts/ai-agent-coordinator.py \
+   # Test orchestrator directly
+   python3 scripts/ai-agent-orchestrator.py \
      "Add battery status display" \
      "test-report.md"
    ```

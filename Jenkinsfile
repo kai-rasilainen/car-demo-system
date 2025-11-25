@@ -61,7 +61,7 @@ pipeline {
                 
                 sh '''
                     mkdir -p ${ANALYSIS_DIR}
-                    chmod +x scripts/ai-agent-coordinator.py
+                    chmod +x scripts/ai-agent-orchestrator.py
                     chmod +x scripts/generate-implementation-plan.py
                     chmod +x scripts/create-component-tasks.py
                 '''
@@ -112,8 +112,8 @@ pipeline {
                         sh """#!/bin/bash
                             cd ${WORKSPACE}
                             
-                            echo "Starting AI coordinator..."
-                            python3 scripts/ai-agent-coordinator.py \\
+                            echo "Starting AI orchestrator..."
+                            python3 scripts/ai-agent-orchestrator.py \\
                                 "${params.FEATURE_REQUEST}" \\
                                 "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \\
                                 "${OLLAMA_HOST}" \\
