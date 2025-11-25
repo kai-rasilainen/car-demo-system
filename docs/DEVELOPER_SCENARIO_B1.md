@@ -62,10 +62,10 @@ User Request: "Add real-time tire pressure monitoring to mobile app"
 After Jenkins completes, download:
 
 ```
-📁 analysis-reports/
-  ├── tire-pressure-monitoring-analysis.md  (full analysis)
-  └── component-tasks/
-      └── task-B1.md  ⬅️ YOUR FILE
+analysis-reports/
+  |-- tire-pressure-monitoring-analysis.md  (full analysis)
+  `-- component-tasks/
+      `-- task-B1.md  <-- YOUR FILE
 ```
 
 ---
