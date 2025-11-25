@@ -117,10 +117,9 @@ pipeline {
                                 "${params.FEATURE_REQUEST}" \\
                                 "${ANALYSIS_DIR}/${params.OUTPUT_FILE}" \\
                                 "${OLLAMA_HOST}" \\
-                                "${params.OLLAMA_MODEL}" \\
-                                2>&1 | tee ${ANALYSIS_DIR}/agent-log.txt
+                                "${params.OLLAMA_MODEL}"
                             
-                            EXIT_CODE=\${PIPESTATUS[0]}
+                            EXIT_CODE=\$?
                             
                             if [ \$EXIT_CODE -ne 0 ]; then
                                 echo "[ERROR] AI agent analysis failed with exit code \$EXIT_CODE"
@@ -279,8 +278,8 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
                 echo "[ARCHIVE] Archiving analysis results..."
                 
                 script {
-                    // Archive the report, implementation plan, and code examples
-                    archiveArtifacts artifacts: "analysis-reports/**/*.md, analysis-reports/**/*.txt, analysis-reports/**/code-examples/**/*", 
+                    // Archive only the analysis reports and component tasks
+                    archiveArtifacts artifacts: "analysis-reports/**/*.md", 
                                      allowEmptyArchive: true
                     
                     // List generated files
@@ -301,11 +300,6 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
                         else
                             echo "[TASKS] Component tasks: (not generated)"
                         fi
-                        echo ""
-                        if [ -d "${ANALYSIS_DIR}/code-examples" ]; then
-                            echo "[CODE] Code Examples:"
-                            ls -lh ${ANALYSIS_DIR}/code-examples/
-                        fi
                     '''
                     
                     echo "[OK] Results archived"
@@ -313,7 +307,6 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
                     echo "[DOC] Report saved to: ${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}"
                     echo "[PLAN] Implementation plan: ${env.ANALYSIS_DIR}/implementation-plan.md"
                     echo "[TASKS] Component tasks: ${env.ANALYSIS_DIR}/component-tasks/"
-                    echo "[CODE] Code examples: ${env.ANALYSIS_DIR}/code-examples/"
                 }
             }
         }
@@ -326,16 +319,10 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
             echo "[INFO] Results:"
             echo "  - Analysis Report: ${env.ANALYSIS_DIR}/${params.OUTPUT_FILE}"
             echo "  - Implementation Plan: ${env.ANALYSIS_DIR}/implementation-plan.md"
-            echo "  - Code examples: ${env.ANALYSIS_DIR}/code-examples/"
-            echo "    • frontend-component.jsx"
-            echo "    • backend-api.js"
-            echo "    • sensor-integration.py"
-            echo "    • ui-design-spec.md"
-            echo "  - Agent Log: ${env.ANALYSIS_DIR}/agent-log.txt"
+            echo "  - Component Tasks: ${env.ANALYSIS_DIR}/component-tasks/"
             echo ""
             echo "[AI] Agents were dynamically orchestrated based on AI analysis"
-            echo "[CODE] Code examples generated automatically"
-            echo "[PLAN] Step-by-step implementation plan created"
+            echo "[TASKS] Component-specific task files with code templates created"
         }
         failure {
             echo "[ERROR] Feature analysis failed"
