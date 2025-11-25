@@ -39,7 +39,7 @@ User Request: "Add real-time tire pressure monitoring to mobile app"
      v
 [Agent B] Analyzes backend impact
      |
-     |--> B1 (API): New monitoring endpoints needed ⬅️ YOUR WORK
+     |--> B1 (API): New monitoring endpoints needed <-- YOUR WORK
      |--> B2 (WebSocket): Real-time push to clients
      |--> B3 (MongoDB): Current readings storage
      |--> B4 (PostgreSQL): Historical data storage
@@ -384,21 +384,21 @@ module.exports = MonitoringService;
 
 ```
 C5 (Sensors) generates pressure data
-     ↓
+     |
 C2 (Redis) stores latest readings
-     ↓
+     |
 C1 (Cloud Comm) fetches from Redis
-     ↓
+     |
 B2 (WebSocket) receives from C1
-     ↓
+     |
 B1 (YOU!) MonitoringService stores data
-     ↓
+     |
 B3 (MongoDB) stores current readings
-     ↓
+     |
 B4 (PostgreSQL) stores historical data
-     ↓
+     |
 B1 (YOU!) API returns data
-     ↓
+     |
 A1 (Mobile) displays to user
 ```
 
@@ -419,14 +419,14 @@ A1 (Mobile) displays to user
 
 **As a B1 developer, you now know**:
 
-✅ What API endpoints to create  
-✅ What data storage logic to implement  
-✅ What database queries to write  
-✅ What other components depend on you (A1, A2)  
-✅ What components you depend on (B2, B3, B4)  
-✅ Example code to start from  
-✅ Estimated effort (4 hours)  
-✅ Clear subtasks to complete  
+[X] What API endpoints to create  
+[X] What data storage logic to implement  
+[X] What database queries to write  
+[X] What other components depend on you (A1, A2)  
+[X] What components you depend on (B2, B3, B4)  
+[X] Example code to start from  
+[X] Estimated effort (4 hours)  
+[X] Clear subtasks to complete  
 
 **You DON'T need to understand**:
 - How C5 generates sensor data
@@ -436,4 +436,4 @@ A1 (Mobile) displays to user
 
 **You ONLY need to focus on**: Your B1 API endpoints and data storage logic.
 
-This is the power of component-level task breakdown! 🎯
+This is the power of component-level task breakdown! [*]
