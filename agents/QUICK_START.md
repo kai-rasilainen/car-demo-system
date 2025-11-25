@@ -273,7 +273,6 @@ Agent A: Frontend rendering limits?
 
 - **Read full agent documents** in `agents/` folder for detailed capabilities
 - **Try with a simple feature** to see how it works
-- **Review agent document** (`AGENT_SYSTEM.md`) for complex features
 - **Provide feedback** to improve agent accuracy
 
 ## Getting Help
@@ -281,7 +280,7 @@ Agent A: Frontend rendering limits?
 If you need clarification on agent outputs:
 - Check the individual agent document (agent-a-frontend.md, etc.)
 - Review example analyses in each document
-- Look at AGENT_SYSTEM.md for orchestration protocols
+- Look at INTER_AGENT_API.md for orchestration protocols
 
 ## Summary: When to Use Each Agent
 

@@ -307,7 +307,7 @@ Update `OLLAMA_MODEL` parameter
 
 ### 5. Deploy to Jenkins
 ```bash
-git add scripts/ai-agent-orchestrator.py Jenkinsfile.ai AI_AGENT_SYSTEM.md
+git add scripts/ai-agent-orchestrator.py Jenkinsfile.ai agents/
 git commit -m "Add AI-driven agent system"
 git push
 ```
@@ -319,7 +319,7 @@ git push
 | `scripts/ai-agent-orchestrator.py` | AI orchestration logic | ✅ Created |
 | `Jenkinsfile.ai` | New AI pipeline | ✅ Created |
 | `Jenkinsfile.backup` | Old pipeline backup | ✅ Created |
-| `AI_AGENT_SYSTEM.md` | Full documentation | ✅ Created |
+| `agents/*.md` | Agent documentation | ✅ Created |
 | `scripts/test-ai-orchestrator.sh` | Test script | ✅ Created |
 | `IMPLEMENTATION_SUMMARY.md` | This file | ✅ Created |
 

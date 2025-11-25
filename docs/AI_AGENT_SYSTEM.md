@@ -293,7 +293,12 @@ car-demo-system/
 |--- Jenkinsfile.backup          # Old hardcoded pipeline  
 |--- scripts/
 |   `--- ai-agent-orchestrator.py # AI orchestration logic
-`--- AI_AGENT_SYSTEM.md          # This file
+|--- agents/                     # Agent documentation
+|   |--- agent-a-frontend.md
+|   |--- agent-b-backend.md
+|   `--- agent-c-in-car.md
+`--- docs/
+    `--- AI_AGENT_SYSTEM.md      # This file
 ```
 
 ## Comparison: Old vs New

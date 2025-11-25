@@ -66,8 +66,8 @@ cp Jenkinsfile.ai Jenkinsfile
 | `scripts/ai-agent-orchestrator.py` | AI orchestration engine |
 | `Jenkinsfile.ai` | New AI-driven pipeline |
 | `Jenkinsfile.backup` | Original pipeline |
-| `AI_AGENT_SYSTEM.md` | Full docs |
-| `IMPLEMENTATION_SUMMARY.md` | Implementation details |
+| `docs/IMPLEMENTATION_SUMMARY.md` | Implementation details |
+| `agents/*.md` | Agent documentation |
 
 ## Agents
 
