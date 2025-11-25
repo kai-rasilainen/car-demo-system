@@ -15,7 +15,7 @@ This Jenkinsfile enables you to use the AI Agent system through Jenkins with inp
 
 ### 1. Create New Pipeline Job
 
-1. Jenkins Dashboard → New Item
+1. Jenkins Dashboard -> New Item
 2. Enter name: `Car-Demo-Feature-Analysis`
 3. Select: **Pipeline**
 4. Click OK

@@ -158,8 +158,8 @@ python -m pytest tests/ -v
 - Redis (port 6379)
 
 **Coverage:**
-- ✅ Complete data flow (Sensor → C2 → B1)
-- ✅ Command flow (B1 → C2 → Car)
+- ✅ Complete data flow (Sensor -> C2 -> B1)
+- ✅ Command flow (B1 -> C2 -> Car)
 - ✅ Real-time WebSocket communication
 - ✅ Multi-service data consistency
 - ✅ Load testing (concurrent requests)

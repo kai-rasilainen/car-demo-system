@@ -16,11 +16,11 @@ User Request
      ↓
 Agent A (Frontend & Coordinator)
      ↓ (AI decides)
-     |--→ Agent B needed? → Agent B (Backend)
+     |---> Agent B needed? -> Agent B (Backend)
      |                          ↓ (AI decides)
-     |                          `--→ Agent C needed? → Agent C (In-Car)
+     |                          `---> Agent C needed? -> Agent C (In-Car)
      |
-     `--→ Agent C needed directly? → Agent C (In-Car)
+     `---> Agent C needed directly? -> Agent C (In-Car)
 ```
 
 ### Agent Responsibilities
@@ -64,11 +64,11 @@ Agents use AI to determine:
 ### 3. Cascading Coordination
 
 ```python
-Agent A analyzes → determines needs_agent_b=true
+Agent A analyzes -> determines needs_agent_b=true
   ↓
-Agent B analyzes → determines needs_agent_c=true
+Agent B analyzes -> determines needs_agent_c=true
   ↓
-Agent C analyzes → provides in-car analysis
+Agent C analyzes -> provides in-car analysis
 ```
 
 ### 4. Report Generation

@@ -34,7 +34,7 @@ User Request: "Add real-time tire pressure monitoring to mobile app"
      |--> A2 (Web): Dashboard might need monitoring view
      |
      v
-[Agent A decides]: Needs backend API → calls Agent B
+[Agent A decides]: Needs backend API -> calls Agent B
      |
      v
 [Agent B] Analyzes backend impact
@@ -45,7 +45,7 @@ User Request: "Add real-time tire pressure monitoring to mobile app"
      |--> B4 (PostgreSQL): Historical data storage
      |
      v
-[Agent B decides]: Needs sensor data → calls Agent C
+[Agent B decides]: Needs sensor data -> calls Agent C
      |
      v
 [Agent C] Analyzes in-car systems

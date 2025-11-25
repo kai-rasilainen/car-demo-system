@@ -13,7 +13,7 @@
 In VirtualBox/WSL, `10.0.2.2` is the default gateway that routes to the Windows host from the guest OS.
 
 ```
-Ubuntu Guest (10.0.2.15) → 10.0.2.2 → Windows Host
+Ubuntu Guest (10.0.2.15) -> 10.0.2.2 -> Windows Host
 ```
 
 ### Verify Connection

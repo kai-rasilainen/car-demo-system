@@ -40,7 +40,7 @@ This document describes the APIs and communication protocols between all compone
 
 ## 1. Frontend to Backend Communication
 
-### A2 Rental Staff App → B1 Web Server
+### A2 Rental Staff App -> B1 Web Server
 
 **Base URL:** `http://localhost:3001`
 
@@ -152,7 +152,7 @@ GET /health
 
 ## 2. Backend Component Communication
 
-### B1 Web Server → B3 MongoDB
+### B1 Web Server -> B3 MongoDB
 
 **Connection:** `mongodb://admin:password@localhost:27017`
 **Database:** `cardata`
@@ -183,7 +183,7 @@ db.collection('car_data').findOne(
 
 ---
 
-### B1 Web Server → B4 PostgreSQL
+### B1 Web Server -> B4 PostgreSQL
 
 **Connection:** `postgresql://postgres:password@localhost:5432/carinfo`
 
@@ -213,7 +213,7 @@ cars (
 
 ---
 
-### B1 Web Server → C2 Redis (Command Publishing)
+### B1 Web Server -> C2 Redis (Command Publishing)
 
 **Connection:** `redis://localhost:6379`
 
@@ -235,7 +235,7 @@ redisClient.publish(
 
 ## 3. In-Car Component Communication
 
-### C5 Data Sensors → B2 IoT Gateway
+### C5 Data Sensors -> B2 IoT Gateway
 
 **Protocol:** WebSocket
 **Endpoint:** `ws://localhost:8081`
@@ -263,7 +263,7 @@ Content-Type: application/json
 
 ---
 
-### B2 IoT Gateway → B3 MongoDB
+### B2 IoT Gateway -> B3 MongoDB
 
 **Connection:** `mongodb://admin:password@localhost:27017`
 **Database:** `cardata`
@@ -282,7 +282,7 @@ db.collection('car_data').insertOne({
 
 ---
 
-### B2 IoT Gateway → C2 Redis
+### B2 IoT Gateway -> C2 Redis
 
 **Connection:** `redis://localhost:6379`
 
@@ -305,7 +305,7 @@ redisClient.publish('car:updates', JSON.stringify({
 
 ---
 
-### C1 Cloud Communication → C2 Redis
+### C1 Cloud Communication -> C2 Redis
 
 **Connection:** `redis://localhost:6379`
 
@@ -378,7 +378,7 @@ GET /health
 
 ### WebSocket Messages (Port 8081)
 
-#### Client → Server (Sensor Data)
+#### Client -> Server (Sensor Data)
 ```json
 {
   "type": "sensor_data",
@@ -392,7 +392,7 @@ GET /health
 }
 ```
 
-#### Server → Client (Command)
+#### Server -> Client (Command)
 ```json
 {
   "type": "command",
@@ -402,7 +402,7 @@ GET /health
 }
 ```
 
-#### Server → Client (Acknowledgment)
+#### Server -> Client (Acknowledgment)
 ```json
 {
   "type": "ack",
@@ -455,30 +455,30 @@ GET /health
 ### Example 1: Getting Car Data
 ```
 User (Browser)
-  → GET /api/car/ABC-123 → B1 Web Server
-      → MongoDB: Get real-time data (temp, GPS)
-      → PostgreSQL: Get static data (owner, service)
-      → Combine data
+  -> GET /api/car/ABC-123 -> B1 Web Server
+      -> MongoDB: Get real-time data (temp, GPS)
+      -> PostgreSQL: Get static data (owner, service)
+      -> Combine data
   ← JSON Response (combined data)
 ```
 
 ### Example 2: Sending Command
 ```
 User (Browser)
-  → POST /api/car/ABC-123/command {"command": "start_ac"} → B1 Web Server
-      → Redis: PUBLISH car:ABC-123:commands
-          → C1 Cloud Comm (subscribed)
-              → Execute command on car
-              → Redis: PUBLISH car:ABC-123:status "executed"
+  -> POST /api/car/ABC-123/command {"command": "start_ac"} -> B1 Web Server
+      -> Redis: PUBLISH car:ABC-123:commands
+          -> C1 Cloud Comm (subscribed)
+              -> Execute command on car
+              -> Redis: PUBLISH car:ABC-123:status "executed"
   ← JSON Response "Command sent"
 ```
 
 ### Example 3: Sensor Data Flow
 ```
 C5 Sensors (Python)
-  → WebSocket: Send sensor data → B2 IoT Gateway
-      → MongoDB: Store data in car_data collection
-      → Redis: PUBLISH car:updates (notify subscribers)
+  -> WebSocket: Send sensor data -> B2 IoT Gateway
+      -> MongoDB: Store data in car_data collection
+      -> Redis: PUBLISH car:updates (notify subscribers)
   ← WebSocket: ACK message
 ```
 

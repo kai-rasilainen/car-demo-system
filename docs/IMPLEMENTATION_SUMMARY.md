@@ -149,7 +149,7 @@ git push
 ### Option 2: Keep Both
 ```bash
 # In Jenkins, configure pipeline to use Jenkinsfile.ai
-# Pipeline → Definition → Script Path: Jenkinsfile.ai
+# Pipeline -> Definition -> Script Path: Jenkinsfile.ai
 ```
 
 ### Running in Jenkins

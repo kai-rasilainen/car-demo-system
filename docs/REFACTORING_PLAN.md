@@ -61,15 +61,15 @@ car-demo-in-car/
 ## 🔗 Inter-Repository Communication
 
 ### API Endpoints (Production Ready)
-- **A1, A2** → **B1**: `http://car-demo-backend.local:3001`
-- **B1, B2** → **B3, B4**: Internal database connections
-- **All** → **C2**: `http://car-demo-in-car.local:3003`
+- **A1, A2** -> **B1**: `http://car-demo-backend.local:3001`
+- **B1, B2** -> **B3, B4**: Internal database connections
+- **All** -> **C2**: `http://car-demo-in-car.local:3003`
 
 ### Development Endpoints (localhost)
-- **A1, A2** → **B1**: `http://localhost:3001`
-- **B1, B2** → **B3**: `mongodb://localhost:27017`
-- **B1, B2** → **B4**: `postgresql://localhost:5432`
-- **All** → **C2**: `redis://localhost:6379`, `http://localhost:3003`
+- **A1, A2** -> **B1**: `http://localhost:3001`
+- **B1, B2** -> **B3**: `mongodb://localhost:27017`
+- **B1, B2** -> **B4**: `postgresql://localhost:5432`
+- **All** -> **C2**: `redis://localhost:6379`, `http://localhost:3003`
 
 ## 📋 Migration Benefits
 

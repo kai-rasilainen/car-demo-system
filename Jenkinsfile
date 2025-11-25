@@ -74,7 +74,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "🔍 Checking Ollama connection..."
+                    echo "[CHECK] Checking Ollama connection..."
                     try {
                         sh '''
                             curl -s ${OLLAMA_HOST}/api/tags > /dev/null || {
@@ -88,7 +88,7 @@ pipeline {
                             if curl -s ${OLLAMA_HOST}/api/tags | grep -q "llama3:8b"; then
                                 echo "[OK] Model llama3:8b is available"
                             else
-                                echo "⚠️  Model llama3:8b may need to be pulled first"
+                                echo "[WARN]  Model llama3:8b may need to be pulled first"
                                 echo "Run on Windows: ollama pull llama3:8b"
                             fi
                         '''

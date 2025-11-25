@@ -82,9 +82,9 @@ The AI Agent System uses a **hierarchical structure** where each component has i
 
 ### 1. Feature Request Entry
 When a feature request comes in, the system determines which frontend agents to start with based on keywords:
-- Keywords like "mobile", "app", "user", "booking" → Start with Agent-A1
-- Keywords like "staff", "admin", "fleet", "report" → Start with Agent-A2
-- If unclear → Start with both A1 and A2
+- Keywords like "mobile", "app", "user", "booking" -> Start with Agent-A1
+- Keywords like "staff", "admin", "fleet", "report" -> Start with Agent-A2
+- If unclear -> Start with both A1 and A2
 
 ### 2. Recursive Analysis
 Each agent:
