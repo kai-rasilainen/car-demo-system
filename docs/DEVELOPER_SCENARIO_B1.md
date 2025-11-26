@@ -102,12 +102,86 @@ Dependencies:
 
 ## Proposed Implementation
 
-### Example Code for B1
+### Mock Pressure Provider (for development)
+
+```javascript
+// File: B1-web-server/utils/mockPressureProvider.js
+// Use this for testing when database is not available
+
+class MockPressureProvider {
+  constructor() {
+    // Normal pressure range: 2.2-2.5 bar
+    this.baselinePressures = {
+      'ABC-123': { frontLeft: 2.3, frontRight: 2.4, rearLeft: 2.3, rearRight: 2.4 },
+      'XYZ-789': { frontLeft: 2.2, frontRight: 2.3, rearLeft: 2.2, rearRight: 2.3 },
+      'DEF-456': { frontLeft: 2.4, frontRight: 2.4, rearLeft: 2.5, rearRight: 2.5 },
+    };
+  }
+  
+  // Generate realistic pressure readings with small variations
+  getCurrentPressure(carId) {
+    const baseline = this.baselinePressures[carId] || {
+      frontLeft: 2.3,
+      frontRight: 2.3,
+      rearLeft: 2.3,
+      rearRight: 2.3
+    };
+    
+    // Add small random variation (+/- 0.1 bar)
+    const addVariation = (value) => {
+      const variation = (Math.random() - 0.5) * 0.2;
+      return Math.max(1.8, Math.min(2.8, value + variation));
+    };
+    
+    return {
+      carId,
+      licensePlate: carId,
+      tirePressure: {
+        frontLeft: parseFloat(addVariation(baseline.frontLeft).toFixed(1)),
+        frontRight: parseFloat(addVariation(baseline.frontRight).toFixed(1)),
+        rearLeft: parseFloat(addVariation(baseline.rearLeft).toFixed(1)),
+        rearRight: parseFloat(addVariation(baseline.rearRight).toFixed(1))
+      },
+      unit: 'bar',
+      timestamp: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      isMockData: true // Flag to indicate this is test data
+    };
+  }
+  
+  // Generate historical data for testing
+  getHistoricalPressure(carId, days = 7) {
+    const history = [];
+    const now = new Date();
+    
+    for (let i = 0; i < days * 4; i++) { // 4 readings per day
+      const timestamp = new Date(now - i * 6 * 60 * 60 * 1000); // Every 6 hours
+      const reading = this.getCurrentPressure(carId);
+      
+      history.push({
+        tirePressure: reading.tirePressure,
+        unit: 'bar',
+        timestamp: timestamp.toISOString()
+      });
+    }
+    
+    return history;
+  }
+}
+
+module.exports = new MockPressureProvider();
+```
+
+### Example Code for B1 (with mock data fallback)
 
 ```javascript
 // File: B1-web-server/routes/monitoring.js
 const express = require('express');
 const router = express.Router();
+const mockPressureProvider = require('../utils/mockPressureProvider');
+
+// Environment flag to enable/disable mock data
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA === 'true';
 
 // GET /api/monitoring/tire-pressure/:carId
 // Returns current tire pressure readings for a specific car
@@ -115,36 +189,50 @@ router.get('/tire-pressure/:carId', async (req, res) => {
   try {
     const { carId } = req.params;
     
-    // Query B3 (MongoDB) for latest reading
-    const reading = await db.collection('tire_pressure_readings')
-      .findOne(
-        { carId },
-        { sort: { timestamp: -1 } }
-      );
+    // Try to get real data from database first
+    let reading = null;
+    let usedMockData = false;
     
-    if (!reading) {
-      return res.status(404).json({
-        success: false,
-        error: 'No tire pressure data found for this car'
-      });
+    if (!USE_MOCK_DATA) {
+      try {
+        reading = await db.collection('tire_pressure_readings')
+          .findOne(
+            { carId },
+            { sort: { timestamp: -1 } }
+          );
+      } catch (dbError) {
+        console.warn('Database unavailable, falling back to mock data:', dbError.message);
+      }
     }
     
-    // Enrich with car details
-    const car = await db.collection('cars').findOne({ carId });
+    // Fallback to mock data if database is unavailable or flag is set
+    if (!reading) {
+      console.log(`[MOCK] Using mock tire pressure data for ${carId}`);
+      reading = mockPressureProvider.getCurrentPressure(carId);
+      usedMockData = true;
+    }
+    
+    // Enrich with car details (skip if using mock data)
+    let licensePlate = reading.licensePlate || carId;
+    if (!usedMockData) {
+      const car = await db.collection('cars').findOne({ carId });
+      licensePlate = car?.licensePlate || carId;
+    }
     
     res.json({
       success: true,
       carId,
-      licensePlate: car?.licensePlate,
+      licensePlate,
       tirePressure: {
-        frontLeft: reading.frontLeft,
-        frontRight: reading.frontRight,
-        rearLeft: reading.rearLeft,
-        rearRight: reading.rearRight
+        frontLeft: reading.tirePressure?.frontLeft || reading.frontLeft,
+        frontRight: reading.tirePressure?.frontRight || reading.frontRight,
+        rearLeft: reading.tirePressure?.rearLeft || reading.rearLeft,
+        rearRight: reading.tirePressure?.rearRight || reading.rearRight
       },
       unit: reading.unit || 'bar',
       timestamp: reading.timestamp,
-      lastUpdated: reading.timestamp
+      lastUpdated: reading.timestamp,
+      isMockData: usedMockData // Let frontend know this is test data
     });
     
   } catch (error) {
@@ -165,57 +253,85 @@ router.get('/tire-pressure/:carId/history', async (req, res) => {
     const { carId } = req.params;
     const { startDate, endDate, limit = 100, offset = 0 } = req.query;
     
-    let query = `
-      SELECT 
-        car_id,
-        front_left,
-        front_right,
-        rear_left,
-        rear_right,
-        unit,
-        recorded_at
-      FROM tire_pressure_history
-      WHERE car_id = $1
-    `;
+    let history = [];
+    let usedMockData = false;
     
-    const params = [carId];
-    let paramIndex = 2;
-    
-    if (startDate) {
-      query += ` AND recorded_at >= $${paramIndex}`;
-      params.push(startDate);
-      paramIndex++;
+    // Try to get real data from database first
+    if (!USE_MOCK_DATA) {
+      try {
+        let query = `
+          SELECT 
+            car_id,
+            front_left,
+            front_right,
+            rear_left,
+            rear_right,
+            unit,
+            recorded_at
+          FROM tire_pressure_history
+          WHERE car_id = $1
+        `;
+        
+        const params = [carId];
+        let paramIndex = 2;
+        
+        if (startDate) {
+          query += ` AND recorded_at >= $${paramIndex}`;
+          params.push(startDate);
+          paramIndex++;
+        }
+        
+        if (endDate) {
+          query += ` AND recorded_at <= $${paramIndex}`;
+          params.push(endDate);
+          paramIndex++;
+        }
+        
+        query += ` ORDER BY recorded_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        params.push(parseInt(limit), parseInt(offset));
+        
+        const result = await pgPool.query(query, params);
+        
+        history = result.rows.map(row => ({
+          tirePressure: {
+            frontLeft: row.front_left,
+            frontRight: row.front_right,
+            rearLeft: row.rear_left,
+            rearRight: row.rear_right
+          },
+          unit: row.unit,
+          timestamp: row.recorded_at
+        }));
+        
+      } catch (dbError) {
+        console.warn('Database unavailable for history, falling back to mock data:', dbError.message);
+        usedMockData = true;
+      }
+    } else {
+      usedMockData = true;
     }
     
-    if (endDate) {
-      query += ` AND recorded_at <= $${paramIndex}`;
-      params.push(endDate);
-      paramIndex++;
+    // Fallback to mock data if database is unavailable
+    if (usedMockData || history.length === 0) {
+      console.log(`[MOCK] Using mock historical tire pressure data for ${carId}`);
+      history = mockPressureProvider.getHistoricalPressure(carId, 7);
+      
+      // Apply pagination to mock data
+      const start = parseInt(offset);
+      const end = start + parseInt(limit);
+      history = history.slice(start, end);
     }
-    
-    query += ` ORDER BY recorded_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    params.push(parseInt(limit), parseInt(offset));
-    
-    const result = await pgPool.query(query, params);
     
     res.json({
       success: true,
       carId,
-      history: result.rows.map(row => ({
-        tirePressure: {
-          frontLeft: row.front_left,
-          frontRight: row.front_right,
-          rearLeft: row.rear_left,
-          rearRight: row.rear_right
-        },
-        unit: row.unit,
-        timestamp: row.recorded_at
-      })),
+      history,
       pagination: {
-        count: result.rows.length,
+        count: history.length,
         limit: parseInt(limit),
         offset: parseInt(offset)
-      }
+      },
+      isMockData: usedMockData
     });
     
   } catch (error) {
@@ -238,15 +354,59 @@ module.exports = router;
     });
     
   } catch (error) {
-    console.error('Error fetching alert history:', error);
+    console.error('Error fetching pressure history:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Failed to fetch alert history' 
+      error: 'Failed to fetch pressure history' 
     });
   }
 });
 
 module.exports = router;
+```
+
+### How to Enable Mock Data
+
+```bash
+# In your .env file or environment variables:
+USE_MOCK_DATA=true
+
+# Start your B1 server:
+npm start
+
+# Mock data will be used automatically when:
+# 1. USE_MOCK_DATA=true is set
+# 2. Database connection fails
+# 3. No data exists for the requested carId
+```
+
+### Testing with Mock Data
+
+```bash
+# Test current pressure endpoint:
+curl http://localhost:3001/api/monitoring/tire-pressure/ABC-123
+
+# Expected response with mock data:
+{
+  "success": true,
+  "carId": "ABC-123",
+  "licensePlate": "ABC-123",
+  "tirePressure": {
+    "frontLeft": 2.4,
+    "frontRight": 2.3,
+    "rearLeft": 2.2,
+    "rearRight": 2.5
+  },
+  "unit": "bar",
+  "timestamp": "2024-11-26T10:30:00.000Z",
+  "lastUpdated": "2024-11-26T10:30:00.000Z",
+  "isMockData": true
+}
+
+# Test historical data endpoint:
+curl http://localhost:3001/api/monitoring/tire-pressure/ABC-123/history?limit=10
+
+# You'll get 10 historical readings with realistic variations
 ```
 
 ### Additional: Data Storage Logic (Background Process)
@@ -323,13 +483,17 @@ module.exports = MonitoringService;
 
 ## Suggested Subtasks
 
-- [x] Review analysis excerpt and understand requirements
+- [X] Review analysis excerpt and understand requirements
+- [ ] Create `/utils/mockPressureProvider.js` for development testing
 - [ ] Adapt the code template to specific feature needs
-- [ ] Create `/routes/monitoring.js` with GET endpoints
+- [ ] Create `/routes/monitoring.js` with GET endpoints and mock data fallback
+- [ ] Add `USE_MOCK_DATA` environment variable to .env file
+- [ ] Test endpoints with mock data (no database required)
 - [ ] Create `/services/monitoringService.js` for data storage logic
 - [ ] Add route to main server.js: `app.use('/api/monitoring', monitoringRouter)`
 - [ ] Coordinate with B3 team: ensure `tire_pressure_readings` collection exists with indexes
 - [ ] Coordinate with B4 team: ensure `tire_pressure_history` table exists
+- [ ] Switch from mock data to real database integration
 - [ ] Add unit tests for monitoring endpoints
 - [ ] Add integration tests with B3 (MongoDB)
 - [ ] Update API documentation (Swagger/OpenAPI)
@@ -341,11 +505,18 @@ module.exports = MonitoringService;
 
 - **Component**: B1 (Web Server API)
 - **Effort**: 4 hours
+- **Mock Data**: Available for testing without Agent C or database
+  - Set `USE_MOCK_DATA=true` to always use mock data
+  - Automatic fallback if database is unavailable
+  - Mock provider generates realistic pressure values (2.0-2.6 bar)
+  - Historical data includes 28 readings (7 days x 4 per day)
+  - Response includes `isMockData: true` flag
 - **Dependencies**: 
-  - B3 (MongoDB): Needs `tire_pressure_readings` collection with index on `carId`
-  - B4 (PostgreSQL): Needs `tire_pressure_history` table with indexes
+  - B3 (MongoDB): Needs `tire_pressure_readings` collection with index on `carId` (optional with mock data)
+  - B4 (PostgreSQL): Needs `tire_pressure_history` table with indexes (optional with mock data)
   - B2 (WebSocket): Will notify clients via `io.emit()`
   - A1 (Mobile): Will consume these API endpoints
+  - **NO dependency on Agent C for development** - mock data provider replaces sensor data
 - **API Endpoints**:
   - `GET /api/monitoring/tire-pressure/:carId` - Get current pressure readings
   - `GET /api/monitoring/tire-pressure/:carId/history` - Get historical data
