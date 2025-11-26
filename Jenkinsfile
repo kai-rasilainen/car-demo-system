@@ -12,6 +12,11 @@ pipeline {
             defaultValue: true,
             description: 'Use AI to dynamically orchestrate agents and generate analysis (requires Ollama)'
         )
+        booleanParam(
+            name: 'USE_MOCK_DATA',
+            defaultValue: false,
+            description: 'Start B1 server with mock tire pressure data (enables development without Agent C sensors or databases)'
+        )
         string(
             name: 'OLLAMA_MODEL',
             defaultValue: 'llama3:8b',
@@ -54,6 +59,7 @@ pipeline {
                 echo "=========================================="
                 echo "Request: ${params.FEATURE_REQUEST}"
                 echo "AI Agents: ${params.USE_AI_AGENTS}"
+                echo "Mock Data: ${params.USE_MOCK_DATA}"
                 echo "Model: ${params.OLLAMA_MODEL}"
                 echo "Timestamp: ${env.TIMESTAMP}"
                 echo ""
@@ -94,6 +100,50 @@ pipeline {
                         '''
                     } catch (Exception e) {
                         error("Ollama is not available. Please start Ollama first.")
+                    }
+                }
+            }
+        }
+        
+        stage('Start Mock Data Server') {
+            when {
+                expression { params.USE_MOCK_DATA == true }
+            }
+            steps {
+                script {
+                    echo "[MOCK] Starting B1 web server with mock tire pressure data..."
+                    try {
+                        sh '''#!/bin/bash
+                            cd B-car-demo-backend/B1-web-server
+                            
+                            # Kill any existing server on port 3001
+                            lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+                            sleep 1
+                            
+                            # Start server in background with mock data
+                            USE_MOCK_DATA=true nohup npm start > ${WORKSPACE}/b1-server.log 2>&1 &
+                            
+                            # Wait for server to start
+                            echo "[INFO] Waiting for server to start..."
+                            for i in {1..30}; do
+                                if curl -s http://localhost:3001/health > /dev/null; then
+                                    echo "[OK] B1 server is running on port 3001"
+                                    echo "[OK] Mock data endpoints:"
+                                    echo "  - GET http://localhost:3001/api/monitoring/tire-pressure/{carId}"
+                                    echo "  - GET http://localhost:3001/api/monitoring/tire-pressure/{carId}/history"
+                                    exit 0
+                                fi
+                                sleep 1
+                            done
+                            
+                            echo "[ERROR] Server failed to start within 30 seconds"
+                            echo "[INFO] Server log:"
+                            cat ${WORKSPACE}/b1-server.log
+                            exit 1
+                        '''
+                    } catch (Exception e) {
+                        echo "[WARN] Could not start mock data server: ${e.message}"
+                        echo "[INFO] You can start it manually with: cd B-car-demo-backend/B1-web-server && USE_MOCK_DATA=true npm start"
                     }
                 }
             }
@@ -323,6 +373,15 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
             echo ""
             echo "[AI] Agents were dynamically orchestrated based on AI analysis"
             echo "[TASKS] Component-specific task files with code templates created"
+            
+            script {
+                if (params.USE_MOCK_DATA == true) {
+                    echo ""
+                    echo "[MOCK] B1 mock data server is still running"
+                    echo "  - Access at: http://localhost:3001/api/monitoring/tire-pressure/{carId}"
+                    echo "  - Stop with: lsof -ti:3001 | xargs kill"
+                }
+            }
         }
         failure {
             echo "[ERROR] Feature analysis failed"
@@ -331,6 +390,14 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
         always {
             echo ""
             echo "Pipeline completed at: " + new Date().toString()
+            
+            script {
+                // Optionally stop mock server on cleanup (commented out to keep it running)
+                // if (params.USE_MOCK_DATA == true) {
+                //     sh 'lsof -ti:3001 | xargs kill -9 2>/dev/null || true'
+                //     echo "[MOCK] Mock data server stopped"
+                // }
+            }
         }
     }
 }
