@@ -391,13 +391,13 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
             echo ""
             echo "Pipeline completed at: " + new Date().toString()
             
-            script {
-                // Optionally stop mock server on cleanup (commented out to keep it running)
-                // if (params.USE_MOCK_DATA == true) {
-                //     sh 'lsof -ti:3001 | xargs kill -9 2>/dev/null || true'
-                //     echo "[MOCK] Mock data server stopped"
-                // }
-            }
+            // Optionally stop mock server on cleanup (commented out to keep it running)
+            // script {
+            //     if (params.USE_MOCK_DATA == true) {
+            //         sh 'lsof -ti:3001 | xargs kill -9 2>/dev/null || true'
+            //         echo "[MOCK] Mock data server stopped"
+            //     }
+            // }
         }
     }
 }
