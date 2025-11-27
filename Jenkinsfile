@@ -114,7 +114,30 @@ pipeline {
                     echo "[MOCK] Starting B1 web server with mock tire pressure data..."
                     try {
                         sh '''#!/bin/bash
-                            cd B-car-demo-backend/B1-web-server
+                            # Initialize submodules if not already done
+                            git submodule update --init --recursive
+                            
+                            # Find the B1 web server directory
+                            if [ -d "B-car-demo-backend/B1-web-server" ]; then
+                                B1_DIR="B-car-demo-backend/B1-web-server"
+                            elif [ -d "${WORKSPACE}/B-car-demo-backend/B1-web-server" ]; then
+                                B1_DIR="${WORKSPACE}/B-car-demo-backend/B1-web-server"
+                            else
+                                echo "[ERROR] B1-web-server directory not found"
+                                echo "[INFO] Current directory: $(pwd)"
+                                echo "[INFO] Directory contents:"
+                                ls -la
+                                exit 1
+                            fi
+                            
+                            echo "[INFO] Found B1 server at: $B1_DIR"
+                            cd "$B1_DIR"
+                            
+                            # Install dependencies if needed
+                            if [ ! -d "node_modules" ]; then
+                                echo "[INFO] Installing npm dependencies..."
+                                npm install
+                            fi
                             
                             # Kill any existing server on port 3001
                             lsof -ti:3001 | xargs kill -9 2>/dev/null || true
