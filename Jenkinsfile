@@ -114,24 +114,47 @@ pipeline {
                     echo "[MOCK] Starting B1 web server with mock tire pressure data..."
                     try {
                         sh '''#!/bin/bash
-                            # Clone B-car-demo-backend if not present (skip submodule init due to .gitmodules issues)
+                            set -e  # Exit on error
+                            
+                            echo "[INFO] Current workspace: $(pwd)"
+                            echo "[INFO] Workspace contents:"
+                            ls -la
+                            
+                            # Clone B-car-demo-backend if not present
                             if [ ! -d "B-car-demo-backend" ]; then
                                 echo "[INFO] Cloning B-car-demo-backend repository..."
-                                git clone https://github.com/kai-rasilainen/B-car-demo-backend.git
+                                git clone -b feature/ai-agent-system https://github.com/kai-rasilainen/B-car-demo-backend.git
+                                
+                                if [ $? -ne 0 ]; then
+                                    echo "[ERROR] Failed to clone B-car-demo-backend"
+                                    exit 1
+                                fi
+                            else
+                                echo "[INFO] B-car-demo-backend already exists, pulling latest..."
+                                cd B-car-demo-backend
+                                git pull origin feature/ai-agent-system || true
+                                cd ..
                             fi
                             
                             # Verify B1 web server directory exists
+                            echo "[INFO] Checking for B1-web-server..."
                             if [ ! -d "B-car-demo-backend/B1-web-server" ]; then
-                                echo "[ERROR] B1-web-server directory not found after clone"
-                                echo "[INFO] Current directory: $(pwd)"
-                                echo "[INFO] Directory contents:"
-                                ls -la B-car-demo-backend/ || echo "B-car-demo-backend directory missing"
+                                echo "[ERROR] B1-web-server directory not found"
+                                echo "[INFO] B-car-demo-backend contents:"
+                                ls -la B-car-demo-backend/
                                 exit 1
                             fi
                             
                             B1_DIR="B-car-demo-backend/B1-web-server"
                             echo "[INFO] Found B1 server at: $B1_DIR"
                             cd "$B1_DIR"
+                            
+                            # Check package.json exists
+                            if [ ! -f "package.json" ]; then
+                                echo "[ERROR] package.json not found in B1-web-server"
+                                ls -la
+                                exit 1
+                            fi
                             
                             # Install dependencies if needed
                             if [ ! -d "node_modules" ]; then
