@@ -14,7 +14,7 @@ pipeline {
         )
         booleanParam(
             name: 'USE_MOCK_DATA',
-            defaultValue: false,
+            defaultValue: true,
             description: 'Start B1 server with mock tire pressure data (enables development without Agent C sensors or databases)'
         )
         string(
@@ -114,22 +114,22 @@ pipeline {
                     echo "[MOCK] Starting B1 web server with mock tire pressure data..."
                     try {
                         sh '''#!/bin/bash
-                            # Initialize submodules if not already done
-                            git submodule update --init --recursive
+                            # Clone B-car-demo-backend if not present (skip submodule init due to .gitmodules issues)
+                            if [ ! -d "B-car-demo-backend" ]; then
+                                echo "[INFO] Cloning B-car-demo-backend repository..."
+                                git clone https://github.com/kai-rasilainen/B-car-demo-backend.git
+                            fi
                             
-                            # Find the B1 web server directory
-                            if [ -d "B-car-demo-backend/B1-web-server" ]; then
-                                B1_DIR="B-car-demo-backend/B1-web-server"
-                            elif [ -d "${WORKSPACE}/B-car-demo-backend/B1-web-server" ]; then
-                                B1_DIR="${WORKSPACE}/B-car-demo-backend/B1-web-server"
-                            else
-                                echo "[ERROR] B1-web-server directory not found"
+                            # Verify B1 web server directory exists
+                            if [ ! -d "B-car-demo-backend/B1-web-server" ]; then
+                                echo "[ERROR] B1-web-server directory not found after clone"
                                 echo "[INFO] Current directory: $(pwd)"
                                 echo "[INFO] Directory contents:"
-                                ls -la
+                                ls -la B-car-demo-backend/ || echo "B-car-demo-backend directory missing"
                                 exit 1
                             fi
                             
+                            B1_DIR="B-car-demo-backend/B1-web-server"
                             echo "[INFO] Found B1 server at: $B1_DIR"
                             cd "$B1_DIR"
                             
