@@ -120,19 +120,39 @@ pipeline {
                             echo "[INFO] Workspace contents:"
                             ls -la
                             
+                            # Remove old directory if it exists and is empty/broken
+                            if [ -d "B-car-demo-backend" ] && [ -z "$(ls -A B-car-demo-backend 2>/dev/null)" ]; then
+                                echo "[WARN] B-car-demo-backend exists but is empty, removing..."
+                                rm -rf B-car-demo-backend
+                            fi
+                            
                             # Clone B-car-demo-backend if not present
-                            if [ ! -d "B-car-demo-backend" ]; then
+                            if [ ! -d "B-car-demo-backend/.git" ]; then
                                 echo "[INFO] Cloning B-car-demo-backend repository..."
-                                git clone -b feature/ai-agent-system https://github.com/kai-rasilainen/B-car-demo-backend.git
+                                git clone -b feature/ai-agent-system https://github.com/kai-rasilainen/B-car-demo-backend.git 2>&1
                                 
-                                if [ $? -ne 0 ]; then
-                                    echo "[ERROR] Failed to clone B-car-demo-backend"
-                                    exit 1
+                                if [ ! -d "B-car-demo-backend/.git" ]; then
+                                    echo "[ERROR] Failed to clone B-car-demo-backend - no .git directory created"
+                                    echo "[INFO] Attempting clone without specifying branch..."
+                                    rm -rf B-car-demo-backend
+                                    git clone https://github.com/kai-rasilainen/B-car-demo-backend.git 2>&1
+                                    
+                                    if [ -d "B-car-demo-backend/.git" ]; then
+                                        echo "[INFO] Clone succeeded, checking out feature/ai-agent-system..."
+                                        cd B-car-demo-backend
+                                        git checkout feature/ai-agent-system 2>&1 || git checkout main 2>&1
+                                        cd ..
+                                    else
+                                        echo "[ERROR] Clone failed completely"
+                                        exit 1
+                                    fi
                                 fi
                             else
                                 echo "[INFO] B-car-demo-backend already exists, pulling latest..."
                                 cd B-car-demo-backend
-                                git pull origin feature/ai-agent-system || true
+                                git fetch origin 2>&1
+                                git checkout feature/ai-agent-system 2>&1 || git checkout main 2>&1
+                                git pull 2>&1 || true
                                 cd ..
                             fi
                             
