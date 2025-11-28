@@ -39,10 +39,10 @@ python -c "import requests, time, random; print('Dependencies OK')"
 
 ```
 C5-data-sensors/
-├── tire_pressure_sensor.py     # Main sensor implementation
-├── sensor_config.py            # Configuration settings
-├── test_sensors.py             # Unit tests
-└── requirements.txt             # Python dependencies
+|-- tire_pressure_sensor.py     # Main sensor implementation
+|-- sensor_config.py            # Configuration settings
+|-- test_sensors.py             # Unit tests
+`-- requirements.txt             # Python dependencies
 ```
 
 ---
@@ -119,7 +119,7 @@ class TirePressureSensor:
             'pressures': self.current_pressures.copy(),
             'unit': 'bar',
             'sensor_health': 'normal',
-            'temperature': round(random.uniform(18, 25), 1)  # Tire temperature in °C
+            'temperature': round(random.uniform(18, 25), 1)  # Tire temperature in C
         }
     
     def send_to_backend(self, data: Dict) -> bool:
@@ -133,20 +133,20 @@ class TirePressureSensor:
             )
             
             if response.status_code == 200:
-                print(f"[{self.car_id}] ✓ Data sent: {data['pressures']}")
+                print(f"[{self.car_id}] [OK] Data sent: {data['pressures']}")
                 return True
             else:
-                print(f"[{self.car_id}] ✗ API error {response.status_code}: {response.text}")
+                print(f"[{self.car_id}] [ERROR] API error {response.status_code}: {response.text}")
                 return False
                 
         except requests.exceptions.ConnectionError:
-            print(f"[{self.car_id}] ✗ Connection failed - backend not available")
+            print(f"[{self.car_id}] [ERROR] Connection failed - backend not available")
             return False
         except requests.exceptions.Timeout:
-            print(f"[{self.car_id}] ✗ Request timeout")
+            print(f"[{self.car_id}] [ERROR] Request timeout")
             return False
         except Exception as e:
-            print(f"[{self.car_id}] ✗ Unexpected error: {e}")
+            print(f"[{self.car_id}] [ERROR] Unexpected error: {e}")
             return False
     
     def start_monitoring(self, interval: int = 10):
