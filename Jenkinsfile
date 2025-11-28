@@ -5,22 +5,22 @@ pipeline {
         string(
             name: 'FEATURE_REQUEST',
             defaultValue: 'Add tire pressure monitoring to the car dashboard',
-            description: 'Describe the feature you want to analyze - will be sent to Agent A who will coordinate with other agents as needed'
+            description: 'Feature request to analyze'
         )
         booleanParam(
             name: 'USE_AI_AGENTS',
             defaultValue: true,
-            description: 'Use AI to dynamically orchestrate agents and generate analysis (requires Ollama)'
+            description: 'Use AI agents for analysis'
         )
         booleanParam(
             name: 'USE_MOCK_DATA',
             defaultValue: true,
-            description: 'Start B1 server with mock tire pressure data (enables development without Agent C sensors or databases)'
+            description: 'Start B1 server with mock data'
         )
         string(
             name: 'OLLAMA_MODEL',
             defaultValue: 'llama3:8b',
-            description: 'Ollama model to use (llama3:8b, codellama, mistral, etc.)'
+            description: 'Ollama model to use'
         )
         string(
             name: 'OUTPUT_FILE',
@@ -456,14 +456,6 @@ orchestrates agents, enable USE_AI_AGENTS parameter.
         always {
             echo ""
             echo "Pipeline completed at: " + new Date().toString()
-            
-            // Optionally stop mock server on cleanup (commented out to keep it running)
-            // script {
-            //     if (params.USE_MOCK_DATA == true) {
-            //         sh 'lsof -ti:3001 | xargs kill -9 2>/dev/null || true'
-            //         echo "[MOCK] Mock data server stopped"
-            //     }
-            // }
         }
     }
 }
