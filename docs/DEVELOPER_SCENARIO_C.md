@@ -1,25 +1,22 @@
-# Developer Scenario: Implementing Agent C - In-Car Systems
+# Developer Scenario: Implementing Agent C5 - Tire Pressure Sensors
 
 ## Scenario Overview
 
 **Feature Request**: "Add tire pressure monitoring to the car dashboard"
 
-**Your Role**: In-Car Systems Developer (Agent C)
+**Your Role**: Sensor Systems Developer (Agent C5)
 
-**Goal**: Implement tire pressure sensors and data transmission from the vehicle to the backend system.
+**Goal**: Implement tire pressure sensors that generate realistic data and send it directly to the backend API.
 
 ---
 
-## Agent C Architecture
+## Agent C5 Architecture
 
 ```
-[C5 - Data Sensors] -> [C2 - Central Broker] -> [C1 - Cloud Communication] -> Backend (Agent B)
+[C5 - Tire Pressure Sensors] --> Backend B1 API (http://localhost:3001/api/monitoring/tire-pressure)
 ```
 
-**Components:**
-- **C5**: Tire pressure sensors (Python simulators)
-- **C2**: Redis message broker for in-car data aggregation
-- **C1**: Cloud communication service (sends data to B1 API)
+**Focus**: Direct sensor-to-cloud communication for tire pressure monitoring
 
 ---
 
@@ -28,508 +25,692 @@
 ### Prerequisites
 
 ```bash
-# Navigate to in-car systems directory
-cd C-car-demo-in-car
+# Navigate to sensor directory
+cd C-car-demo-in-car/C5-data-sensors
 
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Start Redis (C2 broker)
-docker-compose up -d redis
+# Verify dependencies
+python -c "import requests, time, random; print('Dependencies OK')"
 ```
 
-### Verify Setup
+### Project Structure
 
-```bash
-# Test Redis connection
-docker exec -it redis redis-cli ping
-# Expected: PONG
-
-# Check Python environment
-python -c "import redis, requests; print('Dependencies OK')"
+```
+C5-data-sensors/
+├── tire_pressure_sensor.py     # Main sensor implementation
+├── sensor_config.py            # Configuration settings
+├── test_sensors.py             # Unit tests
+└── requirements.txt             # Python dependencies
 ```
 
 ---
 
-## Step 2: Implement Tire Pressure Sensors (C5)
+## Step 2: Implement Tire Pressure Sensor
 
-### Add Tire Pressure to Existing Simulator
+### Core Sensor Class
 
-Edit `C5-data-sensors/sensor_simulator.py`:
+Create `tire_pressure_sensor.py`:
 
 ```python
 import time
 import random
-import redis
-import json
-import argparse
-from datetime import datetime
-
-class TirePressureSensor:
-    def __init__(self, car_id, redis_client):
-        self.car_id = car_id
-        self.redis = redis_client
-        self.base_pressure = 2.2  # bar (normal pressure)
-        
-    def get_tire_pressure(self):
-        """Generate realistic tire pressure data"""
-        return {
-            'front_left': round(self.base_pressure + random.uniform(-0.1, 0.1), 2),
-            'front_right': round(self.base_pressure + random.uniform(-0.1, 0.1), 2),
-            'rear_left': round(self.base_pressure + random.uniform(-0.1, 0.1), 2),
-            'rear_right': round(self.base_pressure + random.uniform(-0.1, 0.1), 2)
-        }
-    
-    def run(self):
-        """Send tire pressure data every 5 seconds"""
-        while True:
-            try:
-                pressure_data = {
-                    'car_id': self.car_id,
-                    'sensor_type': 'tire_pressure',
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'data': self.get_tire_pressure(),
-                    'unit': 'bar'
-                }
-                
-                # Send to Redis channel
-                channel = f"sensor_data:{self.car_id}"
-                self.redis.publish(channel, json.dumps(pressure_data))
-                
-                print(f"[{self.car_id}] Tire pressure: {pressure_data['data']}")
-                time.sleep(5)  # Send every 5 seconds
-                
-            except Exception as e:
-                print(f"Error sending tire pressure data: {e}")
-                time.sleep(1)
-
-# Add to existing sensor simulator main function
-def start_tire_pressure_sensors(cars, redis_url):
-    """Start tire pressure sensors for all cars"""
-    redis_client = redis.Redis.from_url(redis_url)
-    
-    sensors = []
-    for car_id in cars:
-        sensor = TirePressureSensor(car_id, redis_client)
-        sensors.append(sensor)
-    
-    # Run sensors in parallel (simplified for demo)
-    import threading
-    
-    threads = []
-    for sensor in sensors:
-        thread = threading.Thread(target=sensor.run)
-        thread.daemon = True
-        thread.start()
-        threads.append(thread)
-    
-    try:
-        # Keep main thread alive
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Stopping tire pressure sensors...")
-```
-
-### Test Tire Pressure Sensors
-
-```bash
-# Start tire pressure sensors
-cd C5-data-sensors
-python sensor_simulator.py --cars CAR001 CAR002
-
-# In another terminal, monitor Redis
-redis-cli
-> SUBSCRIBE sensor_data:CAR001
-# Should see tire pressure data every 5 seconds
-```
-
----
-
-## Step 3: Configure Central Broker (C2)
-
-### Redis Configuration
-
-Edit `C2-central-broker/docker-compose.yml`:
-
-```yaml
-version: '3.8'
-services:
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
-    networks:
-      - car_network
-
-volumes:
-  redis_data:
-
-networks:
-  car_network:
-    driver: bridge
-```
-
-### Data Aggregation Script
-
-Create `C2-central-broker/data_aggregator.py`:
-
-```python
-import redis
-import json
-import time
-from collections import defaultdict
-
-class DataAggregator:
-    def __init__(self, redis_url="redis://localhost:6379"):
-        self.redis = redis.Redis.from_url(redis_url)
-        self.pubsub = self.redis.pubsub()
-        self.latest_data = defaultdict(dict)
-    
-    def start_aggregation(self, cars):
-        """Aggregate data from all car sensors"""
-        # Subscribe to all car sensor channels
-        for car_id in cars:
-            channel = f"sensor_data:{car_id}"
-            self.pubsub.subscribe(channel)
-        
-        print(f"Aggregating data for cars: {cars}")
-        
-        for message in self.pubsub.listen():
-            if message['type'] == 'message':
-                try:
-                    data = json.loads(message['data'])
-                    car_id = data['car_id']
-                    sensor_type = data['sensor_type']
-                    
-                    # Store latest data for each sensor type
-                    self.latest_data[car_id][sensor_type] = data
-                    
-                    # Forward to cloud communication
-                    self.forward_to_cloud(data)
-                    
-                except Exception as e:
-                    print(f"Error processing message: {e}")
-    
-    def forward_to_cloud(self, sensor_data):
-        """Send aggregated data to cloud communication service"""
-        cloud_channel = "cloud_upload"
-        self.redis.publish(cloud_channel, json.dumps(sensor_data))
-    
-    def get_latest_data(self, car_id):
-        """Get latest sensor data for a car"""
-        return self.latest_data.get(car_id, {})
-
-if __name__ == "__main__":
-    aggregator = DataAggregator()
-    cars = ["CAR001", "CAR002", "CAR003"]
-    aggregator.start_aggregation(cars)
-```
-
----
-
-## Step 4: Implement Cloud Communication (C1)
-
-### Cloud Uploader Service
-
-Create `C1-cloud-communication/cloud_uploader.py`:
-
-```python
-import redis
 import requests
 import json
-import time
+import threading
 from datetime import datetime
+from typing import Dict, List
 
-class CloudUploader:
-    def __init__(self, 
-                 redis_url="redis://localhost:6379",
-                 backend_url="http://localhost:3001/api"):
-        self.redis = redis.Redis.from_url(redis_url)
-        self.pubsub = self.redis.pubsub()
+class TirePressureSensor:
+    """
+    Simulates tire pressure sensors for a vehicle.
+    Generates realistic pressure readings and sends to backend API.
+    """
+    
+    def __init__(self, car_id: str, backend_url: str = "http://localhost:3001"):
+        self.car_id = car_id
         self.backend_url = backend_url
-        self.pubsub.subscribe("cloud_upload")
-    
-    def start_uploading(self):
-        """Listen for data and upload to backend"""
-        print(f"Starting cloud uploader to {self.backend_url}")
+        self.api_endpoint = f"{backend_url}/api/monitoring/tire-pressure"
+        self.running = False
         
-        for message in self.pubsub.listen():
-            if message['type'] == 'message':
-                try:
-                    sensor_data = json.loads(message['data'])
-                    self.upload_sensor_data(sensor_data)
-                except Exception as e:
-                    print(f"Error uploading data: {e}")
-    
-    def upload_sensor_data(self, data):
-        """Upload sensor data to backend API"""
-        if data['sensor_type'] == 'tire_pressure':
-            self.upload_tire_pressure(data)
-    
-    def upload_tire_pressure(self, data):
-        """Upload tire pressure data to B1 API"""
-        try:
-            # Transform data for backend API
-            payload = {
-                'car_id': data['car_id'],
-                'timestamp': data['timestamp'],
-                'pressures': {
-                    'frontLeft': data['data']['front_left'],
-                    'frontRight': data['data']['front_right'],
-                    'rearLeft': data['data']['rear_left'],
-                    'rearRight': data['data']['rear_right']
-                },
-                'unit': data['unit']
-            }
+        # Realistic tire pressure parameters
+        self.normal_pressure = 2.2  # bar (32 PSI)
+        self.min_pressure = 1.8     # bar (26 PSI) - low warning
+        self.max_pressure = 2.6     # bar (38 PSI) - high warning
+        
+        # Current pressure state for each tire
+        self.current_pressures = {
+            'frontLeft': self.normal_pressure,
+            'frontRight': self.normal_pressure,
+            'rearLeft': self.normal_pressure,
+            'rearRight': self.normal_pressure
+        }
+        
+        # Simulation parameters
+        self.drift_rate = 0.001     # Pressure drift per reading
+        self.noise_amplitude = 0.02 # Random noise amplitude
+        
+    def simulate_pressure_changes(self):
+        """Simulate realistic tire pressure changes over time"""
+        for tire in self.current_pressures:
+            # Natural pressure drift (usually slight decrease)
+            drift = random.uniform(-self.drift_rate, self.drift_rate * 0.3)
             
-            # POST to B1 monitoring endpoint
-            url = f"{self.backend_url}/monitoring/tire-pressure"
-            response = requests.post(url, 
-                                   json=payload,
-                                   timeout=5,
-                                   headers={'Content-Type': 'application/json'})
+            # Random noise from road conditions, temperature, etc.
+            noise = random.uniform(-self.noise_amplitude, self.noise_amplitude)
+            
+            # Apply changes
+            new_pressure = self.current_pressures[tire] + drift + noise
+            
+            # Keep within realistic bounds
+            new_pressure = max(self.min_pressure * 0.8, new_pressure)
+            new_pressure = min(self.max_pressure * 1.2, new_pressure)
+            
+            self.current_pressures[tire] = round(new_pressure, 2)
+    
+    def get_tire_pressure_reading(self) -> Dict:
+        """Generate current tire pressure reading"""
+        self.simulate_pressure_changes()
+        
+        return {
+            'carId': self.car_id,
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'pressures': self.current_pressures.copy(),
+            'unit': 'bar',
+            'sensor_health': 'normal',
+            'temperature': round(random.uniform(18, 25), 1)  # Tire temperature in °C
+        }
+    
+    def send_to_backend(self, data: Dict) -> bool:
+        """Send tire pressure data to backend API"""
+        try:
+            response = requests.post(
+                self.api_endpoint,
+                json=data,
+                headers={'Content-Type': 'application/json'},
+                timeout=5
+            )
             
             if response.status_code == 200:
-                print(f"[{data['car_id']}] Uploaded tire pressure data")
+                print(f"[{self.car_id}] ✓ Data sent: {data['pressures']}")
+                return True
             else:
-                print(f"[{data['car_id']}] Upload failed: {response.status_code}")
+                print(f"[{self.car_id}] ✗ API error {response.status_code}: {response.text}")
+                return False
                 
-        except requests.exceptions.RequestException as e:
-            print(f"Network error uploading data: {e}")
+        except requests.exceptions.ConnectionError:
+            print(f"[{self.car_id}] ✗ Connection failed - backend not available")
+            return False
+        except requests.exceptions.Timeout:
+            print(f"[{self.car_id}] ✗ Request timeout")
+            return False
         except Exception as e:
-            print(f"Error uploading tire pressure: {e}")
+            print(f"[{self.car_id}] ✗ Unexpected error: {e}")
+            return False
+    
+    def start_monitoring(self, interval: int = 10):
+        """Start continuous tire pressure monitoring"""
+        self.running = True
+        print(f"[{self.car_id}] Starting tire pressure monitoring (interval: {interval}s)")
+        
+        while self.running:
+            try:
+                # Get current reading
+                reading = self.get_tire_pressure_reading()
+                
+                # Send to backend
+                self.send_to_backend(reading)
+                
+                # Wait for next reading
+                time.sleep(interval)
+                
+            except KeyboardInterrupt:
+                print(f"[{self.car_id}] Monitoring stopped by user")
+                break
+            except Exception as e:
+                print(f"[{self.car_id}] Error in monitoring loop: {e}")
+                time.sleep(1)
+        
+        self.running = False
+    
+    def stop_monitoring(self):
+        """Stop tire pressure monitoring"""
+        self.running = False
+    
+    def simulate_pressure_loss(self, tire: str, target_pressure: float):
+        """Simulate gradual pressure loss in a specific tire"""
+        if tire not in self.current_pressures:
+            print(f"Invalid tire: {tire}")
+            return
+        
+        current = self.current_pressures[tire]
+        print(f"[{self.car_id}] Simulating pressure loss in {tire}: {current} -> {target_pressure} bar")
+        
+        # Gradual pressure loss over 30 seconds
+        steps = 30
+        pressure_drop = (current - target_pressure) / steps
+        
+        for i in range(steps):
+            if not self.running:
+                break
+            self.current_pressures[tire] -= pressure_drop
+            time.sleep(1)
+        
+        self.current_pressures[tire] = target_pressure
+        print(f"[{self.car_id}] Pressure loss simulation complete for {tire}")
+
+class MultiCarSensorSystem:
+    """Manage tire pressure sensors for multiple vehicles"""
+    
+    def __init__(self, car_ids: List[str], backend_url: str = "http://localhost:3001"):
+        self.sensors = {}
+        self.threads = {}
+        
+        for car_id in car_ids:
+            self.sensors[car_id] = TirePressureSensor(car_id, backend_url)
+    
+    def start_all_sensors(self, interval: int = 10):
+        """Start monitoring for all vehicles"""
+        print(f"Starting tire pressure monitoring for {len(self.sensors)} vehicles")
+        
+        for car_id, sensor in self.sensors.items():
+            thread = threading.Thread(
+                target=sensor.start_monitoring,
+                args=(interval,),
+                daemon=True
+            )
+            thread.start()
+            self.threads[car_id] = thread
+            time.sleep(0.5)  # Stagger startup
+    
+    def stop_all_sensors(self):
+        """Stop monitoring for all vehicles"""
+        print("Stopping all tire pressure sensors...")
+        
+        for sensor in self.sensors.values():
+            sensor.stop_monitoring()
+        
+        for thread in self.threads.values():
+            thread.join(timeout=2)
+    
+    def simulate_incident(self, car_id: str, tire: str, pressure: float):
+        """Simulate tire pressure incident for specific vehicle"""
+        if car_id in self.sensors:
+            sensor = self.sensors[car_id]
+            incident_thread = threading.Thread(
+                target=sensor.simulate_pressure_loss,
+                args=(tire, pressure),
+                daemon=True
+            )
+            incident_thread.start()
 
 if __name__ == "__main__":
-    uploader = CloudUploader()
-    uploader.start_uploading()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Tire Pressure Sensor Simulator')
+    parser.add_argument('--cars', nargs='+', default=['CAR001', 'CAR002', 'CAR003'],
+                        help='Car IDs to simulate')
+    parser.add_argument('--interval', type=int, default=10,
+                        help='Reading interval in seconds')
+    parser.add_argument('--backend-url', default='http://localhost:3001',
+                        help='Backend API URL')
+    
+    args = parser.parse_args()
+    
+    # Create multi-car sensor system
+    system = MultiCarSensorSystem(args.cars, args.backend_url)
+    
+    try:
+        # Start all sensors
+        system.start_all_sensors(args.interval)
+        
+        print("\nTire pressure monitoring active. Commands:")
+        print("  'incident <car_id> <tire> <pressure>' - Simulate pressure loss")
+        print("  'quit' - Stop monitoring")
+        print("\nExample: incident CAR001 frontLeft 1.5")
+        
+        # Interactive command loop
+        while True:
+            try:
+                cmd = input("\n> ").strip()
+                
+                if cmd.lower() in ['quit', 'exit', 'q']:
+                    break
+                elif cmd.startswith('incident'):
+                    parts = cmd.split()
+                    if len(parts) == 4:
+                        _, car_id, tire, pressure = parts
+                        pressure = float(pressure)
+                        system.simulate_incident(car_id, tire, pressure)
+                    else:
+                        print("Usage: incident <car_id> <tire> <pressure>")
+                elif cmd:
+                    print("Unknown command")
+                    
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                print(f"Error: {e}")
+    
+    finally:
+        system.stop_all_sensors()
+        print("Tire pressure monitoring stopped")
+```
+
+### Configuration Management
+
+Create `sensor_config.py`:
+
+```python
+import os
+from typing import Dict, List
+
+class SensorConfig:
+    """Configuration management for tire pressure sensors"""
+    
+    def __init__(self):
+        # Backend configuration
+        self.backend_url = os.getenv('BACKEND_URL', 'http://localhost:3001')
+        self.api_timeout = int(os.getenv('API_TIMEOUT', '5'))
+        
+        # Sensor configuration
+        self.reading_interval = int(os.getenv('READING_INTERVAL', '10'))
+        self.normal_pressure = float(os.getenv('NORMAL_PRESSURE', '2.2'))
+        
+        # Car configuration
+        self.default_cars = ['CAR001', 'CAR002', 'CAR003']
+        cars_env = os.getenv('CARS', '')
+        self.cars = cars_env.split(',') if cars_env else self.default_cars
+        
+        # Simulation parameters
+        self.drift_rate = float(os.getenv('DRIFT_RATE', '0.001'))
+        self.noise_amplitude = float(os.getenv('NOISE_AMPLITUDE', '0.02'))
+        
+        # Logging
+        self.log_level = os.getenv('LOG_LEVEL', 'INFO')
+    
+    def get_pressure_thresholds(self) -> Dict[str, float]:
+        """Get pressure warning thresholds"""
+        return {
+            'low_warning': self.normal_pressure * 0.85,
+            'low_critical': self.normal_pressure * 0.75,
+            'high_warning': self.normal_pressure * 1.15,
+            'high_critical': self.normal_pressure * 1.25
+        }
+    
+    def validate_config(self) -> List[str]:
+        """Validate configuration and return any errors"""
+        errors = []
+        
+        if self.reading_interval < 1:
+            errors.append("Reading interval must be at least 1 second")
+        
+        if self.normal_pressure < 1.0 or self.normal_pressure > 4.0:
+            errors.append("Normal pressure must be between 1.0 and 4.0 bar")
+        
+        if not self.cars:
+            errors.append("At least one car ID must be specified")
+        
+        return errors
 ```
 
 ---
 
-## Step 5: Integration and Testing
+## Step 3: Testing Framework
 
-### Start Complete Agent C System
+### Unit Tests
 
-Create `scripts/start_agent_c.sh`:
+Create `test_sensors.py`:
 
-```bash
-#!/bin/bash
-echo "Starting Agent C - In-Car Systems"
+```python
+import unittest
+import json
+from unittest.mock import Mock, patch
+from tire_pressure_sensor import TirePressureSensor, MultiCarSensorSystem
 
-# Start Redis (C2)
-echo "Starting C2 - Central Broker..."
-cd C2-central-broker
-docker-compose up -d
-cd ..
+class TestTirePressureSensor(unittest.TestCase):
+    
+    def setUp(self):
+        self.sensor = TirePressureSensor('TEST001', 'http://localhost:3001')
+    
+    def test_initial_pressures(self):
+        """Test that sensor initializes with normal pressures"""
+        for tire, pressure in self.sensor.current_pressures.items():
+            self.assertEqual(pressure, 2.2)
+    
+    def test_pressure_reading_format(self):
+        """Test that pressure reading has correct format"""
+        reading = self.sensor.get_tire_pressure_reading()
+        
+        self.assertIn('carId', reading)
+        self.assertIn('timestamp', reading)
+        self.assertIn('pressures', reading)
+        self.assertIn('unit', reading)
+        
+        self.assertEqual(reading['carId'], 'TEST001')
+        self.assertEqual(reading['unit'], 'bar')
+        
+        # Check all tires are present
+        required_tires = ['frontLeft', 'frontRight', 'rearLeft', 'rearRight']
+        for tire in required_tires:
+            self.assertIn(tire, reading['pressures'])
+    
+    def test_pressure_simulation(self):
+        """Test that pressure changes over time"""
+        initial_pressures = self.sensor.current_pressures.copy()
+        
+        # Simulate multiple readings
+        for _ in range(100):
+            self.sensor.simulate_pressure_changes()
+        
+        # At least one tire should have changed
+        changed = False
+        for tire in initial_pressures:
+            if abs(initial_pressures[tire] - self.sensor.current_pressures[tire]) > 0.01:
+                changed = True
+                break
+        
+        self.assertTrue(changed, "Pressures should change over time")
+    
+    @patch('requests.post')
+    def test_successful_api_call(self, mock_post):
+        """Test successful API communication"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+        
+        reading = self.sensor.get_tire_pressure_reading()
+        result = self.sensor.send_to_backend(reading)
+        
+        self.assertTrue(result)
+        mock_post.assert_called_once()
+    
+    @patch('requests.post')
+    def test_failed_api_call(self, mock_post):
+        """Test failed API communication"""
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_response.text = "Internal Server Error"
+        mock_post.return_value = mock_response
+        
+        reading = self.sensor.get_tire_pressure_reading()
+        result = self.sensor.send_to_backend(reading)
+        
+        self.assertFalse(result)
+    
+    def test_pressure_loss_simulation(self):
+        """Test tire pressure loss simulation"""
+        original_pressure = self.sensor.current_pressures['frontLeft']
+        target_pressure = 1.5
+        
+        # Mock the time.sleep to speed up test
+        with patch('time.sleep'):
+            self.sensor.simulate_pressure_loss('frontLeft', target_pressure)
+        
+        self.assertAlmostEqual(
+            self.sensor.current_pressures['frontLeft'], 
+            target_pressure, 
+            places=1
+        )
 
-# Wait for Redis
-sleep 3
+class TestMultiCarSensorSystem(unittest.TestCase):
+    
+    def setUp(self):
+        self.system = MultiCarSensorSystem(['CAR001', 'CAR002'])
+    
+    def test_sensor_creation(self):
+        """Test that sensors are created for all cars"""
+        self.assertEqual(len(self.system.sensors), 2)
+        self.assertIn('CAR001', self.system.sensors)
+        self.assertIn('CAR002', self.system.sensors)
 
-# Start Data Aggregator
-echo "Starting C2 - Data Aggregator..."
-cd C2-central-broker
-python data_aggregator.py &
-AGGREGATOR_PID=$!
-cd ..
-
-# Start Cloud Uploader
-echo "Starting C1 - Cloud Communication..."
-cd C1-cloud-communication
-python cloud_uploader.py &
-UPLOADER_PID=$!
-cd ..
-
-# Start Tire Pressure Sensors
-echo "Starting C5 - Tire Pressure Sensors..."
-cd C5-data-sensors
-python sensor_simulator.py --cars CAR001 CAR002 CAR003 &
-SENSORS_PID=$!
-cd ..
-
-echo "Agent C system started!"
-echo "PIDs: Aggregator=$AGGREGATOR_PID, Uploader=$UPLOADER_PID, Sensors=$SENSORS_PID"
-echo "Press Ctrl+C to stop all services"
-
-# Wait for interrupt
-trap "echo 'Stopping Agent C...'; kill $AGGREGATOR_PID $UPLOADER_PID $SENSORS_PID; docker-compose -f C2-central-broker/docker-compose.yml down" INT
-wait
-```
-
-### Test Complete Flow
-
-```bash
-# Terminal 1: Start Agent C
-chmod +x scripts/start_agent_c.sh
-./scripts/start_agent_c.sh
-
-# Terminal 2: Monitor Redis data
-redis-cli monitor
-
-# Terminal 3: Check backend API (if B1 is running)
-curl http://localhost:3001/api/monitoring/tire-pressure/CAR001
+if __name__ == '__main__':
+    unittest.main()
 ```
 
 ---
 
-## Step 6: Development Workflow
+## Step 4: Development Workflow
 
-### Daily Development Tasks
-
-1. **Sensor Development** (C5):
-   ```bash
-   cd C5-data-sensors
-   python sensor_simulator.py --cars TEST001
-   # Develop and test new sensor types
-   ```
-
-2. **Data Flow Testing** (C2):
-   ```bash
-   redis-cli
-   > MONITOR  # Watch all Redis traffic
-   ```
-
-3. **Cloud Integration** (C1):
-   ```bash
-   cd C1-cloud-communication
-   python cloud_uploader.py
-   # Test API integration with backend
-   ```
-
-### Debugging
+### Quick Start
 
 ```bash
-# Check Redis connections
-redis-cli ping
+# Start tire pressure sensors for default cars
+python tire_pressure_sensor.py
 
-# Monitor specific car data
-redis-cli
-> SUBSCRIBE sensor_data:CAR001
+# Start with custom cars
+python tire_pressure_sensor.py --cars CAR001 CAR002 --interval 5
 
-# Test backend connectivity
+# Start with different backend
+python tire_pressure_sensor.py --backend-url http://staging.example.com
+```
+
+### Environment Configuration
+
+Create `.env` file:
+
+```bash
+# Backend configuration
+BACKEND_URL=http://localhost:3001
+API_TIMEOUT=5
+
+# Sensor configuration
+READING_INTERVAL=10
+NORMAL_PRESSURE=2.2
+
+# Simulation parameters
+CARS=CAR001,CAR002,CAR003
+DRIFT_RATE=0.001
+NOISE_AMPLITUDE=0.02
+
+# Logging
+LOG_LEVEL=INFO
+```
+
+### Testing Commands
+
+```bash
+# Run unit tests
+python -m pytest test_sensors.py -v
+
+# Test single sensor
+python -c "
+from tire_pressure_sensor import TirePressureSensor
+sensor = TirePressureSensor('TEST001')
+reading = sensor.get_tire_pressure_reading()
+print(reading)
+"
+
+# Test API connectivity
 curl -X POST http://localhost:3001/api/monitoring/tire-pressure \
   -H "Content-Type: application/json" \
-  -d '{"car_id":"TEST","pressures":{"frontLeft":2.2}}'
+  -d '{"carId":"TEST","timestamp":"2025-11-28T10:00:00Z","pressures":{"frontLeft":2.2,"frontRight":2.2,"rearLeft":2.2,"rearRight":2.2},"unit":"bar"}'
 ```
 
 ---
 
-## Step 7: Production Deployment
+## Step 5: Production Deployment
 
-### Docker Compose for Agent C
+### Docker Configuration
 
-Create `docker-compose.yml`:
+Create `Dockerfile`:
+
+```dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY *.py ./
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash sensor
+USER sensor
+
+# Set default environment
+ENV BACKEND_URL=http://backend:3001
+ENV CARS=CAR001,CAR002,CAR003
+ENV READING_INTERVAL=10
+
+CMD ["python", "tire_pressure_sensor.py"]
+```
+
+### Docker Compose Integration
 
 ```yaml
 version: '3.8'
 services:
-  c2-redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - car_network
-  
-  c2-aggregator:
-    build: 
-      context: ./C2-central-broker
-      dockerfile: Dockerfile
-    depends_on:
-      - c2-redis
+  tire-pressure-sensors:
+    build: .
     environment:
-      - REDIS_URL=redis://c2-redis:6379
-    networks:
-      - car_network
-  
-  c1-uploader:
-    build:
-      context: ./C1-cloud-communication
-      dockerfile: Dockerfile
-    depends_on:
-      - c2-redis
-    environment:
-      - REDIS_URL=redis://c2-redis:6379
-      - BACKEND_URL=http://backend:3001/api
-    networks:
-      - car_network
-  
-  c5-sensors:
-    build:
-      context: ./C5-data-sensors
-      dockerfile: Dockerfile
-    depends_on:
-      - c2-redis
-    environment:
-      - REDIS_URL=redis://c2-redis:6379
+      - BACKEND_URL=http://backend:3001
       - CARS=CAR001,CAR002,CAR003
+      - READING_INTERVAL=10
+      - NORMAL_PRESSURE=2.2
+    depends_on:
+      - backend
     networks:
       - car_network
-
-volumes:
-  redis_data:
+    restart: unless-stopped
 
 networks:
   car_network:
     external: true
 ```
 
-### Deployment Commands
+---
 
-```bash
-# Build and start all Agent C services
-docker-compose up -d
+## Step 6: Monitoring and Debugging
 
-# Scale sensors for more cars
-docker-compose up -d --scale c5-sensors=3
+### Logging Enhancement
 
-# View logs
-docker-compose logs -f c1-uploader
-docker-compose logs -f c2-aggregator
+Add to `tire_pressure_sensor.py`:
+
+```python
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+class TirePressureSensor:
+    def __init__(self, car_id: str, backend_url: str = "http://localhost:3001"):
+        # ... existing init code ...
+        logger.info(f"Initialized tire pressure sensor for {car_id}")
+    
+    def send_to_backend(self, data: Dict) -> bool:
+        """Send tire pressure data with detailed logging"""
+        try:
+            logger.debug(f"[{self.car_id}] Sending data: {data}")
+            response = requests.post(self.api_endpoint, json=data, timeout=5)
+            
+            if response.status_code == 200:
+                logger.info(f"[{self.car_id}] Successfully sent pressure data")
+                return True
+            else:
+                logger.error(f"[{self.car_id}] API error {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"[{self.car_id}] Failed to send data: {e}")
+            return False
+```
+
+### Health Check Endpoint
+
+Create `health_check.py`:
+
+```python
+import requests
+import json
+from tire_pressure_sensor import TirePressureSensor
+
+def check_sensor_health(car_id: str, backend_url: str) -> Dict:
+    """Check sensor and backend connectivity"""
+    sensor = TirePressureSensor(car_id, backend_url)
+    
+    health_status = {
+        'car_id': car_id,
+        'sensor_status': 'ok',
+        'backend_connectivity': False,
+        'last_reading': None,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    
+    try:
+        # Test sensor reading
+        reading = sensor.get_tire_pressure_reading()
+        health_status['last_reading'] = reading
+        
+        # Test backend connectivity
+        test_data = {'carId': f"{car_id}_healthcheck", 'test': True}
+        response = requests.get(f"{backend_url}/health", timeout=5)
+        health_status['backend_connectivity'] = response.status_code == 200
+        
+    except Exception as e:
+        health_status['sensor_status'] = f'error: {e}'
+    
+    return health_status
+
+if __name__ == "__main__":
+    cars = ['CAR001', 'CAR002', 'CAR003']
+    backend_url = 'http://localhost:3001'
+    
+    for car_id in cars:
+        status = check_sensor_health(car_id, backend_url)
+        print(json.dumps(status, indent=2))
 ```
 
 ---
 
 ## Suggested Subtasks
 
-1. **Setup Environment** (30 min)
-   - Install Redis and Python dependencies
-   - Verify connections between components
+1. **Basic Sensor Implementation** (2 hours)
+   - Implement TirePressureSensor class
+   - Add realistic pressure simulation
+   - Test data generation and formatting
 
-2. **Implement Tire Pressure Sensors** (2 hours)
-   - Add TirePressureSensor class to simulator
-   - Generate realistic pressure variations
-   - Test data transmission to Redis
+2. **API Integration** (1.5 hours)
+   - Implement HTTP client for backend communication
+   - Add error handling and retries
+   - Test with B1 monitoring endpoints
 
-3. **Configure Data Aggregation** (1 hour)
-   - Set up Redis channels for sensor data
-   - Implement data forwarding to cloud service
+3. **Multi-Car Support** (1 hour)
+   - Implement MultiCarSensorSystem class
+   - Add threading for parallel monitoring
+   - Test multiple vehicle simulation
 
-4. **Build Cloud Communication** (2 hours)
-   - Create HTTP client for backend API
-   - Transform sensor data to backend format
-   - Add error handling and retry logic
+4. **Interactive Features** (1 hour)
+   - Add pressure loss simulation
+   - Implement command interface
+   - Add real-time monitoring display
 
-5. **Integration Testing** (1 hour)
-   - Test complete C5->C2->C1->B1 data flow
-   - Verify data arrives at backend monitoring API
+5. **Testing and Validation** (1 hour)
+   - Write unit tests for sensor logic
+   - Create integration tests with backend
+   - Add health check functionality
 
-6. **Docker Deployment** (1 hour)
-   - Create Dockerfiles for each service
-   - Configure docker-compose for production
+6. **Production Deployment** (1 hour)
+   - Create Docker configuration
+   - Add environment variable support
+   - Configure logging and monitoring
 
 ---
 
 ## Notes
 
-- **Real Hardware**: In production, C5 would interface with actual tire pressure sensors via CAN bus or OBD-II
-- **Security**: Add authentication for cloud communication in production
-- **Reliability**: Implement data buffering in case of network outages
-- **Monitoring**: Add health checks and metrics for all services
-- **NO dependency on A1/B1**: Agent C can be developed and tested independently using mock backend
+- **Direct Communication**: C5 sends data directly to B1 API, bypassing C2 broker for simplicity
+- **Realistic Simulation**: Pressure values drift naturally and respond to simulated incidents
+- **Production Ready**: Includes error handling, logging, health checks, and Docker deployment
+- **NO dependencies**: Can be developed and tested independently using B1 mock endpoints
+- **Scalable**: Easy to add more cars or sensor types
 
 **Total Estimated Effort**: 6-8 hours for complete implementation
